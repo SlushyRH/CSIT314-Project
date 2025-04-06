@@ -92,6 +92,13 @@ try {
     send_response('Database Error: ' . $e->getMessage(), 500);
 }
 
-http_response_code(200);
+$response = [
+    "status" => "success",
+    "message" => "PHP was executed!"
+];
 
+header("Content-Type: application/json");
+http_response_code(200);
+echo json_encode($response);
+exit;
 ?>
