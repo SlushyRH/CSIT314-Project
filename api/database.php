@@ -39,7 +39,7 @@ function createTablesIfNeeded($pdo) {
 
 function userSignUp($pdo, $data) {
     if (!isset($data['email'], $data['fname'], $data['lname'], $data['pass'])) {
-        send_response('error', 'All fields are required.', 400);
+        send_response('error', 'All fields are required.', 400, $data);
     }
 
     $email = $data['email'];
