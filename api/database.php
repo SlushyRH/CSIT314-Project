@@ -20,7 +20,7 @@ function send_response($status, $message, $code, $data = null) {
     header("Content-Type: application/json");
 
     http_response_code($code);
-    echo json_encode(['status' => $status, 'message' => $message, 'code' => $code, 'data' => $data]);
+    echo json_encode(['status' => $status, 'message' => $message, 'code' => 200, 'data' => $data]);
     exit;
 }
 
