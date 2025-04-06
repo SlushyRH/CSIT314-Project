@@ -6,28 +6,9 @@ header("Access-Control-Allow-Origin: *");
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-$users = [
-    [
-        "name" => "Dom",
-        "age" => 29,
-        "occupation" => "Web Developer"
-    ],
-    [
-        "name" => "Jack",
-        "age" => 19,
-        "occupation" => "Software Developer"
-    ]
-]
-
-echo json_encode($users, JSON_PRETTY_PRINT);
-exit;
-
 function send_response($status, $message, $code, $data = null) {  
-    header("Access-Control-Allow-Origin: *");
-    header("Content-Type: application/json");
-
     // Send the response
-    http_response_code($code);
+    http_response_code(200);
     echo json_encode(['status' => $status, 'message' => $message, 'code' => $code, 'data' => $data]);
     exit;
 }
@@ -45,10 +26,10 @@ function createTablesIfNeeded($pdo) {
 }
 
 function userSignUp($pdo, $data) {
-    if (!isset($data['email'], $data['fname'], $data['lname'], $data['pass'])) {
+    if (empty($data['email']) || empty($data['fname']) || empty($data['lname']) || empty($data['pass'])) {
         send_response('error', 'All fields are required.', 400, $data);
     }
-
+    
     $email = $data['email'];
     $fname = $data['fname'];
     $lname = $data['lname'];
@@ -75,20 +56,11 @@ function userSignUp($pdo, $data) {
 
 try {
     // establish connection to sql database
-    $pdo = new PDO("mysql:host=mediumslateblue-toad-454408.hostingersite.com;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
+    $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     ]);
 
-    // create tables if needed
-    $createTestTable = "
-        CREATE TABLE IF NOT EXISTS TestTable (
-            EmailAddress VARCHAR(255) PRIMARY KEY UNIQUE,
-            FirstName VARCHAR(255) NOT NULL,
-            LastName VARCHAR(255) NOT NULL,
-            Password VARCHAR(255) NOT NULL
-        );
-    ";
-    $pdo->exec($createTestTable);
+    createTablesIfNeeded($pdo);
     
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? null;
