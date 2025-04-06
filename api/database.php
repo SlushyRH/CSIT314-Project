@@ -52,7 +52,7 @@ function userSignUp($pdo, $data) {
 }
 
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
+    $pdo = new PDO("mysql:host=mediumslateblue-toad-454408.hostingersite.com;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     ]);
 
