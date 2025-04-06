@@ -1,13 +1,15 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-function handle_error($error_message) {
-    echo json_encode([
-        'status' => 'error',
-        'message' => $error_message
-    ]);
+function send_response($status, $message, $code, $data = null) {
+    http_response_code($code);
+    echo json_encode(['status' => $status, 'message' => $message, 'code' => $code, 'data' => $data]);
     exit;
 }
 
@@ -23,6 +25,35 @@ function createTablesIfNeeded($pdo) {
     $pdo->exec($createTestTable);
 }
 
+function userSignUp($pdo, $data) {
+    if (!isset($data['email'], $data['fname'], $data['lname'], $data['pass'])) {
+        send_response('error', 'All fields are required.', 400);
+    }
+
+    $email = $data['email'];
+    $fname = $data['fname'];
+    $lname = $data['lname'];
+    $pass = password_hash($data['pass'], PASSWORD_DEFAULT);
+
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO TestTable (EmailAddress, FirstName, LastName, Password)
+            VALUES (:email, :fname, :lname, :pass)
+        ");
+
+        $stmt->execute([
+            'email' => $email,
+            'fname' => $fname,
+            'lname' => $lname,
+            'pass' => $pass
+        ]);
+
+        send_response('success', 'User has successfully signed up!', 200);
+    } catch (Exception $e) {
+        send_response('error', 'Could not sign up user. Error: ' . $e->getMessage(), 500);
+    }
+}
+
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -33,51 +64,21 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? null;
     
-    if ($method === "GET") {
-        if ($action === "TEST") {
-            getTestData();
+    if ($method === "POST") {
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        if ($data === null) {
+            send_response('error', 'Invalid JSON input.', 400);
         }
-    } else if ($method === "POST") {
-        if ($action === "TEST") {
-            postTestData();
+
+        if ($action === "USER_SIGN_UP_TEST") {
+            userSignUp($pdo, $data);
         }
-    }
-    
-    function getTestData() {
-        global $pdo;
-        
-        $stmt = $pdo->query("SELECT * FROM TestTable");
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        echo json_encode([
-            'status' => 'success',
-            'data' => $result
-        ]);
-    }
-    
-    function postTestData() {
-        global $pdo;
-        
-        // Example for inserting data
-        if (!isset($_POST['EmailAddress'], $_POST['FirstName'], $_POST['LastName'], $_POST['Password'])) {
-            handle_error('Missing required fields');
-        }
-        
-        $email = $_POST['EmailAddress'];
-        $firstName = $_POST['FirstName'];
-        $lastName = $_POST['LastName'];
-        $password = $_POST['Password'];
-        
-        $stmt = $pdo->prepare("INSERT INTO TestTable (EmailAddress, FirstName, LastName, Password) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$email, $firstName, $lastName, $password]);
-        
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Data inserted successfully'
-        ]);
+    } else {
+        send_response('error', 'Invalid request method.', 405);
     }
 } catch (Exception $e) {
-    handle_error('Database Error: ' . $e->getMessage());
+    send_response('Database Error: ' . $e->getMessage(), 500);
 }
 
 ?>
