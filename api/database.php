@@ -1,22 +1,29 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json");
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-function send_response($status, $message, $code, $data = null) { 
-    // Handle preflight request (OPTIONS)
-    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Methods: GET, POST");
-        header("Access-Control-Allow-Headers: Content-Type");
-        http_response_code(200);  // Respond with 200 OK for OPTIONS request
-        exit;  // Exit here as no further processing is needed
-    }
+$users = [
+    [
+        "name" => "Dom",
+        "age" => 29,
+        "occupation" => "Web Developer"
+    ],
+    [
+        "name" => "Jack",
+        "age" => 19,
+        "occupation" => "Software Developer"
+    ]
+]
 
-    // Set response headers
+echo json_encode($users, JSON_PRETTY_PRINT);
+exit;
+
+function send_response($status, $message, $code, $data = null) {  
     header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: GET, POST");
-    header("Access-Control-Allow-Headers: Content-Type");
     header("Content-Type: application/json");
 
     // Send the response
@@ -67,17 +74,28 @@ function userSignUp($pdo, $data) {
 }
 
 try {
+    // establish connection to sql database
     $pdo = new PDO("mysql:host=mediumslateblue-toad-454408.hostingersite.com;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     ]);
 
-    createTablesIfNeeded($pdo);
+    // create tables if needed
+    $createTestTable = "
+        CREATE TABLE IF NOT EXISTS TestTable (
+            EmailAddress VARCHAR(255) PRIMARY KEY UNIQUE,
+            FirstName VARCHAR(255) NOT NULL,
+            LastName VARCHAR(255) NOT NULL,
+            Password VARCHAR(255) NOT NULL
+        );
+    ";
+    $pdo->exec($createTestTable);
     
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? null;
     
     if ($method === "POST") {
-        $data = json_decode(file_get_contents("php://input"), true);
+        $rawData = file_get_contents("php://input");
+        $data = json_decode($rawData, true);
 
         if ($data === null) {
             send_response('error', 'Invalid JSON input.', 400);
