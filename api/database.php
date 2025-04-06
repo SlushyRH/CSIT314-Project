@@ -19,8 +19,8 @@ function send_response($status, $message, $code, $data = null) {
 
     header("Content-Type: application/json");
 
-    http_response_code(200);
-    echo json_encode(['status' => $status, 'message' => $message, 'code' => 200, 'data' => $data]);
+    http_response_code($code);
+    echo json_encode(['status' => $status, 'message' => $message, 'code' => $code, 'data' => $data]);
     exit;
 }
 
@@ -91,5 +91,7 @@ try {
 } catch (Exception $e) {
     send_response('Database Error: ' . $e->getMessage(), 500);
 }
+
+http_response_code(200);
 
 ?>
