@@ -17,7 +17,7 @@ function sqlRequest(method, action, data = null)
     return new Promise((resolve, reject) =>
     {
         const xhr = new XMLHttpRequest();
-        xhr.open(method, `${URL}/api/database.php?action=${action}`, true);
+        xhr.open(method, `/api/database.php?action=${action}`, true);
         xhr.setRequestHeader("Content-Type", "application/json");
 
         xhr.onload = function()
