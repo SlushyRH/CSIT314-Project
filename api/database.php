@@ -3,8 +3,20 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-function send_response($status, $message, $code, $data = null) {
+function send_response($status, $message, $code, $data = null) { 
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST");
+        header("Access-Control-Allow-Headers: Content-Type");
+        http_response_code(200);  // Respond with 200 OK for OPTIONS request
+        exit;  // Exit here as no further processing is needed
+    }
+
     header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: GET, POST");
+    header("Access-Control-Allow-Headers: Content-Type");
+    header("Content-Type: application/json");
+
     header("Content-Type: application/json");
 
     http_response_code($code);
