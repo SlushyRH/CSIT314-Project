@@ -1,57 +1,96 @@
-const URL = "https://mediumslateblue-toad-454408.hostingersite.com";
+const URL = ""; // https://mediumslateblue-toad-454408.hostingersite.com
 
-// load header and footer into each page
-document.addEventListener("DOMContentLoaded", function()
+async function sqlRequest(method, action, data = null)
 {
-    fetch("/header.html")
-        .then(response => response.text())
-        .then(data => document.getElementById("header").innerHTML = data);
+    const url = `${URL}api/database.php?action=${action}`;
+    const options = {
+        method: method,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: data ? JSON.stringify(data) : null
+    };
 
-    fetch("/footer.html")
-        .then(response => response.text())
-        .then(data => document.getElementById("footer").innerHTML = data);
-});
-
-function sqlRequest(method, action, data = null)
-{
-    return new Promise((resolve, reject) =>
+    try
     {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, `/api/database.php?action=${action}`, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
+        const response = await fetch(url, options);
 
-        xhr.onload = function()
+        if (!response.ok)
         {
-            if (xhr.status >= 200 && xhr.status < 300)
-            {
-                try
-                {
-                    const response = JSON.parse(xhr.responseText);
-                    resolve(response);
-                }
-                catch (error)
-                {
-                    reject(new Error("Failed to parse response JSON"));
-                }
-            }
-            else
-            {
-                reject(new Error(`Request failed with status ${xhr.status}`));
-            }
-        };
-
-        xhr.onerror = function()
-        {
-            reject(new Error("Network error"));
-        };
-
-        if (data !== null)
-        {
-            xhr.send(JSON.stringify(data));
+            throw new Error(`Request failed with status ${response.status}`);
         }
-        else
+
+        return await response.json();
+    }
+    catch (error)
+    {
+        throw new Error(error.message || "Network error");
+    }
+}
+
+async function openModalWindow(title, description, ...buttons)
+{
+    return new Promise((resolve) =>
+    {
+        // create background overlay
+        let overlay = document.createElement("div");
+        overlay.className = `
+            fixed inset-0 bg-opacity-50 backdrop-blur-md
+            flex items-center justify-center z-50
+        `;
+        overlay.tabIndex = -1;
+
+        // create modal container
+        let modal = document.createElement("div");
+        modal.className = `
+            bg-white text-black dark:bg-gray-800 dark:text-white
+            rounded-2xl shadow-2xl max-w-lg w-full p-6
+            flex flex-col space-y-4 text-center
+        `;
+
+        // create title
+        let titleContainer = document.createElement("h2");
+        titleContainer.className = "text-xl font-bold text-center";
+        titleContainer.textContent = title;
+        modal.appendChild(titleContainer);
+
+        // create description
+        let descContainer = document.createElement("p");
+        descContainer.className = "text-base text-center";
+        descContainer.textContent = description;
+        modal.appendChild(descContainer);
+
+        // button container
+        let buttonContainer = document.createElement("div");
+        buttonContainer.className = "flex justify-center space-x-4 pt-4";
+
+        // return button id on click
+        buttons.forEach((btnLabel, idx) =>
         {
-            xhr.send();
-        }
+            // create btn
+            let btn = document.createElement("button");
+            btn.textContent = btnLabel;
+            btn.className = `
+                px-4 py-2 rounded-xl transition
+                bg-blue-600 text-white hover:bg-blue-700
+                dark:bg-blue-500 dark:hover:bg-blue-600
+            `;
+            
+            // assign btn onClick
+            btn.onclick = () =>
+            {
+                document.body.removeChild(overlay);
+                resolve(idx);
+            };
+            buttonContainer.appendChild(btn);
+        });
+
+        // append to body
+        modal.appendChild(buttonContainer);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // trap focus inside modal
+        setTimeout(() => modal.focus(), 0);
     });
 }
