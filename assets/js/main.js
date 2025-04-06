@@ -12,24 +12,46 @@ document.addEventListener("DOMContentLoaded", function()
         .then(data => document.getElementById("footer").innerHTML = data);
 });
 
-async function sqlRequest(method, action, data = null)
+function sqlRequest(method, action, data = null)
 {
-    const options = 
+    return new Promise((resolve, reject) =>
     {
-        method: method,
-        headers:
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, `${URL}/api/database.php?action=${action}`, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onload = function()
         {
-            "Content-Type": "application/json"
+            if (xhr.status >= 200 && xhr.status < 300)
+            {
+                try
+                {
+                    const response = JSON.parse(xhr.responseText);
+                    resolve(response);
+                }
+                catch (error)
+                {
+                    reject(new Error("Failed to parse response JSON"));
+                }
+            }
+            else
+            {
+                reject(new Error(`Request failed with status ${xhr.status}`));
+            }
+        };
+
+        xhr.onerror = function()
+        {
+            reject(new Error("Network error"));
+        };
+
+        if (data !== null)
+        {
+            xhr.send(JSON.stringify(data));
         }
-    };
-
-    if (data !== null)
-    {
-        options.body = JSON.stringify(data);
-    }
-
-    const response = await fetch(`${URL}/api/database.php?action=${action}`, options);
-    const json = await response.json();
-
-    return json;
+        else
+        {
+            xhr.send();
+        }
+    });
 }

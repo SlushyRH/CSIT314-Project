@@ -29,12 +29,12 @@ async function signUpUser()
             alert("User Sign Up was successful!");
         else
             alert("Error: " + response.message);
+
+        console.log(response);
     }
     catch (error)
     {
         console.error("Signup Failed:", error);
-        alert("An unexpected error occured!");
+        alert("An unexpected error occurred!");
     }
-
-    console.log(response);
 }
