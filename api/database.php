@@ -1,6 +1,6 @@
 <?php
 
-header("Access-Control-Allow-Origin: http://127.0.0.1:5500");
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
