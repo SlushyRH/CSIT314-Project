@@ -1,0 +1,67 @@
+<header class="bg-gray-800 p-4 flex items-center justify-between">
+
+    <!-- left side for largers screens -->
+    <div class="flex items-center space-x-6 lg:flex hidden" id="desktop-header">
+        <!-- logo that acts as home button -->
+        <a href="index.html" class="flex-shrink-0" id="logo">
+            <img src="content/logo.png" alt="Company Logo" class="h-10">
+        </a>
+    
+        <!-- navigation links for larger screens -->
+        <nav class="space-x-6 flex items-center" id="nav-links">
+            <a href="index.html" class="text-white hover:text-gray-300">Home</a>
+            <a href="#" class="text-white hover:text-gray-300">Upcoming</a>
+            <a href="#" class="text-white hover:text-gray-300">Concerts</a>
+            <a href="#" class="text-white hover:text-gray-300">Sports</a>
+            <a href="#" class="text-white hover:text-gray-300">Musicals</a>
+            <a href="#" class="text-white hover:text-gray-300">Comedy</a>
+        </nav>
+    </div>
+    
+    
+    <!-- left side for smaller screens -->
+    <div class="lg:hidden flex items-center space-x-6" id="mobile-header">
+        <!-- mobile hamburger menu -->
+        <button id="hamburger" class="text-white">
+            <i class="fa-solid fa-bars w-6 h-6"></i>
+        </button>
+
+        <!-- mobile navigation links (hidden by default) -->
+        <div class="lg:hidden hidden" id="mobile-menu">
+            <a href="index.html" class="block text-white hover:text-gray-300 py-2">Home</a>
+            <nav class="space-y-4">
+                <a href="#" class="block text-white hover:text-gray-300">Upcoming</a>
+                <a href="#" class="block text-white hover:text-gray-300">Concerts</a>
+                <a href="#" class="block text-white hover:text-gray-300">Sports</a>
+                <a href="#" class="block text-white hover:text-gray-300">Musicals</a>
+                <a href="#" class="block text-white hover:text-gray-300">Comedy</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- right side -->
+    <div class="flex items-center space-x-4">
+        <!-- search bar -->
+        <button class="text-white p-2 rounded-full hover:text-gray-600">
+            <i class="fa-solid fa-magnifying-glass w-5 h-5"></i>
+        </button>
+
+        <!-- profile icon -->
+        <div class="relative">
+            <div class="w-8 h-8 rounded-full overflow-hidden">
+                <img src="content/pfp.png" alt="User Icon" class="object-cover w-full h-full">
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    // toggle the visibility of mobile menu
+    hamburger.addEventListener('click', () => {
+        alert("Hambuger");
+        mobileMenu.classList.toggle('hidden');
+    });
+</script>

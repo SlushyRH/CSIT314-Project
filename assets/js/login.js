@@ -24,13 +24,7 @@ async function signUpUser()
     try
     {
         var response = await sqlRequest("POST", "USER_SIGN_UP_TEST", data);
-
-        if (response.status === "success")
-            alert("User Sign Up was successful!");
-        else
-            alert("Error: " + response.message);
-
-        console.log(response);
+        await openModalWindow(response.status, response.message, "ok", "no", "cancel");
     }
     catch (error)
     {
