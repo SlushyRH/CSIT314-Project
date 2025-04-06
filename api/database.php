@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 function send_response($status, $message, $code, $data = null) { 
+    // Handle preflight request (OPTIONS)
     if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: GET, POST");
@@ -12,13 +13,13 @@ function send_response($status, $message, $code, $data = null) {
         exit;  // Exit here as no further processing is needed
     }
 
+    // Set response headers
     header("Access-Control-Allow-Origin: *");
     header("Access-Control-Allow-Methods: GET, POST");
     header("Access-Control-Allow-Headers: Content-Type");
     header("Content-Type: application/json");
 
-    header("Content-Type: application/json");
-
+    // Send the response
     http_response_code($code);
     echo json_encode(['status' => $status, 'message' => $message, 'code' => $code, 'data' => $data]);
     exit;
@@ -91,14 +92,3 @@ try {
 } catch (Exception $e) {
     send_response('Database Error: ' . $e->getMessage(), 500);
 }
-
-$response = [
-    "status" => "success",
-    "message" => "PHP was executed!"
-];
-
-header("Content-Type: application/json");
-http_response_code(200);
-echo json_encode($response);
-exit;
-?>
