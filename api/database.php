@@ -1,10 +1,12 @@
 <?php
 
-
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 function send_response($status, $message, $code, $data = null) {
+    header("Access-Control-Allow-Origin: *");
+    header("Content-Type: application/json");
+
     http_response_code($code);
     echo json_encode(['status' => $status, 'message' => $message, 'code' => $code, 'data' => $data]);
     exit;
