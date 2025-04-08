@@ -1,10 +1,17 @@
 <?php
 
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
+// handle preflight request for cors
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 // send the response back to client
 function send_response($status, $message, $code, $data = null) {
@@ -22,7 +29,7 @@ function createTablesIfNeeded($pdo) {
             password VARCHAR(255) NOT NULL,
             dob DATE,
             phone_number VARCHAR(20),
-            notification_type ENUM('email', 'phone')
+            notification_type ENUM('email', 'phone') DEFAULT 'phone'
         );
 
         CREATE TABLE IF NOT EXISTS EventCategories (
@@ -82,35 +89,69 @@ function createTablesIfNeeded($pdo) {
             FOREIGN KEY (user_id) REFERENCES Users(user_id)
         );
     ";
+
     $pdo->exec($createTestTable);
 }
 
 function userSignUp($pdo, $data) {
-    if (empty($data['email']) || empty($data['fname']) || empty($data['lname']) || empty($data['password'])) {
+    if (empty($data['email']) || empty($data['name'])|| empty($data['phoneNumber']) || empty($data['password'])) {
         send_response('error', 'All fields are required.', 400, $data);
     }
 
     $email = $data['email'];
-    $fname = $data['fname'];
-    $lname = $data['lname'];
-    $pass = password_hash($data['password'], PASSWORD_DEFAULT);
+    $name = $data['name'];
+    $dob = $data['dob'];
+    $phoneNumber = $data['phoneNumber'];
+    $password = password_hash($data['password'], PASSWORD_DEFAULT);
 
     try {
         $stmt = $pdo->prepare("
-            INSERT INTO TestTable (EmailAddress, FirstName, LastName, Password)
-            VALUES (:email, :fname, :lname, :pass)
+            INSERT INTO Users (email, name, password, dob, phone_number)
+            VALUES (:email, :name, :password, :dob, :phoneNumber)
         ");
 
         $stmt->execute([
             'email' => $email,
-            'fname' => $fname,
-            'lname' => $lname,
-            'pass' => $pass
+            'name' => $name,
+            'password' => $password,
+            'dob' => $dob,
+            'phoneNumber' => $phoneNumber
         ]);
 
         send_response('success', 'User has successfully signed up!', 200);
     } catch (Exception $e) {
         send_response('error', 'Could not sign up user. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function userLogIn($pdo, $data) {
+    if (empty($data['email']) || empty($data['password'])) {
+        send_response('error', 'All fields are required.', 400, $data);
+    }
+    
+    $email = $data['email'];
+    $password = $data['password'];
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT user_id, password FROM Users
+            WHERE email = :email
+        ");
+
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            send_response('error', 'User not found!', 404);
+        }
+
+        if (!password_verify($password, $user['password'])) {
+            send_response('error', 'Incorrect password', 401);
+        }
+
+        send_response('success', 'User has successfully logged in!', 200);
+    } catch (Exception $e) {
+        send_response('error', 'Could not let user log in. Error: ' . $e->getMessage(), 500);
     }
 }
 
@@ -133,12 +174,14 @@ try {
             send_response('error', 'Invalid JSON input.', 400);
         }
 
-        if ($action === "USER_SIGN_UP_TEST") {
+        if ($action === "USER_SIGN_UP") {
             userSignUp($pdo, $data);
+        } else if ($action === "USER_LOG_IN") {
+            userLogIn($pdo, $data);
         }
     } else {
         send_response('error', 'Invalid request method.', 405);
     }
 } catch (Exception $e) {
-    send_response('Database Error: ' . $e->getMessage(), 500);
+    send_response('error', 'Database Error: ' . $e->getMessage(), 500);
 }

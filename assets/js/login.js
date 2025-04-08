@@ -1,34 +1,99 @@
-window.addEventListener("DOMContentLoaded", function()
+window.addEventListener("DOMContentLoaded", () =>
 {
-    var signUpBtn = this.document.querySelector("#sign-up-btn");
-
-    if (signUpBtn)
-        signUpBtn.addEventListener("click", signUpUser);
+    if (location.search === "?signUp")
+        toggleLogInType();
 });
 
-async function signUpUser()
+let hasAccount = true;
+
+async function logIn(event)
 {
-    var email = document.querySelector('input[name="user-email"]').value;
-    var fname = document.querySelector('input[name="fname"]').value;
-    var lname = document.querySelector('input[name="lname"]').value;
-    var password = document.querySelector('input[name="pass"]').value;
+    event.preventDefault(); // stop button from refreshing page
 
-    var data = {
-        email: email,
-        fname: fname,
-        lname: lname,
-        password: password
-    };
-    console.log(data);
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
 
-    try
+    if (!hasAccount)
     {
-        var response = await sqlRequest("POST", "USER_SIGN_UP_TEST", data);
-        await openModalWindow(response.status, response.message, "ok", "no", "cancel");
+        var name = document.getElementById("name").value;
+        var dob = document.getElementById("dob").value;
+        var phoneNumber = document.getElementById("pnumber").value;
+
+        var data = {
+            name: name,
+            dob: dob,
+            phoneNumber: phoneNumber,
+            email: email,
+            password: password
+        };
+    
+        try 
+        {
+            var response = await sqlRequest("POST", "USER_SIGN_UP", data);
+            alert(response.message);
+        }
+        catch (error)
+        {
+            console.error("Signup Failed:", error);
+            alert("An unexpected error occured!");
+        }
     }
-    catch (error)
+    else
     {
-        console.error("Signup Failed:", error);
-        alert("An unexpected error occurred!");
+        var data = {
+            email: email,
+            password: password
+        };
+
+        try 
+        {
+            var response = await sqlRequest("POST", "USER_LOG_IN", data);
+            alert(response.message);
+        }
+        catch (error)
+        {
+            console.error("Signup Failed:", error);
+            alert("An unexpected error occured!");
+        }
+    }
+}
+
+function toggleLogInType()
+{
+    hasAccount = !hasAccount;
+
+    const titleText = document.getElementById("titleText");
+    const logInBtn = document.getElementById("logInBtn");
+    const toggleText = document.getElementById("showSignUpBtn");
+
+    const name = document.getElementById("name");
+    const dob = document.getElementById("dob");
+    const pnumber = document.getElementById("pnumber");
+
+    if (hasAccount)
+    {
+        titleText.textContent = "Log In";
+        logInBtn.textContent = "Log In";
+        toggleText.textContent = "Sign Up";
+        toggleText.previousSibling.textContent = "Don't have an account? ";
+
+        name.classList.add("hidden");
+        dob.classList.add("hidden");
+        pnumber.classList.add("hidden");
+
+        history.replaceState(null, "", location.pathname);
+    }
+    else
+    {
+        titleText.textContent = "Sign Up";
+        logInBtn.textContent = "Sign Up";
+        toggleText.textContent = "Sign In";
+        toggleText.previousSibling.textContent = "Already have an account? ";
+
+        name.classList.remove("hidden");
+        dob.classList.remove("hidden");
+        pnumber.classList.remove("hidden");
+        
+        history.replaceState(null, "", location.pathname + "?signUp");
     }
 }

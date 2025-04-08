@@ -1,4 +1,4 @@
-const URL = ""; // https://mediumslateblue-toad-454408.hostingersite.com
+const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https://mediumslateblue-toad-454408.hostingersite.com/
 
 async function sqlRequest(method, action, data = null)
 {
