@@ -1,5 +1,22 @@
 const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https://mediumslateblue-toad-454408.hostingersite.com/
 
+addEventListener("DOMContentLoaded", (event) => 
+{
+    tailwind.config =
+    {
+        theme:
+        {
+            extend:
+            {
+                colors:
+                {
+                    customBlue: '#007595'
+                }
+            }
+        }
+    }
+})
+
 async function sqlRequest(method, action, data = null)
 {
     const url = `${URL}api/database.php?action=${action}`;

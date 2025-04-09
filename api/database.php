@@ -105,6 +105,16 @@ function userSignUp($pdo, $data) {
     $password = password_hash($data['password'], PASSWORD_DEFAULT);
 
     try {
+        // try find user id
+        $stmt = $pdo->prepare("SELECT user_id FROM Users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // if user exists, log them in instead
+        if ($user) {
+            return userLogIn($pdo, $data);
+        }
+
         $stmt = $pdo->prepare("
             INSERT INTO Users (email, name, password, dob, phone_number)
             VALUES (:email, :name, :password, :dob, :phoneNumber)

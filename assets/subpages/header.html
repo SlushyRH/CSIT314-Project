@@ -1,7 +1,7 @@
-<header class="bg-gray-800 p-4 flex items-center justify-between">
+<header class="p-4 flex items-center justify-between">
 
     <!-- left side for largers screens -->
-    <div class="flex items-center space-x-6 lg:flex hidden" id="desktop-header">
+    <div class="hidden flex items-center space-x-6 lg:flex" id="desktop-header">
         <!-- logo that acts as home button -->
         <a href="index.html" class="flex-shrink-0" id="logo">
             <img src="content/logo.png" alt="Company Logo" class="h-10">
@@ -9,32 +9,31 @@
     
         <!-- navigation links for larger screens -->
         <nav class="space-x-6 flex items-center" id="nav-links">
-            <a href="index.html" class="text-white hover:text-gray-300">Home</a>
-            <a href="#" class="text-white hover:text-gray-300">Upcoming</a>
-            <a href="#" class="text-white hover:text-gray-300">Concerts</a>
-            <a href="#" class="text-white hover:text-gray-300">Sports</a>
-            <a href="#" class="text-white hover:text-gray-300">Musicals</a>
-            <a href="#" class="text-white hover:text-gray-300">Comedy</a>
+            <a href="index.html" class="hover:text-(--hover-text)">Home</a>
+            <a href="#" class="hover:text-(--hover-text)">Upcoming</a>
+            <a href="#" class="hover:text-(--hover-text)">Concerts</a>
+            <a href="#" class="hover:text-(--hover-text)">Sports</a>
+            <a href="#" class="hover:text-(--hover-text)">Musicals</a>
+            <a href="#" class="hover:text-(--hover-text)">Comedy</a>
         </nav>
     </div>
-    
     
     <!-- left side for smaller screens -->
     <div class="lg:hidden flex items-center space-x-6" id="mobile-header">
         <!-- mobile hamburger menu -->
-        <button id="hamburger" class="text-white">
+        <button id="hamburger" class="">
             <i class="fa-solid fa-bars w-6 h-6"></i>
         </button>
 
         <!-- mobile navigation links (hidden by default) -->
         <div class="lg:hidden hidden" id="mobile-menu">
-            <a href="index.html" class="block text-white hover:text-gray-300 py-2">Home</a>
+            <a href="index.html" class="block hover:text-(--hover-text) py-2">Home</a>
             <nav class="space-y-4">
-                <a href="#" class="block text-white hover:text-gray-300">Upcoming</a>
-                <a href="#" class="block text-white hover:text-gray-300">Concerts</a>
-                <a href="#" class="block text-white hover:text-gray-300">Sports</a>
-                <a href="#" class="block text-white hover:text-gray-300">Musicals</a>
-                <a href="#" class="block text-white hover:text-gray-300">Comedy</a>
+                <a href="#" class="block hover:text-(--hover-text)">Upcoming</a>
+                <a href="#" class="block hover:text-(--hover-text)">Concerts</a>
+                <a href="#" class="block hover:text-(--hover-text)">Sports</a>
+                <a href="#" class="block hover:text-(--hover-text)">Musicals</a>
+                <a href="#" class="block hover:text-(--hover-text)">Comedy</a>
             </nav>
         </div>
     </div>
@@ -42,13 +41,13 @@
     <!-- right side -->
     <div class="flex items-center space-x-4">
         <!-- search bar -->
-        <button class="text-white p-2 rounded-full hover:text-gray-600">
+        <button class="p-2 cursor-pointer rounded-full hover:block text-color(--icon) hover:text-(--hover-icon)">
             <i class="fa-solid fa-magnifying-glass w-5 h-5"></i>
         </button>
 
         <!-- profile icon -->
         <div class="relative">
-            <div class="w-8 h-8 rounded-full overflow-hidden">
+            <div class="w-8 h-8 cursor-pointer rounded-full overflow-hidden text-color(--icon) hover:text-(--hover-icon)">
                 <img src="content/pfp.png" alt="User Icon" class="object-cover w-full h-full">
             </div>
         </div>

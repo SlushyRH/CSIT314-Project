@@ -16,33 +16,53 @@
   </head>
 
   <body>
-    <div class="flex items-center justify-center h-screen"> 
-        <div class="bg-[#181818] rounded-xl shadow-md p-8 w-full max-w-md">
-
-            <h2 id="titleText" class="text-2xl font-semibold text-center mb-6">Log In</h2>
-
-            <form class="space-y-4">
-                
-                <input type="text" id="name" class="hidden mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2" placeholder="Name" required>
-                <input type="date" id="dob" class="hidden mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2" placeholder="Date" required>
-                <input type="number" id="pnumber" class="hidden mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2" placeholder="Phone Number" required>
-                <input type="email" id="email" class="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2" placeholder="Email" required>
-                <input type="password" id="password" class="mt-1 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2" placeholder="Password" required>
-
-                <div class="text-center text-sm text-gray-600">
-                    Don't have an account?
-                    <button type="button" id="showSignUpBtn" onclick="toggleLogInType()" class="text-blue-600 cursor-pointer hover:underline focus:outline-none">
-                        Sign Up
-                    </button>
-                </div>
-
-                <div class="flex justify-center mt-6 space-x-4">
-                    <button id="logInBtn" onclick="logIn(event)" class="w-1/2 bg-gray-200 cursor-pointer text-gray-800 py-2 rounded-md hover:bg-gray-300 transition-colors">Log In</button>
-                </div>
-
-            </form>
-
-        </div>
+    <div class="flex items-center justify-center h-screen">
+      <div class="bg-(--secondary) shadow-2xl rounded-xl p-8 w-full max-w-md">
+        <h2 id="titleText" class="text-2xl font-semibold text-center mb-6">Log In</h2>
+  
+        <form class="space-y-4">
+          <!-- full name -->
+          <div class="flex items-center space-x-4 hidden" id="name-wrapper">
+            <label for="name" class="w-28 text-right">Full Name:</label>
+            <input type="text" id="name" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Name" required>
+          </div>
+  
+          <!-- date of birth -->
+          <div class="flex items-center space-x-4 hidden" id="dob-wrapper">
+            <label for="dob" class="w-28 text-right">DOB:</label>
+            <input type="date" id="dob" class="text-color(--text-colour) border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Date" required>
+          </div>
+  
+          <!-- phone number -->
+          <div class="flex items-center space-x-4 hidden" id="pnumber-wrapper">
+            <label for="pnumber" class="w-28 text-right">Phone:</label>
+            <input type="number" id="pnumber" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Phone Number" required>
+          </div>
+  
+          <!-- email -->
+          <div class="flex items-center space-x-4">
+            <label for="email" class="w-28 text-right">Email:</label>
+            <input type="email" id="email" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Email" required>
+          </div>
+  
+          <!-- password -->
+          <div class="flex items-center space-x-4">
+            <label for="password" class="w-28 text-right">Password:</label>
+            <input type="password" id="password" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none" placeholder="Password" required>
+          </div>
+  
+          <div class="text-center text-sm text-(--text)">
+            Don't have an account?
+            <button type="button" id="showSignUpBtn" onclick="toggleLogInType()" class="text-(--highlight-text) cursor-pointer hover:underline focus:outline-none">
+              Sign Up
+            </button>
+          </div>
+  
+          <div class="flex justify-center mt-6 space-x-4">
+            <button id="logInBtn" onclick="logIn(event)" class="w-1/2 bg-gray-200 cursor-pointer text-gray-800 py-2 rounded-md hover:bg-gray-300 transition-colors">Log In</button>
+          </div>
+        </form>
+      </div>
     </div>
-  </body>
+  </body>  
 </html>

@@ -1,10 +1,24 @@
-/* Website Variables */
+/* website colour */
 :root {
-    --backgroundColour: #212121;
-    --primaryTextColour: #ffffff;
+    --bg: #0f172a;
+    --secondary: #1d2841;
+    --text: #f8fafc;
+    --hover-text: #9ca3af;
+    --highlight-text: #005eff;
+    --icon: #f8fafc;
+    --hover-icon: #9ca3af;
+    --form-outline: #f8fafc;
+    --form-focus-outline: #9ca3af;
 }
 
 body {
-    background-color: var(--backgroundColour);
-    color: var(--primaryTextColour);
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+/* remove icon from date form as we cant change colour */
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
 }
