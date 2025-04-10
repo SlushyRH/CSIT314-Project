@@ -1,9 +1,11 @@
 <?php
 
+// allow requests from all sources
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
+// display errors on screen and report all errors
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -20,6 +22,7 @@ function send_response($status, $message, $code, $data = null) {
     exit;
 }
 
+// create all tables in database if needed
 function createTablesIfNeeded($pdo) {
     $createTestTable = "
         CREATE TABLE IF NOT EXISTS Users (
@@ -94,15 +97,17 @@ function createTablesIfNeeded($pdo) {
 }
 
 function userSignUp($pdo, $data) {
+    // ensure all data is given
     if (empty($data['email']) || empty($data['name'])|| empty($data['phoneNumber']) || empty($data['password'])) {
         send_response('error', 'All fields are required.', 400, $data);
     }
 
+    // get all data
     $email = $data['email'];
     $name = $data['name'];
     $dob = $data['dob'];
     $phoneNumber = $data['phoneNumber'];
-    $password = password_hash($data['password'], PASSWORD_DEFAULT);
+    $password = password_hash($data['password'], PASSWORD_DEFAULT); // hash password
 
     try {
         // try find user id

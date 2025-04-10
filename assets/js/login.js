@@ -3,28 +3,51 @@ window.addEventListener("DOMContentLoaded", () =>
     // toggle sign up based on url
     if (location.search === "?signUp")
         toggleLogInType();
+    else if (location.search === "?resetPassword")
+        toggleResetPassword();
 });
 
 let hasAccount = true;
 
+// declare constant elements
+let titleText;
+let logInBtn;
+let toggleText;
+let forgotPasswordText;
+
+// declare sign in/up form elements
+let email;
+let password;
+let fullName;
+let dob;
+let phoneNumber;
+
+function getElements()
+{
+    // get constant elements
+     titleText = document.getElementById("titleText");
+     logInBtn = document.getElementById("logInBtn");
+     toggleText = document.getElementById("showSignUpBtn");
+     forgotPasswordText = document.getElementById("forgotPassword");
+    
+    // get sign in/up form elements
+     email = document.getElementById("email").value;
+     password = document.getElementById("password").value;
+     fullName = document.getElementById("name-wrapper");
+     dob = document.getElementById("dob-wrapper");
+     phoneNumber = document.getElementById("pnumber-wrapper");
+}
+
 async function logIn(event)
 {
+    getElements();
     event.preventDefault(); // stop button from refreshing page
-
-    // get email and passworrd
-    var email = document.getElementById("email").value;
-    var password = document.getElementById("password").value;
 
     if (!hasAccount)
     {
-        // get sign up elements
-        var name = document.getElementById("name").value;
-        var dob = document.getElementById("dob").value;
-        var phoneNumber = document.getElementById("pnumber").value;
-
         // create sign up data
         var data = {
-            name: name,
+            name: fullName,
             dob: dob,
             phoneNumber: phoneNumber,
             email: email,
@@ -82,15 +105,7 @@ function toggleLogInType()
     // toggle has account
     hasAccount = !hasAccount;
 
-    // get constant elements
-    const titleText = document.getElementById("titleText");
-    const logInBtn = document.getElementById("logInBtn");
-    const toggleText = document.getElementById("showSignUpBtn");
-
-    // get sign up form elements
-    const name = document.getElementById("name-wrapper");
-    const dob = document.getElementById("dob-wrapper");
-    const pnumber = document.getElementById("pnumber-wrapper");
+    getElements();
 
     // if hasAccount is true, only show sign in elements, otherwise show sign up elements
     if (hasAccount)
@@ -102,7 +117,7 @@ function toggleLogInType()
         toggleText.previousSibling.textContent = "Don't have an account? ";
 
         // make sign up form elements hidden
-        name.classList.add("hidden");
+        fullName.classList.add("hidden");
         dob.classList.add("hidden");
         pnumber.classList.add("hidden");
 
@@ -118,7 +133,7 @@ function toggleLogInType()
         toggleText.previousSibling.textContent = "Already have an account? ";
 
         // make sign up form elements visible
-        name.classList.remove("hidden");
+        fullName.classList.remove("hidden");
         dob.classList.remove("hidden");
         pnumber.classList.remove("hidden");
         
