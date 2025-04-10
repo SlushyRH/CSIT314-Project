@@ -1,24 +1,30 @@
 const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https://mediumslateblue-toad-454408.hostingersite.com/
 
-addEventListener("DOMContentLoaded", (event) => 
+function initHeader() { initComponent('header', 'header'); }
+function initFooter() { initComponent('footer', 'footer'); }
+
+function initComponent(component, id)
 {
-    tailwind.config =
+    // get element
+    var element = document.getElementById(id);
+
+    if (element != null)
     {
-        theme:
-        {
-            extend:
-            {
-                colors:
-                {
-                    customBlue: '#007595'
-                }
-            }
-        }
+        //load component
+        fetch(`./assets/components/${component}.html`)
+            .then(response => response.text())
+            .then(data => element.innerHTML = data);
     }
-})
+}
+
+function navToPage(pageUrl)
+{
+    window.location.href = pageUrl;
+}
 
 async function sqlRequest(method, action, data = null)
 {
+    // sets url and options
     const url = `${URL}api/database.php?action=${action}`;
     const options = {
         method: method,
@@ -30,21 +36,24 @@ async function sqlRequest(method, action, data = null)
 
     try
     {
+        // send request to url
         const response = await fetch(url, options);
 
+        // check if response was sent successully
         if (!response.ok)
-        {
             throw new Error(`Request failed with status ${response.status}`);
-        }
 
+        // return response as json
         return await response.json();
     }
     catch (error)
     {
+        // throw error
         throw new Error(error.message || "Network error");
     }
 }
 
+// some code I took from a previous project I did, I need to refresh on this
 async function openModalWindow(title, description, ...buttons)
 {
     return new Promise((resolve) =>

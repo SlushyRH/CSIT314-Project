@@ -9,7 +9,6 @@
     
         <!-- navigation links for larger screens -->
         <nav class="space-x-6 flex items-center" id="nav-links">
-            <a href="index.html" class="hover:text-(--hover-text)">Home</a>
             <a href="#" class="hover:text-(--hover-text)">Upcoming</a>
             <a href="#" class="hover:text-(--hover-text)">Concerts</a>
             <a href="#" class="hover:text-(--hover-text)">Sports</a>
@@ -47,8 +46,13 @@
 
         <!-- profile icon -->
         <div class="relative">
-            <div class="w-8 h-8 cursor-pointer rounded-full overflow-hidden text-color(--icon) hover:text-(--hover-icon)">
+            <button type="button" onclick="navToPage('login.html')" class="w-8 h-8 cursor-pointer rounded-full overflow-hidden text-color(--icon) hover:text-(--hover-icon)">
                 <img src="content/pfp.png" alt="User Icon" class="object-cover w-full h-full">
+            </button>
+        </div>
+
+        <div class="absolute">
+            <div class="py-1" role="none">
             </div>
         </div>
     </div>
