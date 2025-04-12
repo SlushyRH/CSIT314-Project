@@ -163,10 +163,61 @@ function userLogIn($pdo, $data) {
         if (!password_verify($password, $user['password'])) {
             send_response('error', 'Incorrect password', 401);
         }
-
-        send_response('success', 'User has successfully logged in!', 200);
+        
+        send_response('success', 'User has successfully logged in!', 200, [
+            'user_id' => $user['user_id']
+        ]);
     } catch (Exception $e) {
         send_response('error', 'Could not let user log in. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function resetPassword($pdo, $data) {
+    if (empty($data['email']) || empty($data['password']))
+    {
+        send_response('error', 'Email and new password are required.', 400);
+    }
+
+    $email = $data['email'];
+    $newPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+
+    try
+    {
+        $stmt = $pdo->prepare("SELECT user_id FROM Users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user)
+        {
+            send_response('error', 'User with that email does not exist.', 404);
+        }
+
+        $updateStmt = $pdo->prepare("UPDATE Users SET password = :password WHERE email = :email");
+        $updateStmt->execute([
+            'password' => $newPassword,
+            'email' => $email
+        ]);
+
+        send_response('success', 'Password has been successfully updated.', 200);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Could not reset password. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function getEvents($pdo) {
+    try
+    {
+        $stmt = $pdo->prepare("SELECT * FROM Events");
+        $stmt->execute();
+        
+        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        send_response('success', 'Got all events', 200, $events);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', $e->getMessage(), 500);
     }
 }
 
@@ -193,6 +244,12 @@ try {
             userSignUp($pdo, $data);
         } else if ($action === "USER_LOG_IN") {
             userLogIn($pdo, $data);
+        } else if ($action === "RESET_PASSWORD") {
+            resetPassword($pdo, $data);
+        }
+    } else if ($method === "GET") {
+        if ($action === "ALL_EVENTS") {
+            getEvents($pdo);
         }
     } else {
         send_response('error', 'Invalid request method.', 405);

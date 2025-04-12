@@ -1,4 +1,4 @@
-/* website colour */
+/* website colour scheme */
 :root {
     --bg: #0f172a;
     --secondary: #1d2841;
@@ -9,6 +9,8 @@
     --hover-icon: #9ca3af;
     --form-outline: #f8fafc;
     --form-focus-outline: #9ca3af;
+    --book-btn: #005eff;
+    --hover-book-btn: #0042b4;
 }
 
 body {
@@ -16,7 +18,7 @@ body {
     color: var(--text);
 }
 
-/* remove icon from date form as we cant change colour */
+/* remove icon from date form as we cant change colour and it looks strange */
 input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-calendar-picker-indicator {
     display: none;
