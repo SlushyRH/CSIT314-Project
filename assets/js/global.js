@@ -88,6 +88,7 @@ async function sqlRequest(method, action, data = null)
     try
     {
         // send request to url
+        document.body.style.cursor = 'wait';
         const response = await fetch(url, options);
 
         console.log(response);
@@ -97,11 +98,13 @@ async function sqlRequest(method, action, data = null)
             throw new Error(`Request failed with status ${response.status}`);
 
         // return response as json
+        document.body.style.cursor = 'default';
         return await response.json();
     }
     catch (error)
     {
         // throw error
+        document.body.style.cursor = 'default';
         throw new Error(error.message || "Network error");
     }
 }
