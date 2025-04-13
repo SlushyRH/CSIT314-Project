@@ -1,29 +1,28 @@
-<div class="flex items-center justify-between bg-(--secondary) shadow-md rounded-lg p-4 space-x-4">
-    <div class="w-1/6 font-bold text-(--text)">
-        {{title}}
-    </div>
+<div class="bg-(--secondary) shadow-xl rounded-lg overflow-hidden max-w-xs w-full">
+    <!-- image block -->
+    <img src="content/events/1174180_40.jpg" alt="Event Image" class="w-full h-48 object-cover" />
 
-    <div class="w-1/2 text-(--text) truncate">
-        {{description}}
-    </div>
+    <!-- card content -->
+    <div class="p-4 space-y-3">
+        <!-- title and date -->
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-(--text) truncate">Event Title</h2>
+            <span class="text-sm text-(--text) whitespace-nowrap">Apr 20, 2025</span>
+        </div>
 
-    <div class="w-1/12 text-sm text-(--text)">
-        {{location}}
-    </div>
+        <!-- description -->
+        <p class="text-sm text-(--text)">
+            This is a short description of the event. It gives a quick idea of what to expect.
+        </p>
 
-    <div class="w-1/12 text-sm text-(--text)">
-        {{date}}
-    </div>
-
-    <div class="w-1/12 text-sm font-medium text-(--text) text-center">
-        {{capacity}}
-    </div>
-
-    <div class="w-1/12 text-right">
-        <a href="{{link}}">
-            <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer font-semibold py-1 px-3 rounded shadow">
-                Book
-            </button>
-        </a>
+        <!-- capacity and book button -->
+        <div class="flex items-center justify-between pt-4">
+            <span class="text-sm font-medium text-(--text)">Capacity: 50/50</span>
+            <a href="#" class="text-right cursor-pointer">
+                <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) font-semibold py-1 px-3 rounded shadow">
+                    Book
+                </button>
+            </a>
+        </div>
     </div>
 </div>
