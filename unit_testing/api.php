@@ -41,7 +41,7 @@ function getTicketTypeId($pdo, $event_id, $ticket_name)
 
 function alert($msg) 
 {
-    echo "<script>alert(" . $msg . ");</script>";
+    echo "<script>alert(" . json_encode($msg) . ");</script>";
 }
 
 try
@@ -86,8 +86,8 @@ try
         $organiser_id = getUserIdByEmail($pdo, $event['organiser_email']);
         $category_id = getCategoryIdByName($pdo, $event['category']);
 
-        $stmt = $pdo->prepare("INSERT IGNORE INTO Events (organiser_id, title, description, category_id, location, event_date, tickets_left, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$organiser_id, $event['title'], $event['description'], $category_id, $event['location'], $event['event_date'], $event['tickets_left'], $event['capacity']]);
+        $stmt = $pdo->prepare("INSERT IGNORE INTO Events (organiser_id, title, description, category_id, location, event_date) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$organiser_id, $event['title'], $event['description'], $category_id, $event['location'], $event['event_date']]);
     }
 
     // insert ticket types
