@@ -39,6 +39,11 @@ function getTicketTypeId($pdo, $event_id, $ticket_name)
     return $stmt->fetchColumn();
 }
 
+function alert($msg) 
+{
+    echo "<script>alert(" . $msg . ");</script>";
+}
+
 try
 {
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
@@ -56,6 +61,8 @@ try
     $registrations = json_decode(file_get_contents('registrations.json'), true);
     $payments = json_decode(file_get_contents('payments.json'), true);
     $notifications = json_decode(file_get_contents('notifications.json'), true);
+    
+    alert("Got JSON Data!");
 
     // insert users
     foreach ($users as $user)
@@ -63,6 +70,8 @@ try
         $stmt = $pdo->prepare("INSERT IGNORE INTO Users (email, name, password, dob, phone_number, notification_type) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute([$user['email'], $user['name'], $user['password'], $user['dob'], $user['phone_number'], $user['notification_type']]);
     }
+
+    alert("User Data Successfully Added!");
 
     // insert categories
     foreach ($categories as $cat)
@@ -129,11 +138,11 @@ try
         $stmt->execute([$user_id, $note['message']]);
     }
 
-    echo "<script>alert('Test data successfully added!');</script>";
+    alert("Test Data Successfully Added!");
 }
 catch (Exception $e)
 {
     $error = htmlspecialchars($e->getMessage());
-    echo "<script>alert('Error adding test data: $error');</script>";
+    alert($error);
 }
 ?>
