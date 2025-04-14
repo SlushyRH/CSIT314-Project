@@ -258,3 +258,5 @@ try {
 } catch (Exception $e) {
     send_response('error', 'Database Error: ' . $e->getMessage(), 500);
 }
+
+?>
