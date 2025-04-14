@@ -4,13 +4,39 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS')
 {
     http_response_code(200);
     exit;
+}
+
+// helper functions
+function getUserIdByEmail($pdo, $email)
+{
+    $stmt = $pdo->prepare("SELECT user_id FROM Users WHERE email = ?");
+    $stmt->execute([$email]);
+    return $stmt->fetchColumn();
+}
+
+function getCategoryIdByName($pdo, $name)
+{
+    $stmt = $pdo->prepare("SELECT category_id FROM EventCategories WHERE name = ?");
+    $stmt->execute([$name]);
+    return $stmt->fetchColumn();
+}
+
+function getEventIdByTitle($pdo, $title)
+{
+    $stmt = $pdo->prepare("SELECT event_id FROM Events WHERE title = ?");
+    $stmt->execute([$title]);
+    return $stmt->fetchColumn();
+}
+
+function getTicketTypeId($pdo, $event_id, $ticket_name)
+{
+    $stmt = $pdo->prepare("SELECT ticket_type_id FROM TicketTypes WHERE event_id = ? AND name = ?");
+    $stmt->execute([$event_id, $ticket_name]);
+    return $stmt->fetchColumn();
 }
 
 try
@@ -19,34 +45,8 @@ try
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     ]);
 
-    // helper functions
-    function getUserIdByEmail($pdo, $email)
-    {
-        $stmt = $pdo->prepare("SELECT user_id FROM Users WHERE email = ?");
-        $stmt->execute([$email]);
-        return $stmt->fetchColumn();
-    }
-
-    function getCategoryIdByName($pdo, $name)
-    {
-        $stmt = $pdo->prepare("SELECT category_id FROM EventCategories WHERE name = ?");
-        $stmt->execute([$name]);
-        return $stmt->fetchColumn();
-    }
-
-    function getEventIdByTitle($pdo, $title)
-    {
-        $stmt = $pdo->prepare("SELECT event_id FROM Events WHERE title = ?");
-        $stmt->execute([$title]);
-        return $stmt->fetchColumn();
-    }
-
-    function getTicketTypeId($pdo, $event_id, $ticket_name)
-    {
-        $stmt = $pdo->prepare("SELECT ticket_type_id FROM TicketTypes WHERE event_id = ? AND name = ?");
-        $stmt->execute([$event_id, $ticket_name]);
-        return $stmt->fetchColumn();
-    }
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
 
     // load and decode JSON files
     $users = json_decode(file_get_contents('users.json'), true);
