@@ -48,8 +48,6 @@ function createTablesIfNeeded($pdo) {
             category_id INT,
             location VARCHAR(255),
             event_date DATETIME NOT NULL,
-            tickets_left INT NOT NULL,
-            capacity INT NOT NULL,
             FOREIGN KEY (organiser_id) REFERENCES Users(user_id),
             FOREIGN KEY (category_id) REFERENCES EventCategories(category_id)
         );
@@ -61,6 +59,7 @@ function createTablesIfNeeded($pdo) {
             price DECIMAL(10, 2),
             benefits TEXT,
             quantity_available INT,
+            tickets_left INT,
             FOREIGN KEY (event_id) REFERENCES Events(event_id)
         );
 

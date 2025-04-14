@@ -1,9 +1,10 @@
 [
-    {
+  {
       "event_title": "A Talk About Squirrels",
       "name": "General Admission",
       "price": 15,
       "benefits": "",
-      "tickets_left": 13
-    }
-  ]
+      "tickets_left": 13,
+      "quantity_available": 100
+  }
+]
