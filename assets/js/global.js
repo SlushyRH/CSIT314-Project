@@ -28,7 +28,29 @@ function attachHeaderScripts() {
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobile-menu');
 
+    const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
+    const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
+    const headerSettingsBtn = document.getElementById('headerSettingsBtn');
+    const logoutBtn = document.getElementById('headerLogoutBtn');
+
     const userId = localStorage.getItem('user');
+
+    headerOrgEventsBtn.onclick = function() {
+        navToPage('organisedEvents.html');
+    };
+
+    headerUserEventsBtn.onclick = function() {
+        navToPage('bookedEvents.html');
+    };
+
+    headerSettingsBtn.onclick = function() {
+        navToPage('settings.html');
+    };
+
+    logoutBtn.onclick = function() {
+        localStorage.removeItem('user');
+        navToPage('login.html');
+    };
 
     // handle profile icon btn
     if (profileButton) {
@@ -48,7 +70,7 @@ function attachHeaderScripts() {
         } else {
             // if not logged in then redirect to login
             profileButton.addEventListener('click', () => {
-                navToPage('login');
+                navToPage('login.html', window.location.href);
             });
         }
     }
@@ -68,9 +90,24 @@ function attachHeaderScripts() {
     }
 }
 
-function navToPage(pageUrl)
+function navToPage(page, redirectURL = null)
 {
-    window.location.href = pageUrl + '.html';
+    let url = page;
+
+    if (redirectURL)
+    {
+        const encodedRedirect = encodeURIComponent(redirectURL);
+        url += `?redirect=${encodedRedirect}`;
+    }
+
+    window.location.href = url;
+}
+
+let lastSqlResponse = null;
+
+function getLastResponse()
+{
+    return lastSqlResponse;
 }
 
 async function sqlRequest(method, action, data = null)
@@ -90,8 +127,7 @@ async function sqlRequest(method, action, data = null)
         // send request to url
         document.body.style.cursor = 'wait';
         const response = await fetch(url, options);
-
-        console.log(response);
+        lastSqlResponse = response;
 
         // check if response was sent successully
         if (!response.ok)

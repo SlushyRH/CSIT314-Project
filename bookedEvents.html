@@ -1,0 +1,41 @@
+<!--
+  Shows the user a list of all the events the user has booked. This includes
+  all upcoming events, as well as past events. The user can navigate to the event
+  page by clicking a button on the event, or the event.
+
+  Ideas: show all upcoming events first? grey out all past events (should still be able to see)?
+  if the user clicks on event (or button on event) go to event page,
+  so maybe show ticket book info? or not? idk? maybe order list based on date?
+  or have filters? search bar?
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CSIT314 Project</title>
+    <link rel="icon" href="content/logo.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="assets/js/global.js"></script>
+    <script src="assets/js/bookedEvents.js"></script>
+  </head>
+
+  <body class="min-h-screen flex flex-col">
+    <div id="header"></div>
+      <main class="flex-grow">
+
+      </main>
+    <div id="footer"></div>
+
+    <script>
+        initHeader();      
+        initFooter();
+    </script>
+  </body>  
+</html>

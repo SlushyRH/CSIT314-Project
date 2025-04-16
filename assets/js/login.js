@@ -1,13 +1,19 @@
 window.addEventListener("DOMContentLoaded", () =>
 {
+    // get redirect params
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirect = urlParams.get("redirect");
+
+    if (redirect)
+        redirectUrl = redirect;
+
     // toggle sign up based on url
     if (location.search === "?signUp")
         toggleLogInType();
-    else if (location.search === "?resetPassword")
-        toggleResetPassword();
 });
 
 let hasAccount = true;
+let redirectUrl;
 
 // declare constant elements
 let titleText;
@@ -32,7 +38,7 @@ function getElements()
     email = document.getElementById("email");
     password = document.getElementById("password");
 
-    // wrapper elements
+    // wrapper elements 
     fullName = document.getElementById("name-wrapper");
     dob = document.getElementById("dob-wrapper");
     phoneNumber = document.getElementById("pnumber-wrapper");
@@ -43,70 +49,30 @@ function getElements()
     phoneNumber.input = phoneNumber.querySelector("input");
 }
 
-async function logIn(event)
+async function submitBtn(event)
 {
     getElements();
-    event.preventDefault(); // stop button from refreshing page
+    event.preventDefault();
 
     if (!hasAccount)
     {
-        // create sign up data
-        var data = {
-            name: fullName.input.value,
-            dob: dob.input.value,
-            phoneNumber: phoneNumber.input.value,
-            email: email.value,
-            password: password.value
-        };
-    
-        try 
-        {
-            console.log(data);
-
-            // send request to server
-            var response = await sqlRequest("POST", "USER_SIGN_UP", data);
-
-            // alert status for debugging
-            if (response.status == "success")
-                alert("User has signed up!");
-            else
-                alert("User could not sign up! " + response.message);
-        }
-        catch (error)
-        {
-            // log any errors
-            console.error("Signup Failed:", error);
-            alert("An unexpected error occured!");
-        }
+        await signup(
+            fullName.input.value,
+            dob.input.value,
+            phoneNumber.input.value,
+            email.value,
+            password.value
+        );
     }
     else
     {
-        // create log in data
-        var data = {
-            email: email.value,
-            password: password.value
-        };
-
-        try 
-        {
-            // send request to server
-            var response = await sqlRequest("POST", "USER_LOG_IN", data);
-
-            // alert status for debugging
-            if (response.status != "success")
-                alert("User could not sign in! " + response.message);
-
-            var userId = response.data.user_id;
-            localStorage.setItem('user', userId);
-        }
-        catch (error)
-        {
-            // log any errors
-            console.error("Signup Failed:", error);
-            alert("An unexpected error occured!");
-        }
+        await login(
+            email.value,
+            password.value
+        );
     }
 }
+
 
 function toggleLogInType()
 {
@@ -150,71 +116,59 @@ function toggleLogInType()
     }
 }
 
-function toggleResetPassword()
+async function login(email, password)
 {
-    getElements();
-
-    hasAccount = true;
-
-    // Hide name, dob, phone fields
-    fullName.classList.add("hidden");
-    dob.classList.add("hidden");
-    phoneNumber.classList.add("hidden");
-
-    // Update title and button text
-    titleText.textContent = "Reset Password";
-    logInBtn.textContent = "Reset";
-
-    // Show email and password fields (if they were hidden)
-    document.getElementById("email").parentElement.classList.remove("hidden");
-    document.getElementById("password").parentElement.classList.remove("hidden");
-
-    // Change password placeholder
-    document.getElementById("password").placeholder = "New Password";
-
-    // Remove 'Don't have an account? Sign Up' text
-    toggleText.parentElement.classList.add("hidden");
-
-    // Update 'Forgot Password' text
-    forgotPasswordText.textContent = "Remember Your Password";
-    forgotPasswordText.onclick = function()
-    {
-        toggleLogInType();
+    const data = {
+        email: email,
+        password: password
     };
 
-    // Replace URL
-    history.replaceState(null, "", location.pathname + "?resetPassword");
-
-    // Change log in button action
-    logInBtn.onclick = async function(event)
+    try
     {
-        event.preventDefault();
-        getElements();
+        const response = await sqlRequest("POST", "USER_LOG_IN", data);
 
-        const data = {
-            email: email.value,
-            password: password.value
-        };
-
-        try
+        if (response.status != "success")
         {
-            console.log(data);
-            const response = await sqlRequest("POST", "RESET_PASSWORD", data);
+            alert("User could not sign in! " + response.message);
+            return;
+        }
 
-            if (response.status === "success")
-            {
-                alert("Password has been reset!");
-                location.href = location.pathname; // return to login page
-            }
-            else
-            {
-                alert("Could not reset password: " + response.message);
-            }
-        }
-        catch (err)
-        {
-            console.error("Reset Failed:", err);
-            alert("An unexpected error occurred!");
-        }
+        const userId = response.data.user_id;
+        localStorage.setItem("user", userId);
+
+        // naviaget to index unless there was aa url give to direcct to
+        if (redirectUrl)
+            navToPage(redirectUrl);
+        else
+            navToPage('index.html');
+    }
+    catch (error)
+    {
+        console.error("Login Failed:", error);
+    }
+}
+
+async function signup(name, dob, phoneNumber, email, password)
+{
+    const data = {
+        name: name,
+        dob: dob,
+        phoneNumber: phoneNumber,
+        email: email,
+        password: password
     };
+
+    try
+    {
+        console.log(data);
+
+        const response = await sqlRequest("POST", "USER_SIGN_UP", data);
+
+        if (response.status !== "success")
+            alert("User could not sign up! " + response.message);
+    }
+    catch (error)
+    {
+        console.error("Signup Failed:", error);
+    }
 }

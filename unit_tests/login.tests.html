@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Tests</title>
+</head>
+<body>
+    <script src="/assets/js/global.js"></script>
+    <script src="/assets/js/login.js"></script>
+    <script>
+        function runTests()
+        {
+            console.log("Running Login Tests...");
+
+            login("valid@example.com", "password").then(() =>
+            {
+                console.assert(localStorage.getItem("user") === "1", "Login success failed");
+            });
+            
+            console.log("Finished running Login Tests.");
+        }
+
+        // delay tests a little to ensure js loads
+        setTimeout(runTests, 500);
+    </script>
+</body>
+</html>

@@ -47,26 +47,26 @@
         <!-- profile icon -->
         <div class="relative">
             <!-- Profile button -->
-            <button id="profileButton" class="w-8 h-8 rounded-full overflow-hidden focus:outline-none">
+            <button id="profileButton" class="w-8 h-8 rounded-full overflow-hidden focus:outline-none cursor-pointer">
                 <img src="content/pfp.png" alt="User Icon" class="object-cover w-full h-full">
             </button>
         
             <!-- dropdown menu -->
             <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-(--secondary) rounded-md shadow-lg hidden z-50">
 
-                <button type="button" onclick="window.location.href='#'" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
-                    <i class="fa-solid fa-gear mr-2 w-4"></i>
-                    <span>Settings</span>
-                </button>
-                <button type="button" onclick="window.location.href='#'" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
+                <button type="button" id="headerOrgEventsBtn" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
                     <i class="fa-solid fa-chart-line mr-2 w-4"></i>
-                    <span>Event Dashboard</span>
+                    <span>Organised Events</span>
                 </button>
-                <button type="button" onclick="window.location.href='#'" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
+                <button type="button" id="headerUserEventsBtn" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
                     <i class="fa-solid fa-calendar-days mr-2 w-4"></i>
                     <span>Your Events</span>
                 </button>
-                <button type="button" onclick="logout()" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
+                <button type="button" id="headerSettingsBtn" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
+                    <i class="fa-solid fa-gear mr-2 w-4"></i>
+                    <span>Settings</span>
+                </button>
+                <button type="button" id="headerLogoutBtn" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
                     <i class="fa-solid fa-arrow-right-from-bracket mr-2 w-4"></i>
                     <span>Logout</span>
                 </button>

@@ -41,7 +41,15 @@ function userSignUp($data)
             'phone' => $phoneNumber
         ]);
 
-        send_response('success', 'User has successfully signed up!', 200);
+        $stmt = $pdo->prepare("
+            SELECT user_id, password FROM Users WHERE email = :email
+        ");
+        $stmt->execute(['email' => $data['email']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        send_response('success', 'User logged in successfully.', 200, [
+            'user_id' => $user['user_id']
+        ]);
     }
     catch (Exception $e)
     {
