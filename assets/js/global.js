@@ -1,7 +1,7 @@
 const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https://mediumslateblue-toad-454408.hostingersite.com/
 
 function initFooter() { initComponent('footer', 'footer'); }
-function initHeader() { initComponent('header', 'header', attachHeaderScripts); }
+function initHeader(hideNav = false, hideSearch = false) { initComponent('header', 'header', () => attachHeaderScripts(hideNav, hideSearch)); }
 
 function initComponent(component, id, callback)
 {
@@ -22,16 +22,57 @@ function initComponent(component, id, callback)
     }
 }
 
-function attachHeaderScripts() {
+function attachHeaderScripts(hideNav, hideSearch) {
     const profileButton = document.getElementById('profileButton');
     const profileDropdown = document.getElementById('profileDropdown');
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobile-menu');
 
+    const searchIcon = document.getElementById('searchIcon');
+    const searchBar = document.getElementById('searchBar');
+    const searchInput = searchBar?.querySelector('input');
+    
+    searchIcon?.addEventListener('click', (e) =>
+    {
+        e.stopPropagation();
+        searchBar?.classList.toggle('hidden');
+    
+        if (!searchBar?.classList.contains('hidden'))
+        {
+            searchInput?.focus();
+        }
+    });
+    
+    searchBar?.addEventListener('click', (e) =>
+    {
+        e.stopPropagation();
+    });
+    
+    window.addEventListener('click', () =>
+    {
+        if (!searchBar?.classList.contains('hidden'))
+        {
+            searchBar.classList.add('hidden');
+            if (searchInput)
+            {
+                searchInput.value = '';
+            }
+        }
+    });
+
     const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
     const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
     const headerSettingsBtn = document.getElementById('headerSettingsBtn');
     const logoutBtn = document.getElementById('headerLogoutBtn');
+
+    if (hideNav)
+    {
+        document.getElementById('navLinks').classList.add('hidden');
+        document.getElementById('mobileNavLinks').classList.add('hidden');
+    }
+
+    if (hideSearch)
+        searchIcon.classList.add('hidden');
 
     const userId = localStorage.getItem('user');
 
@@ -51,7 +92,7 @@ function attachHeaderScripts() {
         localStorage.removeItem('user');
         navToPage('login.html');
     };
-
+    
     // handle profile icon btn
     if (profileButton) {
         if (userId) {
@@ -143,72 +184,4 @@ async function sqlRequest(method, action, data = null)
         document.body.style.cursor = 'default';
         throw new Error(error.message || "Network error");
     }
-}
-
-// some code I took from a previous project I did
-async function openModalWindow(title, description, ...buttons)
-{
-    return new Promise((resolve) =>
-    {
-        // create background overlay
-        let overlay = document.createElement("div");
-        overlay.className = `
-            fixed inset-0 bg-opacity-50 backdrop-blur-md
-            flex items-center justify-center z-50
-        `;
-        overlay.tabIndex = -1;
-
-        // create modal container
-        let modal = document.createElement("div");
-        modal.className = `
-            bg-white text-black dark:bg-gray-800 dark:text-white
-            rounded-2xl shadow-2xl max-w-lg w-full p-6
-            flex flex-col space-y-4 text-center
-        `;
-
-        // create title
-        let titleContainer = document.createElement("h2");
-        titleContainer.className = "text-xl font-bold text-center";
-        titleContainer.textContent = title;
-        modal.appendChild(titleContainer);
-
-        // create description
-        let descContainer = document.createElement("p");
-        descContainer.className = "text-base text-center";
-        descContainer.textContent = description;
-        modal.appendChild(descContainer);
-
-        // button container
-        let buttonContainer = document.createElement("div");
-        buttonContainer.className = "flex justify-center space-x-4 pt-4";
-
-        // return button id on click
-        buttons.forEach((btnLabel, idx) =>
-        {
-            // create btn
-            let btn = document.createElement("button");
-            btn.textContent = btnLabel;
-            btn.className = `
-                px-4 py-2 rounded-xl transition
-                bg-blue-600 text-white hover:bg-blue-700
-                dark:bg-blue-500 dark:hover:bg-blue-600
-            `;
-            
-            // assign btn onClick
-            btn.onclick = () =>
-            {
-                document.body.removeChild(overlay);
-                resolve(idx);
-            };
-            buttonContainer.appendChild(btn);
-        });
-
-        // append to body
-        modal.appendChild(buttonContainer);
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-
-        // trap focus inside modal
-        setTimeout(() => modal.focus(), 0);
-    });
 }

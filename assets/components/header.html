@@ -1,14 +1,14 @@
 <header class="p-4 flex items-center justify-between">
 
     <!-- left side for largers screens -->
-    <div class="hidden flex items-center space-x-6 lg:flex" id="desktop-header">
+    <div class="hidden flex items-center space-x-6 lg:flex" id="desktopHeader">
         <!-- logo that acts as home button -->
         <a href="index.html" class="flex-shrink-0" id="logo">
             <img src="content/logo.png" alt="Company Logo" class="h-10">
         </a>
     
         <!-- navigation links for larger screens -->
-        <nav class="space-x-6 flex items-center" id="nav-links">
+        <nav class="space-x-6 flex items-center" id="navLinks">
             <a href="#" class="hover:text-(--hover-text)">Upcoming</a>
             <a href="#" class="hover:text-(--hover-text)">Concerts</a>
             <a href="#" class="hover:text-(--hover-text)">Sports</a>
@@ -18,7 +18,7 @@
     </div>
     
     <!-- left side for smaller screens -->
-    <div class="lg:hidden flex items-center space-x-6" id="mobile-header">
+    <div class="lg:hidden flex items-center space-x-6" id="mobileHeader">
         <!-- mobile hamburger menu -->
         <button id="hamburger" class="">
             <i class="fa-solid fa-bars w-6 h-6"></i>
@@ -27,7 +27,7 @@
         <!-- mobile navigation links (hidden by default) -->
         <div class="lg:hidden hidden" id="mobile-menu">
             <a href="index.html" class="block hover:text-(--hover-text) py-2">Home</a>
-            <nav class="space-y-4">
+            <nav id="mobileNavLinks" class="space-y-4">
                 <a href="#" class="block hover:text-(--hover-text)">Upcoming</a>
                 <a href="#" class="block hover:text-(--hover-text)">Concerts</a>
                 <a href="#" class="block hover:text-(--hover-text)">Sports</a>
@@ -39,21 +39,30 @@
 
     <!-- right side -->
     <div class="flex items-center space-x-4">
-        <!-- search bar -->
-        <button class="p-2 cursor-pointer rounded-full hover:block text-color(--icon) hover:text-(--hover-icon)">
+        
+        <!-- search input-->
+        <div id="searchBar" class="flex items-center hidden bg-white rounded-full px-3 py-1 w-32 sm:w-48 md:w-64 shadow-sm focus-within:ring-2 focus-within:ring-(--accent)">
+            <input
+                type="text"
+                placeholder="Search..."
+                class="bg-transparent focus:outline-none w-full text-sm text-black placeholder-gray-500"
+            />
+        </div>
+
+
+        <!-- search icon -->
+        <button id="searchIcon" class="p-2 cursor-pointer rounded-full hover:block text-color(--icon) hover:text-(--hover-icon)">
             <i class="fa-solid fa-magnifying-glass w-5 h-5"></i>
         </button>
 
         <!-- profile icon -->
         <div class="relative">
-            <!-- Profile button -->
             <button id="profileButton" class="w-8 h-8 rounded-full overflow-hidden focus:outline-none cursor-pointer">
                 <img src="content/pfp.png" alt="User Icon" class="object-cover w-full h-full">
             </button>
-        
+
             <!-- dropdown menu -->
             <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-(--secondary) rounded-md shadow-lg hidden z-50">
-
                 <button type="button" id="headerOrgEventsBtn" class="w-full px-4 py-2 flex items-center hover:bg-(--bg) cursor-pointer text-sm text-left">
                     <i class="fa-solid fa-chart-line mr-2 w-4"></i>
                     <span>Organised Events</span>
@@ -70,9 +79,9 @@
                     <i class="fa-solid fa-arrow-right-from-bracket mr-2 w-4"></i>
                     <span>Logout</span>
                 </button>
-
             </div>
         </div>
     </div>
+
 
 </header>

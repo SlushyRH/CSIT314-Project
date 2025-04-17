@@ -5,36 +5,58 @@ async function initEvents()
 
     try
     {
-        // check for cached events
+        // check for cached events and load if needed
         const cached = localStorage.getItem("cached_events");
+        const cachedTimestamp = localStorage.getItem("cached_events_timestamp");
+        const now = Date.now();
+        const tenMinutes = 10 * 60 * 1000;
 
-        // check cache timestamp, and if older than X minutes, refresh from datbase no matter what
+        // render all chached events no matter what
+        const template = await fetch('./assets/components/event.html')
+            .then(res => res.text());
 
         if (cached)
         {
             events = JSON.parse(cached);
+            renderEvents(container, events, template);
         }
-        else
+
+        const shouldUpdate = !cachedTimestamp || (now - parseInt(cachedTimestamp) > tenMinutes);
+
+        if (shouldUpdate)
         {
             const response = await sqlRequest("GET", "ALL_EVENTS");
-            events = response;
 
             if (response.status == "success")
             {
+                events = response.data;
+
                 // cache if success
-                localStorage.setItem("cached_events", JSON.stringify(response));
+                localStorage.setItem("cached_events", JSON.stringify(response.data));
                 localStorage.setItem("cached_events_timestamp", Date.now().toString());
+
+                container.innerHTML = '';
+                renderEvents(container, events, template);
             }
         }
-
-        // fetch event component template
-        const template = await fetch('./assets/components/event.html')
-            .then(res => res.text());
-
-        // need to render onto main page
     }
     catch (error)
     {
         console.error("Failed to initialize events:", error);
     }
+}
+
+function renderEvents(container, events, template)
+{
+    events.forEach(event =>
+    {
+        let html = template
+            .replace('{{title}}', event.title)
+            .replace('{{date}}', event.date)
+            .replace('{{description}}', event.description);
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        container.appendChild(wrapper.firstElementChild);
+    });
 }

@@ -18,9 +18,7 @@ body {
     color: var(--text);
 }
 
-/* remove icon from date form as we cant change colour and it looks strange */
-input[type="date"]::-webkit-inner-spin-button,
-input[type="date"]::-webkit-calendar-picker-indicator {
-    display: none;
-    -webkit-appearance: none;
+/* change icon colour of ddate icon in form input */
+input {
+    color-scheme: dark;
 }

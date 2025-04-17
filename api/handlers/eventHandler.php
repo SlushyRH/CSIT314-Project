@@ -25,13 +25,18 @@ function getAllEvents()
         $stmt->execute();
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        send_response('success', 'Events fetched successfully.', 200, $events);
+        foreach ($events as &$event)
+        {
+            $event['event_date'] = date("d M Y", strtotime($event['event_date']));
+        }
+
+
+        send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }
     catch (Exception $e)
     {
         send_response('error', 'Could not fetch events. Error: ' . $e->getMessage(), 500);
     }
 }
-
 
 ?>
