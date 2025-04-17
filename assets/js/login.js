@@ -5,7 +5,10 @@ window.addEventListener("DOMContentLoaded", () =>
     const redirect = urlParams.get("redirect");
 
     if (redirect)
+    {
         redirectUrl = redirect;
+        urlParams.remove("redirect");
+    }
 
     // toggle sign up based on url
     if (location.search === "?signUp")
