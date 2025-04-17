@@ -128,14 +128,17 @@ async function login(email, password)
 
     try
     {
+        // send and get response from sql api
         const response = await sqlRequest("POST", "USER_LOG_IN", data);
 
+        // check if success and alert if not
         if (response.status != "success")
         {
             alert("User could not sign in! " + response.message);
             return;
         }
 
+        // log userID to local storage
         const userId = response.data.user_id;
         localStorage.setItem("user", userId);
 

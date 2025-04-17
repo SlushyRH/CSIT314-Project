@@ -30,7 +30,6 @@ function getAllEvents()
             $event['event_date'] = date("d M Y", strtotime($event['event_date']));
         }
 
-
         send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }
     catch (Exception $e)
