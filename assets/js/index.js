@@ -1,6 +1,6 @@
 async function initEvents()
 {
-    const container = document.getElementById('event-list');
+    const container = document.getElementById('eventList');
     let events = [];
 
     try
@@ -32,7 +32,7 @@ async function initEvents()
                 events = response.data;
 
                 // cache if success
-                localStorage.setItem("cached_events", JSON.stringify(response.data));
+                localStorage.setItem("cached_events", JSON.stringify(events));
                 localStorage.setItem("cached_events_timestamp", Date.now().toString());
 
                 container.innerHTML = '';
@@ -50,9 +50,11 @@ function renderEvents(container, events, template)
 {
     events.forEach(event =>
     {
+        console.log(event);
         let html = template
             .replace('{{title}}', event.title)
-            .replace('{{date}}', event.date)
+            .replace('{{date}}', event.event_date)
+            .replace('{{category}}', event.category_id)
             .replace('{{description}}', event.description);
 
         const wrapper = document.createElement('div');

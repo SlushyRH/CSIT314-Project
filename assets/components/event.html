@@ -1,11 +1,14 @@
-<div class="bg-(--secondary) shadow-xl rounded-lg overflow-hidden max-w-xs w-full">
+<div class="bg-(--secondary) shadow-xl rounded-lg overflow-hidden cursor-pointer max-w-xs w-full">
 
     <!-- card content -->
     <div class="p-4 space-y-3">
-        <!-- title and date -->
-        <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-(--text) truncate">{{title}}</h2>
-            <span class="text-sm text-(--text) whitespace-nowrap">{{date}}</span>
+        <!-- title -->
+        <h2 class="text-lg font-bold text-(--text) truncate">{{title}}</h2>
+
+        <!-- date and category -->
+        <div class="flex items-center justify-between text-xs text-(--text)">
+            <span>{{date}}</span>
+            <span class="font-medium">{{category}}</span>
         </div>
 
         <!-- description -->
@@ -13,16 +16,6 @@
             {{description}}
         </p>
 
-        <!-- capacity and book button
-        <div class="flex items-center justify-between pt-4">
-            <span class="text-sm font-medium text-(--text)">Capacity: 50/50</span>
-            <a href="#" class="text-right cursor-pointer">
-                <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) font-semibold py-1 px-3 rounded shadow">
-                    Book
-                </button>
-            </a>
-        </div>
-         -->
     </div>
 
 </div>
