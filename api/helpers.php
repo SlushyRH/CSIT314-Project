@@ -76,7 +76,7 @@ function createTablesIfNeeded($pdo)
 }
 
 // send response back to client
-function send_response($status, $message, $code, $data = null)
+function sendResponse($status, $message, $code, $data = null)
 {
     http_response_code(200);
     echo json_encode([
@@ -98,10 +98,12 @@ function getPdo()
     {
         try
         {
+            // connect to database
             $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
         
+            // create tables if needed
             createTablesIfNeeded($pdo);
         }
         catch (Exception $e)
