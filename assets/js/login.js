@@ -4,10 +4,14 @@ window.addEventListener("DOMContentLoaded", () =>
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get("redirect");
 
+    // get redirect url if it exists and rmeove it from the url params
     if (redirect)
     {
         redirectUrl = redirect;
-        urlParams.remove("redirect");
+        urlParams.delete("redirect");
+        
+        const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
+        history.replaceState(null, "", newUrl);
     }
 
     // toggle sign up based on url
@@ -54,11 +58,15 @@ function getElements()
 
 async function submitBtn(event)
 {
-    getElements();
+    // prevent default form submission
+    // this is needed to prevent the page from reloading when the form is submitted
     event.preventDefault();
+
+    getElements();
 
     if (!hasAccount)
     {
+        // signup if hasAccount is false
         await signup(
             fullName.input.value,
             dob.input.value,
@@ -69,6 +77,7 @@ async function submitBtn(event)
     }
     else
     {
+        // otherwise login
         await login(
             email.value,
             password.value
@@ -83,6 +92,13 @@ function toggleLogInType()
     hasAccount = !hasAccount;
 
     getElements();
+
+    // reset form values
+    email.value = "";
+    password.value = "";
+    fullName.input.value = "";
+    dob.input.value = "";
+    phoneNumber.input.value = "";
 
     // if hasAccount is true, only show sign in elements, otherwise show sign up elements
     if (hasAccount)
@@ -156,6 +172,7 @@ async function login(email, password)
 
 async function signup(name, dob, phoneNumber, email, password)
 {
+    // package data to to send to api
     const data = {
         name: name,
         dob: dob,
@@ -166,17 +183,18 @@ async function signup(name, dob, phoneNumber, email, password)
 
     try
     {
-        console.log(data);
-
+        // send and get response
         const response = await sqlRequest("POST", "USER_SIGN_UP", data);
 
+        // log error if not success
         if (response.status !== "success")
         {
             console.error("Signup Failed:", response.message);
             return;
         }
         
-        toggleLogInType(); // toggle to sign in page
+        // switch to login page so user can log in
+        toggleLogInType();
     }
     catch (error)
     {
