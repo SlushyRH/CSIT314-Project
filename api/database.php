@@ -130,7 +130,7 @@ function userSignUp($pdo, $data)
             'name' => $name,
             'password' => $password,
             'dob' => $dob,
-            'phone' => $phoneNumber
+            'phone_number' => $phoneNumber
         ]);
 
         $stmt = $pdo->prepare("

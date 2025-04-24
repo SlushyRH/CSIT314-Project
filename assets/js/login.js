@@ -134,7 +134,7 @@ async function login(email, password)
         // check if success and alert if not
         if (response.status != "success")
         {
-            alert("User could not sign in! " + response.message);
+            console.error("Login Failed:", response.message);
             return;
         }
 
@@ -171,7 +171,12 @@ async function signup(name, dob, phoneNumber, email, password)
         const response = await sqlRequest("POST", "USER_SIGN_UP", data);
 
         if (response.status !== "success")
-            alert("User could not sign up! " + response.message);
+        {
+            console.error("Signup Failed:", response.message);
+            return;
+        }
+        
+        toggleLogInType(); // toggle to sign in page
     }
     catch (error)
     {
