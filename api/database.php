@@ -96,33 +96,33 @@ function createTablesIfNeeded($pdo) {
     $pdo->exec($createTestTable);
 }
 
-function userSignUp($pdo, $data) {
-    // ensure all data is given
-    if (empty($data['email']) || empty($data['name'])|| empty($data['phoneNumber']) || empty($data['password'])) {
-        send_response('error', 'All fields are required.', 400, $data);
+function userSignUp($pdo, $data)
+{
+    $required = ['email', 'name', 'dob', 'phoneNumber', 'password'];
+
+    foreach ($required as $field)
+    {
+        if (empty($data[$field]))
+            send_response('error', $field . ' is required!', 400);
     }
 
-    // get all data
     $email = $data['email'];
     $name = $data['name'];
     $dob = $data['dob'];
     $phoneNumber = $data['phoneNumber'];
-    $password = password_hash($data['password'], PASSWORD_DEFAULT); // hash password
+    $password = password_hash($data['password'], PASSWORD_DEFAULT);
 
-    try {
-        // try find user id
-        $stmt = $pdo->prepare("SELECT user_id FROM Users WHERE email = :email");
+    try
+    {
+        $stmt = $pdo->prepare("SELECT user_id FROM Users where email = :email");
         $stmt->execute(['email' => $email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // if user exists, log them in instead
-        if ($user) {
-            return userLogIn($pdo, $data);
-        }
+        if ($stmt->fetch())
+            return userLogIn($data);
 
         $stmt = $pdo->prepare("
             INSERT INTO Users (email, name, password, dob, phone_number)
-            VALUES (:email, :name, :password, :dob, :phoneNumber)
+            VALUES (:email, :name, :password, :dob, :phone_number)
         ");
 
         $stmt->execute([
@@ -130,75 +130,92 @@ function userSignUp($pdo, $data) {
             'name' => $name,
             'password' => $password,
             'dob' => $dob,
-            'phoneNumber' => $phoneNumber
+            'phone' => $phoneNumber
         ]);
 
-        send_response('success', 'User has successfully signed up!', 200);
-    } catch (Exception $e) {
+        $stmt = $pdo->prepare("
+            SELECT user_id, password FROM Users WHERE email = :email
+        ");
+        $stmt->execute(['email' => $data['email']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        send_response('success', 'User logged in successfully.', 200, [
+            'user_id' => $user['user_id']
+        ]);
+    }
+    catch (Exception $e)
+    {
         send_response('error', 'Could not sign up user. Error: ' . $e->getMessage(), 500);
     }
 }
 
-function userLogIn($pdo, $data) {
-    if (empty($data['email']) || empty($data['password'])) {
-        send_response('error', 'All fields are required.', 400, $data);
+function userLogIn($pdo, $data)
+{
+    $required = ['email', 'password'];
+
+    foreach ($required as $field)
+    {
+        if (empty($data[$field]))
+            send_response('error', $field . ' is required!', 400);
     }
-    
-    $email = $data['email'];
-    $password = $data['password'];
 
-    try {
+    try
+    {
         $stmt = $pdo->prepare("
-            SELECT user_id, password FROM Users
-            WHERE email = :email
+            SELECT user_id, password FROM Users WHERE email = :email
         ");
-
-        $stmt->execute(['email' => $email]);
+        $stmt->execute(['email' => $data['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$user) {
-            send_response('error', 'User not found!', 404);
+        if (!$user)
+        {
+            send_response('error', 'User not found.', 404);
         }
 
-        if (!password_verify($password, $user['password'])) {
-            send_response('error', 'Incorrect password', 401);
+        if (!password_verify($data['password'], $user['password']))
+        {
+            send_response('error', 'Incorrect password.', 401);
         }
-        
-        send_response('success', 'User has successfully logged in!', 200, [
+
+        send_response('success', 'User logged in successfully.', 200, [
             'user_id' => $user['user_id']
         ]);
-    } catch (Exception $e) {
-        send_response('error', 'Could not let user log in. Error: ' . $e->getMessage(), 500);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Could not log in. Error: ' . $e->getMessage(), 500);
     }
 }
 
-function resetPassword($pdo, $data) {
-    if (empty($data['email']) || empty($data['password']))
+function resetPassword($pdo, $data)
+{
+    $required = ['email', 'password'];
+
+    foreach ($required as $field)
     {
-        send_response('error', 'Email and new password are required.', 400);
+        if (empty($data[$field]))
+            send_response('error', $field . ' is required!', 400);
     }
 
-    $email = $data['email'];
     $newPassword = password_hash($data['password'], PASSWORD_DEFAULT);
 
     try
     {
         $stmt = $pdo->prepare("SELECT user_id FROM Users WHERE email = :email");
-        $stmt->execute(['email' => $email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute(['email' => $data['email']]);
 
-        if (!$user)
+        if (!$stmt->fetch())
         {
             send_response('error', 'User with that email does not exist.', 404);
         }
 
-        $updateStmt = $pdo->prepare("UPDATE Users SET password = :password WHERE email = :email");
-        $updateStmt->execute([
+        $stmt = $pdo->prepare("UPDATE Users SET password = :password WHERE email = :email");
+        $stmt->execute([
             'password' => $newPassword,
-            'email' => $email
+            'email' => $data['email']
         ]);
 
-        send_response('success', 'Password has been successfully updated.', 200);
+        send_response('success', 'Password updated successfully.', 200);
     }
     catch (Exception $e)
     {
@@ -206,18 +223,38 @@ function resetPassword($pdo, $data) {
     }
 }
 
-function getEvents($pdo) {
+function getAllEvents($pdo)
+{
     try
     {
-        $stmt = $pdo->prepare("SELECT * FROM Events");
+        $stmt = $pdo->prepare("
+            SELECT 
+                e.event_id,
+                e.organiser_id,
+                e.title,
+                e.description,
+                e.location,
+                e.event_date,
+                e.category_id,
+                ec.name AS category_name
+            FROM Events e
+            LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
+            ORDER BY e.event_date ASC
+        ");
+
         $stmt->execute();
-        
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        send_response('success', 'Got all events', 200, $events);
+
+        foreach ($events as &$event)
+        {
+            $event['event_date'] = date("d M Y", strtotime($event['event_date']));
+        }
+
+        send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }
     catch (Exception $e)
     {
-        send_response('error', $e->getMessage(), 500);
+        send_response('error', 'Could not fetch events. Error: ' . $e->getMessage(), 500);
     }
 }
 
@@ -229,17 +266,20 @@ try {
 
     createTablesIfNeeded($pdo);
     
+    // get the method and action from the request
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? null;
     
     if ($method === "POST") {
-        $rawData = file_get_contents("php://input");
-        $data = json_decode($rawData, true);
+        // get json content from the request
+        $data = json_decode(file_get_contents("php://input"), true);
 
+        // check if data is null and return if so
         if ($data === null) {
             send_response('error', 'Invalid JSON input.', 400);
         }
 
+        // call method based on action
         if ($action === "USER_SIGN_UP") {
             userSignUp($pdo, $data);
         } else if ($action === "USER_LOG_IN") {
@@ -249,7 +289,7 @@ try {
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
-            getEvents($pdo);
+            getAllEvents($pdo);
         }
     } else {
         send_response('error', 'Invalid request method.', 405);

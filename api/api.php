@@ -1,12 +1,9 @@
 <?php
 
-require_once 'helpers.php';
-require_once 'handlers/authHandler.php'
-require_once 'handlers/eventHandler.php'
-
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
+header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS')
 {
@@ -14,10 +11,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS')
     exit;
 }
 
+require_once '/helpers.php';
+require_once '/handlers/authHandler.php';
+require_once '/handlers/eventHandler.php';
+
 try
 {
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? null;
+
+    $pdo = getPdo();
+
+    if ($pdo === null)
+        send_response('error', 'Database connection failed.', 500);
 
     if ($method === "POST")
     {
@@ -54,7 +60,7 @@ try
         switch ($action)
         {
             case 'GET_EVENTS':
-                getAllEvents();
+                getAllEvents($pdo);
                 break;
                 
             default:

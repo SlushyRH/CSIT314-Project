@@ -5,25 +5,19 @@ async function initEvents()
 
     try
     {
-        // check for cached events and load if needed
-        const cached = localStorage.getItem("cached_events");
-        const cachedTimestamp = localStorage.getItem("cached_events_timestamp");
-        const now = Date.now();
-        const tenMinutes = 10 * 60 * 1000;
-
         // render all chached events no matter what
         const template = await fetch('./assets/components/event.html')
             .then(res => res.text());
 
+        const cached = getCachedEvents();
+
         if (cached)
         {
-            events = JSON.parse(cached);
+            events = cached;
             renderEvents(container, events, template);
         }
-
-        const shouldUpdate = !cachedTimestamp || (now - parseInt(cachedTimestamp) > tenMinutes);
-
-        if (shouldUpdate)
+    
+        if (!cached)
         {
             const response = await sqlRequest("GET", "ALL_EVENTS");
 
@@ -55,7 +49,8 @@ function renderEvents(container, events, template)
             .replace('{{title}}', event.title)
             .replace('{{date}}', event.event_date)
             .replace('{{category}}', event.category_id)
-            .replace('{{description}}', event.description);
+            .replace('{{description}}', event.description)
+            .replace('{{onclick}}', `window.location.href='event.html?id=${event.event_id}'`); 
 
         const wrapper = document.createElement('div');
         wrapper.innerHTML = html;
