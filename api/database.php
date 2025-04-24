@@ -234,7 +234,7 @@ function getAllEvents($pdo)
                 e.title,
                 e.description,
                 e.location,
-                e.event_date,
+                DATE_FORMAT(e.event_date, '%H:%i %d/%m/%Y') AS event_date,
                 e.category_id,
                 ec.name AS category_name
             FROM Events e
@@ -244,11 +244,6 @@ function getAllEvents($pdo)
 
         $stmt->execute();
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($events as &$event)
-        {
-            $event['event_date'] = date("d M Y", strtotime($event['event_date']));
-        }
 
         send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }

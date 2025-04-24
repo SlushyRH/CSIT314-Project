@@ -16,14 +16,13 @@ async function initEvents()
             events = cached;
             renderEvents(container, events, template);
         }
-    
-        if (!cached)
+        else
         {
             const response = await sqlRequest("GET", "ALL_EVENTS");
 
             if (response.status == "success")
             {
-                events = response.data;
+                events = JSON.parse(response.data);
 
                 // cache if success
                 localStorage.setItem("cached_events", JSON.stringify(events));
@@ -42,18 +41,24 @@ async function initEvents()
 
 function renderEvents(container, events, template)
 {
+    // go through each event and render it
     events.forEach(event =>
     {
         console.log(event);
+
+        // create template and replace the placeholders with the event data
         let html = template
             .replace('{{title}}', event.title)
             .replace('{{date}}', event.event_date)
-            .replace('{{category}}', event.category_id)
+            .replace('{{category}}', event.category_name)
             .replace('{{description}}', event.description)
             .replace('{{onclick}}', `window.location.href='event.html?id=${event.event_id}'`); 
 
+        // create a wrrapper div to append the html event
         const wrapper = document.createElement('div');
         wrapper.innerHTML = html;
+
+        // append the wrapper to the event list container
         container.appendChild(wrapper.firstElementChild);
     });
 }
