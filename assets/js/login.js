@@ -10,6 +10,7 @@ window.addEventListener("DOMContentLoaded", () =>
         redirectUrl = redirect;
         urlParams.delete("redirect");
         
+        // remove redirect from url
         const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
         history.replaceState(null, "", newUrl);
     }
