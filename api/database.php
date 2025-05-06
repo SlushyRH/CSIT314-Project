@@ -253,6 +253,42 @@ function getAllEvents($pdo)
     }
 }
 
+function createEvent($pdo, $data)
+{
+    $required = ['title', 'user_id', 'description', 'category_id', 'location', 'event_date'];
+
+    foreach ($required as $field)
+    {
+        if (empty($data[$field]))
+            send_response('error', $field . ' is required!', 400);
+    }
+
+    try
+    {
+        $stmt = $pdo->prepare("
+            INSERT INTO Events (user_id, title, description, category_id, location, event_date)
+            VALUES (:userId, :title, :description, :categoryId, :location, :eventDate)
+        ");
+
+        $stmt->execute([
+            'userId' => $data['user_id'],
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'categoryId' => $data['category_id'],
+            'location' => $data['location'],
+            'eventDate' => $data['event_date']
+        ]);
+
+        $eventId = $pdo->lastInsertId();
+
+        send_response('success', 'Event successfully created.', 200, json_encode(['event_id' => $eventId]));
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Could not create a new event. Error: ' . $e->getMessage(), 500);
+    }
+}
+
 try {
     // establish connection to sql database
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
@@ -281,6 +317,8 @@ try {
             userLogIn($pdo, $data);
         } else if ($action === "RESET_PASSWORD") {
             resetPassword($pdo, $data);
+        } else if ($action === "CREATE_EVENT") {
+            createEvent($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
