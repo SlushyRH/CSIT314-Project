@@ -6,7 +6,8 @@ header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
 // display errors on screen and report all errors
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 // handle preflight request for cors
@@ -289,6 +290,51 @@ function createEvent($pdo, $data)
     }
 }
 
+function getBookedEvents($pdo, $data)
+{
+    $required = ['user_id'];
+
+    foreach ($required as $field)
+    {
+        if (empty($data[$field]))
+            send_response('error', $field . ' is required!', 400);
+    }
+
+    $userId = $data['user_id'];
+
+    try
+    {
+        $stmt = $pdo->prepare("
+            SELECT
+                Events.event_id,
+                Events.title,
+                Events.description,
+                Events.location,
+                Events.event_date,
+                EventCategories.name as category_name,
+                TicketTypes.name as ticket_type,
+                TicketTypes.price,
+                Registrations.status,
+                Payments.payment_status
+            FROM Registrations
+            JOIN Events on Registrations.event_id = Events.event_id
+            JOIN TicketTypes on Registrations.ticket_type_id = TicketTypes.ticket_type_id
+            LEFT JOIN Payments ON Payments.registration_id = Registrations.registration_id
+            LEFT JOIN EventCategories ON Events.category_id = EventCategories.category_id
+            WHERE Registrations.user_id = :user_id
+        ");
+
+        $stmt->execute(['user_id' => $userId]);
+        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        send_response('success', 'Successfully got all booked events', 200, $events);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Could not get user booked events. Error: ' . $e->getMessage(), 500);
+    }
+}
+
 try {
     // establish connection to sql database
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
@@ -319,6 +365,8 @@ try {
             resetPassword($pdo, $data);
         } else if ($action === "CREATE_EVENT") {
             createEvent($pdo, $data);
+        } else if ($action === "GET_BOOKED_EVENTS") {
+            getBookedEvents($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
