@@ -1,15 +1,15 @@
 // page will get data from regestrations table in database
 // should search by customer_id to get events
 
-function getUserEvents() {
-    var user_id = localStorage("user_id");
+async function getUserEvents() {
+    //var user_id = localStorage("user_id");
     const userSearchId = {
-        "user_id":user_id
+        "user_id":2
     };
 
-    const userResponse = await sqlRequest("POST", "GET_BOOKED_EVENTS", userData);
+    const userResponse = await sqlRequest("POST", "GET_BOOKED_EVENTS", userSearchId);
     const allEvents = userResponse.data; // this being a json object
-
+    console.log(allEvents);
     
 }
 
@@ -28,7 +28,7 @@ function orderEventsAscending(events){
     do {
         swapped = false;
         for (let i = 0; i < len - 1; i++) {
-            if (events[i] > eventsi + 1]) {
+            if (events[i] > events[i + 1]) {
                 // Swap elements
                 [events[i], events[i + 1]] = [events[i + 1], events[i]];
                 swapped = true;
@@ -46,7 +46,7 @@ function orderEventsDescending(events){
     do {
         swapped = false;
         for (let i = 0; i < len - 1; i++) {
-            if (events[i] < eventsi + 1]) {
+            if (events[i] < events[i + 1]) {
                 // Swap elements
                 [events[i], events[i + 1]] = [events[i + 1], events[i]];
                 swapped = true;
@@ -87,6 +87,6 @@ function getToday(){
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate() + 7).padStart(2, '0');
-    const today = `${yyyy}-${mm}-${dd}`;
+    today = `${yyyy}-${mm}-${dd}`;
     return today;
 }
