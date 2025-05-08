@@ -22,12 +22,46 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="assets/js/global.js"></script>
     <script src="assets/js/createEvent.js"></script>
+
+
   </head>
 
   <body class="min-h-screen flex flex-col">
     <div id="header"></div>
-      <main class="flex-grow">
+      <main class="flex-grow flex justify-center items-center">
+        <div class="w-full max-w-md p-4">
+          <p>Event Creation Form: </p>
 
+          <label>Title:</label>
+          <input type="text" id="eventTitle" name="eventTitle" style="color: black; background-color: #eee;">
+          <p id="titleMissing"></p>
+          <br/>
+
+          <label>Description:</label>
+          <input type="text" id="description" name="description" style="color: black; background-color: #eee;">
+          <p id="descMissing"></p>
+          <br />
+
+          <label>Event Type:</label>
+          <select  id="category" name="category" style="color: black; background-color: #eee;">
+            <option value="N/A">No Selection</option>
+            <option value="1">Conference</option>
+            <option value="2">Music Concert</option>
+            <option value="3">Networking Session</option>
+          </select>
+          <p id="catInvalRes"></p>
+          <br />
+
+          <label>Location:</label>
+          <input type="text" id="location" name="location" style="color: black; background-color: #eee;">
+          <p id="locMissing"></p>
+          <br/>
+          <label>Event Date:</label>
+          <input type="date" id="eventDate">
+          <p id="eventInvalRes"></p>
+          <br/>
+          <button onclick="create()" style="color: black; background-color: #eee;">Submit</button>
+        </div>
       </main>
     <div id="footer"></div>
 
