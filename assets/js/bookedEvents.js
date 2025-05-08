@@ -21,6 +21,40 @@ function GetEvents(Events){
 
 }
 
+function GetPastEvents(allEvents){
+    const Today=getToday();
+    const resultArray = [];
+    for (let i = 0; i < allEvents.length; i++) {
+        event = allEvents[i];
+        if (event.event_date < Today) {
+            resultArray.push(event);
+        };
+    };
+    return resultArray;
+}
+
+function GetUpcomingEvents(allEvents){
+    const Today=getToday();
+    const resultArray = [];
+    for (let i = 0; i < allEvents.length; i++) {
+        event = allEvents[i];
+        if (event.event_date > Today) {
+            resultArray.push(event);
+        };
+    };
+    return resultArray;
+}
+
+function getToday(){
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate() + 7).padStart(2, '0');
+    today = `${yyyy}-${mm}-${dd}`;
+    return today;
+}
+
+
 function orderEventsAscending(events){
     let len = events.length;
     let swapped;
@@ -58,35 +92,3 @@ function orderEventsDescending(events){
 }
 
 
-function GetPastEvents(allEvents){
-    const Today=getToday();
-    const resultArray = [];
-    for (let i = 0; i < allEvents.length; i++) {
-        event = allEvents[i];
-        if (event.event_date < Today) {
-            resultArray.push(event);
-        };
-    };
-    return resultArray;
-}
-
-function GetUpcomingEvents(allEvents){
-    const Today=getToday();
-    const resultArray = [];
-    for (let i = 0; i < allEvents.length; i++) {
-        event = allEvents[i];
-        if (event.event_date > Today) {
-            resultArray.push(event);
-        };
-    };
-    return resultArray;
-}
-
-function getToday(){
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate() + 7).padStart(2, '0');
-    today = `${yyyy}-${mm}-${dd}`;
-    return today;
-}
