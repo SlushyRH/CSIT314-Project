@@ -10,23 +10,26 @@ async function getUserEvents() {
     const userResponse = await sqlRequest("POST", "GET_BOOKED_EVENTS", userSearchId);
     const allEvents = userResponse.data; // this being a json object
     console.log(allEvents);
-    
+
+    GetEvents(allEvents);
 }
 
 function GetEvents(Events){
     const pastEvents = GetPastEvents(Events);
     const upcomingEvents = GetUpcomingEvents(Events);
-
+    console.log(pastEvents);
+    console.log(upcomingEvents);
 
 
 }
 
 function GetPastEvents(allEvents){
-    const Today=getToday();
+    const Now=getNow();
     const resultArray = [];
     for (let i = 0; i < allEvents.length; i++) {
         event = allEvents[i];
-        if (event.event_date < Today) {
+        console.log(event.event_date);
+        if (event.event_date < Now) {
             resultArray.push(event);
         };
     };
@@ -34,24 +37,28 @@ function GetPastEvents(allEvents){
 }
 
 function GetUpcomingEvents(allEvents){
-    const Today=getToday();
+    const Now=getNow();
     const resultArray = [];
     for (let i = 0; i < allEvents.length; i++) {
         event = allEvents[i];
-        if (event.event_date > Today) {
+        if (event.event_date > Now) {
             resultArray.push(event);
         };
     };
     return resultArray;
 }
 
-function getToday(){
+function getNow(){
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate() + 7).padStart(2, '0');
-    today = `${yyyy}-${mm}-${dd}`;
-    return today;
+
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+
+    const now = `${yyyy}-${mm}-${dd}T${hh}:${mins}`;
+    return now;
 }
 
 
