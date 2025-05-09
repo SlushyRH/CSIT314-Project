@@ -18,11 +18,12 @@ async function initEvents()
         }
         else
         {
+            // if no cached events, then fetch from API
             const response = await sqlRequest("GET", "ALL_EVENTS");
 
             if (response.status == "success")
             {
-                events = JSON.parse(response.data);
+                const events = JSON.parse(response.data);
 
                 // cache if success
                 localStorage.setItem("cached_events", JSON.stringify(events));
@@ -30,6 +31,11 @@ async function initEvents()
 
                 container.innerHTML = '';
                 renderEvents(container, events, template);
+            }
+            else
+            {
+                console.error("Failed to fetch events from API:", response.message);
+                return null;
             }
         }
     }

@@ -144,10 +144,10 @@ function navToPage(page, redirectURL = null)
     window.location.href = url;
 }
 
-async function getEvent(eventId)
+function getEvent(eventId)
 {
     // check for cached events and load if needed
-    const cachedEvents = await getCachedEvents();
+    const cachedEvents = getCachedEvents();
 
     if (!cachedEvents)
         return null;
@@ -162,7 +162,7 @@ async function getEvent(eventId)
     return null;
 }
 
-async function getCachedEvents()
+function getCachedEvents()
 {
     // check for cached events and load if needed
     const cached = localStorage.getItem("cached_events");
@@ -175,25 +175,6 @@ async function getCachedEvents()
     // parse cached events
     if (cached && cachedTimestamp && (now - parseInt(cachedTimestamp) <= tenMinutes))
         return JSON.parse(cached);
-
-    // if no cached events, then fetch from API
-    const response = await sqlRequest("GET", "ALL_EVENTS");
-
-    if (response.status == "success")
-    {
-        const events = JSON.parse(response.data);
-
-        // cache if success
-        localStorage.setItem("cached_events", JSON.stringify(events));
-        localStorage.setItem("cached_events_timestamp", Date.now().toString());
-
-        return events;
-    }
-    else
-    {
-        console.error("Failed to fetch events from API:", response.message);
-        return null;
-    }
 }
 
 let lastSqlResponse = null;
