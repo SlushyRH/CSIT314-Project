@@ -327,7 +327,8 @@ function getBookedEvents($pdo, $data)
         $stmt->execute(['user_id' => $userId]);
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        send_response('success', 'Successfully got all booked events', 200, $events);
+        //send_response('success', 'Successfully got all booked events', 200, $events);
+        send_response('success', 'Successfully got all booked events', 200, json_encode(['events' => $events]));
     }
     catch (Exception $e)
     {
