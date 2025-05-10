@@ -260,10 +260,10 @@ function getFilterData($pdo)
     {
         $stmt = $pdo->prepare("
             SELECT
-                GROUP_CONCAT(DISTINCT e.location) AS locations,
-                GROUP_CONCAT(DISTINCT c.name) AS categories
+                JSON_ARRAYAGG(DISTINCT e.location) AS locations,
+                JSON_ARRAYAGG(DISTINCT c.name) AS categories
             FROM Events e
-            JOIN EventCategories c ON c.category_id = c.category_id
+            JOIN EventCategories c ON e.category_id = c.category_id
             WHERE e.location IS NOT NULL AND e.location != ''
         ");
 
@@ -271,11 +271,11 @@ function getFilterData($pdo)
         $results = $stmt->fetch(PDO::FETCH_ASSOC);
 
         $filterData = [
-            'locations' => array_map('trim', explode(',', $rresultsow['locations'])),
-            'categories' => array_map('trim', explode(',', $rresultsow['categories']))
+            'locations' => json_decode($results['locations'], true),
+            'categories' => json_decode($results['categories'], true)
         ];
 
-        send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
+        send_response('success', 'Filter data fetched successfully.', 200, $filterData);
     }
     catch (Exception $e)
     {
