@@ -254,6 +254,33 @@ function getAllEvents($pdo)
     }
 }
 
+function getFilterData($pdo)
+{
+    try
+    {
+        // get unique locations
+        $locationStmt = $pdo->prepare("SELECT DISTINCT location FROM Events WHERE location IS NOT NULL AND location != ''");
+        $locationStmt->execute();
+        $locations = $locationStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // get all categories
+        $categoryStmt = $pdo->prepare("SELECT name FROM EventCategories");
+        $categoryStmt->execute();
+        $categories = $categoryStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $filterData = [
+            'locations' => $locations,
+            'categories' => $categories
+        ];
+
+        send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Could not fetch filter data. Error: ' . $e->getMessage(), 500);
+    }
+}
+
 function createEvent($pdo, $data)
 {
     $required = ['title', 'user_id', 'description', 'category_id', 'location', 'event_date'];
