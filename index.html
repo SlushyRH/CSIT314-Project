@@ -22,46 +22,47 @@
 
         <!-- event filters -->
         <div class="w-full max-w-6xl mx-auto px-4 mt-4">
-            <form id="eventFilter" class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md space-y-4">
+            <form id="eventFilter" class="bg-(--secondary) p-4 rounded-xl shadow-md space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     
-                    <div>
-                        <label for="filterDate" class="block mb-1 text-sm font-medium">Event Date</label>
-                        <input type="date" id="filterDate" name="filterDate" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                    </div>
+                  <div>
+                    <label for="filterDate" class="block mb-1 text-sm font-medium">Event Date</label>
+                    <input type="date" id="filterDate" name="filterDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+                  </div>
 
-                    <div>
-                        <label for="filterCategory" class="block mb-1 text-sm font-medium">Category</label>
-                        <select id="filterCategory" name="filterCategory" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                            <!-- Options loaded dynamically -->
-                        </select>
-                    </div>
+                  <div>
+                    <label for="filterCategory" class="block mb-1 text-sm font-medium">Category</label>
+                    <select id="filterCategory" name="filterCategory" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+                        <!-- categories loaded dynamically -->
+                    </select>
+                  </div>
 
-                    <div>
-                        <label for="filterLocation" class="block mb-1 text-sm font-medium">Location</label>
-                        <select id="filterLocation" name="filterLocation" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                            <!-- Options loaded dynamically -->
-                        </select>
-                    </div>
+                  <div>
+                    <label for="filterLocation" class="block mb-1 text-sm font-medium">Location</label>
+                    <select id="filterLocation" name="filterLocation" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+                        <!-- locations loaded dynamically -->
+                    </select>
+                  </div>
 
-                    <div>
-                        <label for="filterMinPrice" class="block mb-1 text-sm font-medium">Min Price</label>
-                        <input type="number" id="filterMinPrice" name="filterMinPrice" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                    </div>
+                  <div>
+                  <label for="filterMinPrice" class="block mb-1 text-sm font-medium">Min Price</label>
+                  <input type="number" id="filterMinPrice" name="filterMinPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+                  </div>
 
-                    <div>
-                        <label for="filterMaxPrice" class="block mb-1 text-sm font-medium">Max Price</label>
-                        <input type="number" id="filterMaxPrice" name="filterMaxPrice" class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                    </div>
-                </div>
+                  <div>
+                    <label for="filterMaxPrice" class="block mb-1 text-sm font-medium">Max Price</label>
+                    <input type="number" id="filterMaxPrice" name="filterMaxPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+                  </div>
 
-                <div class="flex justify-end gap-2">
-                    <button type="button" id="filterClearBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow">
-                        Clear
+                  <div class="flex w-full max-w-md gap-2 items-center self-end">
+                    <button type="reset" id="filterClearBtn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow">
+                      Clear
                     </button>
-                    <button type="button" id="filterSubmitBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
-                        Filter
+                    <button type="button" id="filterSubmitBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
+                      Filter
                     </button>
+                  </div>
+
                 </div>
             </form>
         </div>

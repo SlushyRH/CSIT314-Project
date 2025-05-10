@@ -7,7 +7,29 @@ async function initFilterData()
         if (response.status == "success")
         {
             const filterData = JSON.parse(response.data);
-            console.log(filterData);
+            
+            const locations = filterData.locations;
+            const categories = filterData.categories;
+
+            const locationSelect = document.getElementById("filterLocation");
+            const categorySelect = document.getElementById("filterCategory");
+
+            locationSelect.innerHTML = "";
+            categorySelect.innerHTML = "";
+
+            locationSelect.appendChild(new Option("Select Location", ""));
+            categorySelect.appendChild(new Option("Select Category", ""));
+
+            locations.forEach(location =>
+            {
+                locationSelect.appendChild(new Option(location, location));
+            });
+
+            // Populate categories
+            categories.forEach(category =>
+            {
+                categorySelect.appendChild(new Option(category, category));
+            });
         }
         else
         {
