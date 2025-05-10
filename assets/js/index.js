@@ -1,3 +1,25 @@
+async function initFilterData()
+{
+    try
+    {
+        const response = await sqlRequest("GET", "GET_FILTER_DATA");
+
+        if (response.status == "success")
+        {
+            const filterData = JSON.parse(response.data);
+            console.log(filterData);
+        }
+        else
+        {
+            console.error("Failed to fetch events from API:", response.message);
+        }
+    }
+    catch (error)
+    {
+        console.error("Failed to initialize filter daata:", error);
+    }
+}
+
 async function initEvents()
 {
     const container = document.getElementById('eventList');
