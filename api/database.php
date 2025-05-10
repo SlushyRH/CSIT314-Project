@@ -271,8 +271,8 @@ function getFilterData($pdo)
         $results = $stmt->fetch(PDO::FETCH_ASSOC);
 
         $filterData = [
-            'locations' => $results['locations'],
-            'categories' => $results['categories']
+            'locations' => array_map('trim', explode(',', $rresultsow['locations'])),
+            'categories' => array_map('trim', explode(',', $rresultsow['categories']))
         ];
 
         send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
