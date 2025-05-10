@@ -275,7 +275,6 @@ function getFilterData($pdo)
             'categories' => $results['categories']
         ];
 
-        error_log('Filter data: ' . json_encode($filterData));
         send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
     }
     catch (Exception $e)
@@ -394,9 +393,7 @@ try {
             userLogIn($pdo, $data);
         } else if ($action === "RESET_PASSWORD") {
             resetPassword($pdo, $data);
-        } else if ($action === "GET_FILTER_DATA") {
-            getFilterData($pdo);
-        } else if ($action === "CREATE_EVENT") {
+        }else if ($action === "CREATE_EVENT") {
             createEvent($pdo, $data);
         } else if ($action === "GET_BOOKED_EVENTS") {
             getBookedEvents($pdo, $data);
@@ -404,10 +401,12 @@ try {
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
             getAllEvents($pdo);
-        }
-    } else {
-        send_response('error', 'Invalid request method.', 405);
+        } else if ($action === "GET_FILTER_DATA") {
+            getFilterData($pdo);
+        } 
     }
+
+    send_response('error', 'Invalid request method.', 405);
 } catch (Exception $e) {
     send_response('error', 'Database Error: ' . $e->getMessage(), 500);
 }
