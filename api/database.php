@@ -258,19 +258,21 @@ function getFilterData($pdo)
 {
     try
     {
-        // get unique locations
-        $locationStmt = $pdo->prepare("SELECT DISTINCT location FROM Events WHERE location IS NOT NULL AND location != ''");
-        $locationStmt->execute();
-        $locations = $locationStmt->fetchAll(PDO::FETCH_COLUMN);
+        $stmt = $pdo->prepare("
+            SELECT
+                GROUP_CONCAT(DISTINCT e.location) AS locations,
+                GROUP_CONCAT(DISTINCT c.name) AS categories
+            FROM Events e
+            JOIN EventCategories c ON c.category_id = c.category_id
+            WHERE e.location IS NOT NULL AND e.location != ''
+        ");
 
-        // get all categories
-        $categoryStmt = $pdo->prepare("SELECT name FROM EventCategories");
-        $categoryStmt->execute();
-        $categories = $categoryStmt->fetchAll(PDO::FETCH_COLUMN);
+        $stmt->execute();
+        $results = $stmt->fetch(PDO::FETCH_ASSOC);
 
         $filterData = [
-            'locations' => $locations,
-            'categories' => $categories
+            'locations' => $results['locations'],
+            'categories' => $results['categories']
         ];
 
         send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
