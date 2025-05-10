@@ -391,6 +391,8 @@ try {
             userLogIn($pdo, $data);
         } else if ($action === "RESET_PASSWORD") {
             resetPassword($pdo, $data);
+        } else if ($action === "GET_FILTER_DATA") {
+            getFilterData($pdo);
         } else if ($action === "CREATE_EVENT") {
             createEvent($pdo, $data);
         } else if ($action === "GET_BOOKED_EVENTS") {
