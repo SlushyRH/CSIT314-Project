@@ -1,3 +1,6 @@
+let eventContainer;
+let eventTemplate;
+
 async function initFilterData()
 {
     try
@@ -13,6 +16,17 @@ async function initFilterData()
 
             const locationSelect = document.getElementById("filterLocation");
             const categorySelect = document.getElementById("filterCategory");
+
+            const resetBtn = document.getElementById("filterClearBtn");
+            const applyBtn = document.getElementById("filterSubmitBtn");
+
+            resetBtn.onclick = function() {
+                applyFilterOnEvents(true);
+            };
+
+            applyBtn.onclick = function() {
+                applyFilterOnEvents();
+            };
 
             locationSelect.innerHTML = "";
             categorySelect.innerHTML = "";
@@ -42,23 +56,72 @@ async function initFilterData()
     }
 }
 
+function applyFilterOnEvents(reset = false)
+{
+    try
+    {
+        // json data from cached events
+        const cachedEvents = getCachedEvents();
+
+        if (reset) {
+            renderEvents(cachedEvents);
+            return;
+        }
+
+        // get values for filter data
+        const dateInput = document.getElementById("filterDate").value;
+        const categoryInput = document.getElementById("filterCategory").value;
+        const locationInput = document.getElementById("filterLocation").value;
+        const minPriceInput = parseFloat(document.getElementById("filterMinPrice").value);
+        const maxPriceInput = parseFloat(document.getElementById("filterMaxPrice").value);
+
+        let filteredEvents = cachedEvents.filter(event => {
+            // format date to match date input form format
+            const [time, date] = event.event_date.split(" ");
+            const [day, month, year] = date.split("/");
+            const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+
+            // check for data matches
+            const dateMatch = !dateInput || dateInput === formattedDate;
+            const categoryMatch = !categoryInput || event.category_name === categoryInput;
+            const locationMatch = !locationInput || event.location === locationInput;
+
+            // ensure the price of at least 1 ticket to be within the price range
+            const eventPrice = 1;
+            const minPriceMatch = isNaN(minPriceInput) || eventPrice >= minPriceInput;
+            const maxPriceMatch = isNaN(maxPriceInput) || eventPrice <= maxPriceInput;
+
+            return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch;
+        });
+
+        renderEvents(filteredEvents);
+    }
+    catch (error)
+    {
+        console.error("Failed to apply filter on events:", error);
+    }
+}
+
 async function initEvents()
 {
-    const container = document.getElementById('eventList');
     let events = [];
-
+    eventTemplate = await fetch('./assets/components/event.html').then(res => res.text());
+    eventContainer = document.getElementById('eventList');
+        
     try
     {
         // render all chached events no matter what
-        const template = await fetch('./assets/components/event.html')
+        if (!eventTemplate) {
+            eventTemplate = await fetch('./assets/components/event.html')
             .then(res => res.text());
+        }
 
         const cached = getCachedEvents();
 
         if (cached)
         {
             events = cached;
-            renderEvents(container, events, template);
+            renderEvents(events);
         }
         else
         {
@@ -74,7 +137,7 @@ async function initEvents()
                 localStorage.setItem("cached_events_timestamp", Date.now().toString());
 
                 container.innerHTML = '';
-                renderEvents(container, events, template);
+                renderEvents(events);
             }
             else
             {
@@ -89,15 +152,16 @@ async function initEvents()
     }
 }
 
-function renderEvents(container, events, template)
+function renderEvents(events)
 {
+    // clear all events that have been crated
+    eventContainer.innerHTML = '';
+
     // go through each event and render it
     events.forEach(event =>
     {
-        console.log(event);
-
         // create template and replace the placeholders with the event data
-        let html = template
+        let html = eventTemplate
             .replace('{{title}}', event.title)
             .replace('{{date}}', event.event_date)
             .replace('{{category}}', event.category_name)
@@ -109,6 +173,6 @@ function renderEvents(container, events, template)
         wrapper.innerHTML = html;
 
         // append the wrapper to the event list container
-        container.appendChild(wrapper.firstElementChild);
+        eventContainer.appendChild(wrapper.firstElementChild);
     });
 }
