@@ -275,7 +275,7 @@ function getFilterData($pdo)
             'categories' => json_decode($results['categories'], true)
         ];
 
-        send_response('success', 'Filter data fetched successfully.', 200, $filterData);
+        send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
     }
     catch (Exception $e)
     {
