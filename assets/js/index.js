@@ -128,8 +128,8 @@ function applyFilterOnEvents(reset = false)
 async function initEvents()
 {
     let events = [];
-    eventTemplate = await fetch('./assets/components/event.html').then(res => res.text());
     eventContainer = document.getElementById('eventList');
+    eventTemplate = await fetch('./assets/components/event.html').then(res => res.text());
         
     try
     {
@@ -150,6 +150,8 @@ async function initEvents()
         {
             // if no cached events, then fetch from API
             const response = await sqlRequest("GET", "ALL_EVENTS");
+            console.log(response.status);
+            console.log(response.data);
 
             if (response.status == "success")
             {
@@ -159,7 +161,7 @@ async function initEvents()
                 localStorage.setItem("cached_events", JSON.stringify(events));
                 localStorage.setItem("cached_events_timestamp", Date.now().toString());
 
-                container.innerHTML = '';
+                eventContainer.innerHTML = '';
                 renderEvents(events);
             }
             else
