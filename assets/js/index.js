@@ -5,55 +5,78 @@ async function initFilterData()
 {
     try
     {
-        const response = await sqlRequest("GET", "GET_FILTER_DATA");
+        const filterData = await getCachedFilterData();
 
-        if (response.status == "success")
+        const locations = filterData.locations;
+        const categories = filterData.categories;
+
+        const locationSelect = document.getElementById("filterLocation");
+        const categorySelect = document.getElementById("filterCategory");
+
+        const resetBtn = document.getElementById("filterClearBtn");
+        const applyBtn = document.getElementById("filterSubmitBtn");
+
+        resetBtn.onclick = function() {
+            applyFilterOnEvents(true);
+        };
+
+        applyBtn.onclick = function() {
+            applyFilterOnEvents();
+        };
+
+        locationSelect.innerHTML = "";
+        categorySelect.innerHTML = "";
+
+        locationSelect.appendChild(new Option("Select Location", ""));
+        categorySelect.appendChild(new Option("Select Category", ""));
+
+        locations.forEach(location =>
         {
-            const filterData = JSON.parse(response.data);
-            
-            const locations = filterData.locations;
-            const categories = filterData.categories;
+            locationSelect.appendChild(new Option(location, location));
+        });
 
-            const locationSelect = document.getElementById("filterLocation");
-            const categorySelect = document.getElementById("filterCategory");
-
-            const resetBtn = document.getElementById("filterClearBtn");
-            const applyBtn = document.getElementById("filterSubmitBtn");
-
-            resetBtn.onclick = function() {
-                applyFilterOnEvents(true);
-            };
-
-            applyBtn.onclick = function() {
-                applyFilterOnEvents();
-            };
-
-            locationSelect.innerHTML = "";
-            categorySelect.innerHTML = "";
-
-            locationSelect.appendChild(new Option("Select Location", ""));
-            categorySelect.appendChild(new Option("Select Category", ""));
-
-            locations.forEach(location =>
-            {
-                locationSelect.appendChild(new Option(location, location));
-            });
-
-            // Populate categories
-            categories.forEach(category =>
-            {
-                categorySelect.appendChild(new Option(category, category));
-            });
-        }
-        else
+        // Populate categories
+        categories.forEach(category =>
         {
-            console.error("Failed to fetch events from API:", response.message);
-        }
+            categorySelect.appendChild(new Option(category, category));
+        });
     }
     catch (error)
     {
         console.error("Failed to initialize filter daata:", error);
     }
+}
+
+async function getCachedFilterData()
+{
+    // get the cached data from the local storage
+    const cached = localStorage.getItem("cached_filter_data");
+    const cachedTimestamp = localStorage.getItem("cached_filter_data_timestamp");
+
+    // get timestamp
+    const now = Date.now();
+    const tenMins = 10 * 60 * 1000;
+
+    // check if the cache data is valid
+    if (cached && cachedTimestamp && (now - parseInt(cachedTimestamp) <= tenMins))
+        return JSON.parse(cached);
+
+    // request data from server
+    const response = await sqlRequest("GET", "GET_FILTER_DATA");
+
+    if (response.status === "success")
+    {
+        // parse json daata
+        const filterData = JSON.parse(response.data);
+
+        // set cached data
+        localStorage.setItem("cached_filter_data", JSON.stringify(filterData));
+        localStorage.setItem("cached_filter_data_timestamp", Date.now().toString());
+
+        return filterData;
+    }
+
+    return null;
 }
 
 function applyFilterOnEvents(reset = false)
