@@ -92,7 +92,8 @@ function applyFilterOnEvents(reset = false)
         }
 
         // get values for filter data
-        const dateInput = document.getElementById("filterDate").value;
+        const startDateInput = document.getElementById("filterStartDate").value;
+        const endDateInput = document.getElementById("filterEndDate").value;
         const categoryInput = document.getElementById("filterCategory").value;
         const locationInput = document.getElementById("filterLocation").value;
         const minPriceInput = parseFloat(document.getElementById("filterMinPrice").value);
@@ -104,15 +105,19 @@ function applyFilterOnEvents(reset = false)
             const [day, month, year] = date.split("/");
             const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 
-            // check for data matches
-            const dateMatch = !dateInput || dateInput === formattedDate;
+            // get date range match
+            const eventDate = new Date(formattedDate);
+            const startDateMatch = !startDateInput || eventDate >= new Date(startDateInput);
+            const endDateMatch = !endDateInput || eventDate <= new Date(endDateInput);
+            const dateMatch = startDateMatch && endDateMatch;
+
+            // check for category and location match
             const categoryMatch = !categoryInput || event.category_name === categoryInput;
             const locationMatch = !locationInput || event.location === locationInput;
 
-            // ensure the price of at least 1 ticket to be within the price range
-            const eventPrice = 1;
-            const minPriceMatch = isNaN(minPriceInput) || eventPrice >= minPriceInput;
-            const maxPriceMatch = isNaN(maxPriceInput) || eventPrice <= maxPriceInput;
+            // ensure the min/maax price of at least 1 ticket is within the price range
+            const minPriceMatch = isNaN(minPriceInput) || event.min_price >= minPriceInput;
+            const maxPriceMatch = isNaN(maxPriceInput) || event.max_price <= maxPriceInput;
 
             return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch;
         });
@@ -150,8 +155,6 @@ async function initEvents()
         {
             // if no cached events, then fetch from API
             const response = await sqlRequest("GET", "ALL_EVENTS");
-            console.log(response.status);
-            console.log(response.data);
 
             if (response.status == "success")
             {
