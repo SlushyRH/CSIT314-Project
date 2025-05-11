@@ -351,7 +351,7 @@ function getBookedEvents($pdo, $data)
                 Events.title,
                 Events.description,
                 Events.location,
-                DATE_FORMAT(Events.event_date, '%H:%i %d/%m/%Y') AS event_date,
+                Events.event_date,
                 EventCategories.name as category_name,
                 TicketTypes.name as ticket_type,
                 TicketTypes.price,
