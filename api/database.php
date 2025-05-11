@@ -237,9 +237,21 @@ function getAllEvents($pdo)
                 e.location,
                 DATE_FORMAT(e.event_date, '%H:%i %d/%m/%Y') AS event_date,
                 e.category_id,
-                ec.name AS category_name
+                ec.name AS category_name,
+                MIN(tt.price) AS min_price,
+                MAX(tt.price) AS max_price
             FROM Events e
             LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
+            LEFT JOIN TicketTypes tt ON e.event_id = tt.event_id
+            GROUP BY 
+                e.event_id,
+                e.organiser_id,
+                e.title,
+                e.description,
+                e.location,
+                e.event_date,
+                e.category_id,
+                ec.name
             ORDER BY e.event_date ASC
         ");
 
