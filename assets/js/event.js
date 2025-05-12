@@ -1,5 +1,3 @@
-let eventObj;
-
 window.addEventListener("DOMContentLoaded", () =>
 {
     const urlParams = new URLSearchParams(window.location.search);
@@ -15,6 +13,8 @@ window.addEventListener("DOMContentLoaded", () =>
 
     loadEventData();
 });
+
+let eventObj;
 
 function loadEventData()
 {
