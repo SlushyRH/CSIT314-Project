@@ -35,11 +35,14 @@ async function initFilterData()
             locationSelect.appendChild(new Option(location, location));
         });
 
-        // Populate categories
+        // populate categories
         categories.forEach(category =>
         {
             categorySelect.appendChild(new Option(category, category));
         });
+        console.log("Loaded the values in category");
+
+        applyFilterOnEvents();
     }
     catch (error)
     {
@@ -91,6 +94,8 @@ function applyFilterOnEvents(reset = false)
             return;
         }
 
+        getUrlFilterQuery();
+
         // get values for filter data
         const startDateInput = document.getElementById("filterStartDate").value;
         const endDateInput = document.getElementById("filterEndDate").value;
@@ -127,6 +132,31 @@ function applyFilterOnEvents(reset = false)
     catch (error)
     {
         console.error("Failed to apply filter on events:", error);
+    }
+}
+
+function getUrlFilterQuery()
+{
+    // get url query
+    const query = window.location.search.substring(1);
+
+    if (query === "Upcoming")
+    {
+        // get the date today
+        const today = new Date();
+        const formattedDateStart = today.toISOString().split("T")[0];
+        document.getElementById("filterStartDate").value = formattedDateStart;
+
+        // get the date one month from now
+        const nextMonthDate = new Date();
+        nextMonthDate.setMonth(today.getMonth() + 1);
+        const formattedDateEnd = nextMonthDate.toISOString().split("T")[0];
+        document.getElementById("filterEndDate").value = formattedDateEnd;
+    }
+    else if (query != null)
+    {
+        document.getElementById("filterCategory").value = query;
+        console.log("Set the value in category");
     }
 }
 
@@ -178,6 +208,8 @@ async function initEvents()
     {
         console.error("Failed to initialize events:", error);
     }
+    
+    initFilterData();
 }
 
 function renderEvents(events)
