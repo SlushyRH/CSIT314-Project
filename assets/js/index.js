@@ -1,10 +1,48 @@
 let eventContainer;
 let eventTemplate;
+let eventModalWindowTemplate;
 
-async function initFilterData()
-{
-    try
-    {
+async function initEvents() {
+    eventContainer = document.getElementById('eventList');
+    eventTemplate = document.getElementById('eventTemplate');
+    eventModalWindowTemplate = document.getElementById('eventModalTemplate');
+
+    try {
+        // get cached events
+        const cached = getCachedEvents();
+
+        if (cached) {
+            renderEvents(cached);
+        }
+        else {
+            // if no cached events, then fetch from API
+            const response = await sqlRequest("GET", "ALL_EVENTS");
+
+            if (response.status == "success") {
+                const events = JSON.parse(response.data);
+
+                // cache if success
+                localStorage.setItem("cached_events", JSON.stringify(events));
+                localStorage.setItem("cached_events_timestamp", Date.now().toString());
+
+                eventContainer.innerHTML = '';
+                renderEvents(events);
+            }
+            else {
+                console.error("Failed to fetch events from API:", response.message);
+                return null;
+            }
+        }
+    }
+    catch (error) {
+        console.error("Failed to initialize events:", error);
+    }
+
+    initFilterData();
+}
+
+async function initFilterData() {
+    try {
         const filterData = await getCachedFilterData();
 
         const locations = filterData.locations;
@@ -16,11 +54,11 @@ async function initFilterData()
         const resetBtn = document.getElementById("filterClearBtn");
         const applyBtn = document.getElementById("filterSubmitBtn");
 
-        resetBtn.onclick = function() {
+        resetBtn.onclick = function () {
             applyFilterOnEvents(true);
         };
 
-        applyBtn.onclick = function() {
+        applyBtn.onclick = function () {
             applyFilterOnEvents();
         };
 
@@ -30,28 +68,24 @@ async function initFilterData()
         locationSelect.appendChild(new Option("Select Location", ""));
         categorySelect.appendChild(new Option("Select Category", ""));
 
-        locations.forEach(location =>
-        {
+        locations.forEach(location => {
             locationSelect.appendChild(new Option(location, location));
         });
 
         // populate categories
-        categories.forEach(category =>
-        {
+        categories.forEach(category => {
             categorySelect.appendChild(new Option(category, category));
         });
         console.log("Loaded the values in category");
 
         applyFilterOnEvents();
     }
-    catch (error)
-    {
+    catch (error) {
         console.error("Failed to initialize filter daata:", error);
     }
 }
 
-async function getCachedFilterData()
-{
+async function getCachedFilterData() {
     // get the cached data from the local storage
     const cached = localStorage.getItem("cached_filter_data");
     const cachedTimestamp = localStorage.getItem("cached_filter_data_timestamp");
@@ -67,8 +101,7 @@ async function getCachedFilterData()
     // request data from server
     const response = await sqlRequest("GET", "GET_FILTER_DATA");
 
-    if (response.status === "success")
-    {
+    if (response.status === "success") {
         // parse json daata
         const filterData = JSON.parse(response.data);
 
@@ -82,10 +115,8 @@ async function getCachedFilterData()
     return null;
 }
 
-function applyFilterOnEvents(reset = false)
-{
-    try
-    {
+function applyFilterOnEvents(reset = false) {
+    try {
         // json data from cached events
         const cachedEvents = getCachedEvents();
 
@@ -129,19 +160,16 @@ function applyFilterOnEvents(reset = false)
 
         renderEvents(filteredEvents);
     }
-    catch (error)
-    {
+    catch (error) {
         console.error("Failed to apply filter on events:", error);
     }
 }
 
-function getUrlFilterQuery()
-{
+function getUrlFilterQuery() {
     // get url query
     const query = window.location.search.substring(1);
 
-    if (query === "Upcoming")
-    {
+    if (query === "Upcoming") {
         // get the date today
         const today = new Date();
         const formattedDateStart = today.toISOString().split("T")[0];
@@ -153,86 +181,64 @@ function getUrlFilterQuery()
         const formattedDateEnd = nextMonthDate.toISOString().split("T")[0];
         document.getElementById("filterEndDate").value = formattedDateEnd;
     }
-    else if (query != null)
-    {
+    else if (query != null) {
         document.getElementById("filterCategory").value = query;
         console.log("Set the value in category");
     }
 }
 
-async function initEvents()
-{
-    let events = [];
-    eventContainer = document.getElementById('eventList');
-    eventTemplate = await fetch('./assets/components/event.html').then(res => res.text());
-        
-    try
-    {
-        // render all chached events no matter what
-        if (!eventTemplate) {
-            eventTemplate = await fetch('./assets/components/event.html')
-            .then(res => res.text());
-        }
-
-        const cached = getCachedEvents();
-
-        if (cached)
-        {
-            events = cached;
-            renderEvents(events);
-        }
-        else
-        {
-            // if no cached events, then fetch from API
-            const response = await sqlRequest("GET", "ALL_EVENTS");
-
-            if (response.status == "success")
-            {
-                const events = JSON.parse(response.data);
-
-                // cache if success
-                localStorage.setItem("cached_events", JSON.stringify(events));
-                localStorage.setItem("cached_events_timestamp", Date.now().toString());
-
-                eventContainer.innerHTML = '';
-                renderEvents(events);
-            }
-            else
-            {
-                console.error("Failed to fetch events from API:", response.message);
-                return null;
-            }
-        }
-    }
-    catch (error)
-    {
-        console.error("Failed to initialize events:", error);
-    }
-    
-    initFilterData();
-}
-
-function renderEvents(events)
-{
+function renderEvents(events) {
     // clear all events that have been crated
     eventContainer.innerHTML = '';
 
     // go through each event and render it
-    events.forEach(event =>
-    {
+    events.forEach(event => {
         // create template and replace the placeholders with the event data
-        let html = eventTemplate
-            .replace('{{title}}', event.title)
-            .replace('{{date}}', event.event_date)
-            .replace('{{category}}', event.category_name)
-            .replace('{{description}}', event.description)
-            .replace('{{onclick}}', `window.location.href='event.html?id=${event.event_id}'`); 
+        const eventClone = eventTemplate.content.cloneNode(true);
+        const eventElement = eventClone.firstElementChild;
 
-        // create a wrrapper div to append the html event
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html;
+        // replace data wiht the actual event date
+        eventElement.querySelector('[data-title]').textContent = event.title;
+        eventElement.querySelector('[data-date]').textContent = event.event_date;
+        eventElement.querySelector('[data-category]').textContent = event.category_name;
+        eventElement.querySelector('[data-description]').textContent = event.description;
 
-        // append the wrapper to the event list container
-        eventContainer.appendChild(wrapper.firstElementChild);
+        // open modal window on click
+        eventElement.onclick = function() {
+            openEventModal(event.event_id);
+        };
+        
+        eventContainer.appendChild(eventElement);
     });
+}
+
+function openEventModal(eventId) {
+    const event = getEvent(eventId);
+
+    const eventClone = eventModalWindowTemplate.content.cloneNode(true);
+    const eventElement = eventClone.firstElementChild;
+
+    // replace ddata with actual event date
+    eventElement.querySelector('[data-title]').textContent = event.title;
+    eventElement.querySelector('[data-date]').textContent = event.event_date;
+    eventElement.querySelector('[data-description]').textContent = event.description;
+    eventElement.querySelector('[data-location]').textContent = event.title;
+
+    // make internal function so clicking background or clicking escape closes window
+    const hideModalOnEscape = function(e) {
+        if (e.key === 'Escape' || e.target.id === 'modalOverlay') {
+            // remove event listeners
+            document.removeEventListener('keydown', hideModalOnEscape);
+            document.removeEventListener('click', hideModalOnEscape);
+
+            eventElement.remove();
+            console.log("Hidden Modal Window");
+        }
+    }
+
+    // add hide function to the events
+    document.addEventListener('keydown', hideModalOnEscape);
+    eventElement.addEventListener('click', hideModalOnEscape);
+
+    document.body.appendChild(eventElement);
 }
