@@ -1,5 +1,8 @@
 // page will get data from regestrations table in database
 // should search by customer_id to get events
+document.addEventListener("DOMContentLoaded", function() {
+    getUserEvents();
+});
 
 async function getUserEvents() {
     //var user_id = localStorage("user_id");
@@ -28,6 +31,10 @@ function GetEvents(Events){
     console.log(upcomingEvents[0]);
     upcomingEvents = orderEventsAscending(upcomingEvents);
     console.log(upcomingEvents);
+    pastEvents = orderEventsDescending(pastEvents);
+
+    displayEvents("upcoming",upcomingEvents)
+
 }
 
 function GetPastEvents(allEvents){
@@ -122,3 +129,44 @@ function orderEventsDescending(events){
     return events;
 }
 
+function displayEvents(containerID, events){
+    const container = document.getElementById(containerID);
+
+    if (!container) {
+        console.warn(`Container with id "${containerId}" not found.`);
+        return;
+    }
+
+    // Clear previous content
+    container.innerHTML = "";
+
+    if (events.length === 0) {
+        container.innerHTML = "<p>No events found.</p>";
+        return;
+    }
+
+    const ul = document.createElement("ul");
+
+    events.forEach((event, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${event.title} on ${event.event_date}`;
+
+        // Add a data attribute to store the event index or ID
+        li.setAttribute("data-index", index);
+        li.style.cursor = "pointer"; // Indicate it's clickable
+
+        // Add click handler
+        li.addEventListener("click", () => {
+            // Store the whole event object in localStorage
+            localStorage.setItem("selected_event", JSON.stringify(event));
+            console.log("Event saved to localStorage:", event);
+
+            // Optional: Redirect to another page
+            // window.location.href = "event_details.html";
+        });
+
+        ul.appendChild(li);
+    });
+
+    container.appendChild(ul);
+}
