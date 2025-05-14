@@ -228,7 +228,6 @@ function getAllEvents($pdo)
 {
     try
     {
-        // fetch all event data
         $stmt = $pdo->prepare("
             SELECT 
                 e.event_id,
@@ -239,62 +238,68 @@ function getAllEvents($pdo)
                 DATE_FORMAT(e.event_date, '%H:%i %d/%m/%Y') AS event_date,
                 e.category_id,
                 ec.name AS category_name,
-                MIN(tt.price) AS min_price,
-                MAX(tt.price) AS max_price
+                tt.ticket_type_id,
+                tt.name AS ticket_name,
+                tt.price,
+                tt.benefits,
+                tt.quantity_available,
+                tt.tickets_left,
+                price_stats.min_price,
+                price_stats.max_price
             FROM Events e
             LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
             LEFT JOIN TicketTypes tt ON e.event_id = tt.event_id
-            GROUP BY 
-                e.event_id,
-                e.organiser_id,
-                e.title,
-                e.description,
-                e.location,
-                e.event_date,
-                e.category_id,
-                ec.name
-            ORDER BY e.event_date ASC
+            LEFT JOIN (
+                SELECT 
+                    event_id,
+                    MIN(price) AS min_price,
+                    MAX(price) AS max_price
+                FROM TicketTypes
+                GROUP BY event_id
+            ) AS price_stats ON price_stats.event_id = e.event_id
+            ORDER BY e.event_date ASC, tt.price ASC
         ");
 
         $stmt->execute();
-        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rawEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // fetch all ticket types
-        $stmtTickets = $pdo->prepare("
-            SELECT 
-                ticket_type_id,
-                event_id,
-                name,
-                price,
-                benefits,
-                quantity_available,
-                tickets_left
-            FROM TicketTypes
-        ");
+        $groupedEvents = [];
 
-        $stmtTickets->execute();
-        $ticketTypes = $stmtTickets->fetchAll(PDO::FETCH_ASSOC);
-
-        // group ticket types by event_id so its all in one json object
-        $ticketsByEvent = [];
-        foreach ($ticketTypes as $ticket)
+        foreach ($rawEvents as $row)
         {
-            $eventId = $ticket['event_id'];
+            $eventId = $row['event_id'];
 
-            if (!isset($ticketsByEvent[$eventId]))
+            if (!isset($groupedEvents[$eventId]))
             {
-                $ticketsByEvent[$eventId] = [];
+                $groupedEvents[$eventId] = [
+                    'event_id' => $row['event_id'],
+                    'organiser_id' => $row['organiser_id'],
+                    'title' => $row['title'],
+                    'description' => $row['description'],
+                    'location' => $row['location'],
+                    'event_date' => $row['event_date'],
+                    'category_id' => $row['category_id'],
+                    'category_name' => $row['category_name'],
+                    'min_price' => $row['min_price'],
+                    'max_price' => $row['max_price'],
+                    'ticket_types' => []
+                ];
             }
 
-            $ticketsByEvent[$eventId][] = $ticket;
+            if (!empty($row['ticket_type_id']))
+            {
+                $groupedEvents[$eventId]['ticket_types'][] = [
+                    'ticket_type_id' => $row['ticket_type_id'],
+                    'name' => $row['ticket_name'],
+                    'price' => $row['price'],
+                    'benefits' => $row['benefits'],
+                    'quantity_available' => $row['quantity_available'],
+                    'tickets_left' => $row['tickets_left']
+                ];
+            }
         }
 
-        // attach ticket types to each event
-        foreach ($events as &$event)
-        {
-            $eventId = $event['event_id'];
-            $event['ticket_types'] = $ticketsByEvent[$eventId] ?? [];
-        }
+        $events = array_values($groupedEvents);
 
         send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }
@@ -303,7 +308,6 @@ function getAllEvents($pdo)
         send_response('error', 'Could not fetch events. Error: ' . $e->getMessage(), 500);
     }
 }
-
 
 function getFilterData($pdo)
 {
