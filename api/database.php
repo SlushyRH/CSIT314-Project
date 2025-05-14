@@ -228,6 +228,7 @@ function getAllEvents($pdo)
 {
     try
     {
+        // fetch all event data
         $stmt = $pdo->prepare("
             SELECT 
                 e.event_id,
@@ -258,6 +259,43 @@ function getAllEvents($pdo)
         $stmt->execute();
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // fetch all ticket types
+        $stmtTickets = $pdo->prepare("
+            SELECT 
+                ticket_type_id,
+                event_id,
+                name,
+                price,
+                benefits,
+                quantity_available,
+                tickets_left
+            FROM TicketTypes
+        ");
+
+        $stmtTickets->execute();
+        $ticketTypes = $stmtTickets->fetchAll(PDO::FETCH_ASSOC);
+
+        // group ticket types by event_id so its all in one json object
+        $ticketsByEvent = [];
+        foreach ($ticketTypes as $ticket)
+        {
+            $eventId = $ticket['event_id'];
+
+            if (!isset($ticketsByEvent[$eventId]))
+            {
+                $ticketsByEvent[$eventId] = [];
+            }
+
+            $ticketsByEvent[$eventId][] = $ticket;
+        }
+
+        // attach ticket types to each event
+        foreach ($events as &$event)
+        {
+            $eventId = $event['event_id'];
+            $event['ticket_types'] = $ticketsByEvent[$eventId] ?? [];
+        }
+
         send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }
     catch (Exception $e)
@@ -265,6 +303,7 @@ function getAllEvents($pdo)
         send_response('error', 'Could not fetch events. Error: ' . $e->getMessage(), 500);
     }
 }
+
 
 function getFilterData($pdo)
 {
