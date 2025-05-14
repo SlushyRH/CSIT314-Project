@@ -222,7 +222,9 @@ function openEventModal(eventId) {
     eventElement.querySelector('[data-title]').textContent = event.title;
     eventElement.querySelector('[data-date]').textContent = event.event_date;
     eventElement.querySelector('[data-description]').textContent = event.description;
-    eventElement.querySelector('[data-location]').textContent = event.title;
+    eventElement.querySelector('[data-location]').textContent = event.location;
+
+    // populate ticket types
 
     // make internal function so clicking background or clicking escape closes window
     const hideModalOnEscape = function(e) {
