@@ -166,14 +166,8 @@ function getCachedEvents()
 {
     // check for cached events and load if needed
     const cached = localStorage.getItem("cached_events");
-    const cachedTimestamp = localStorage.getItem("cached_events_timestamp");
-
-    // set timestamp
-    const now = Date.now();
-    const tenMinutes = 10 * 60 * 1000;
-
-    // parse cached events
-    if (cached && cachedTimestamp && (now - parseInt(cachedTimestamp) <= tenMinutes))
+    
+    if (cached)
         return JSON.parse(cached);
 }
 

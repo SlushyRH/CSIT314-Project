@@ -88,26 +88,18 @@ async function initFilterData() {
 async function getCachedFilterData() {
     // get the cached data from the local storage
     const cached = localStorage.getItem("cached_filter_data");
-    const cachedTimestamp = localStorage.getItem("cached_filter_data_timestamp");
-
-    // get timestamp
-    const now = Date.now();
-    const tenMins = 10 * 60 * 1000;
 
     // check if the cache data is valid
-    if (cached && cachedTimestamp && (now - parseInt(cachedTimestamp) <= tenMins))
+    if (cached)
         return JSON.parse(cached);
 
     // request data from server
     const response = await sqlRequest("GET", "GET_FILTER_DATA");
 
     if (response.status === "success") {
-        // parse json daata
+        // parse and set json daata
         const filterData = JSON.parse(response.data);
-
-        // set cached data
         localStorage.setItem("cached_filter_data", JSON.stringify(filterData));
-        localStorage.setItem("cached_filter_data_timestamp", Date.now().toString());
 
         return filterData;
     }
@@ -224,7 +216,14 @@ function openEventModal(eventId) {
     eventElement.querySelector('[data-description]').textContent = event.description;
     eventElement.querySelector('[data-location]').textContent = event.location;
 
-    // populate ticket types
+    // reset ticket options
+    const ticketSelect = eventElement.querySelector('#ticketSelect');
+    ticketSelect.innerHTML = '';
+
+    // append all ticket options
+    event.ticket_types.forEach(ticket => {
+        ticketSelect.appendChild(new Option(ticket.name, ticket.ticket_type_id));
+    });
 
     // make internal function so clicking background or clicking escape closes window
     const hideModalOnEscape = function(e) {
