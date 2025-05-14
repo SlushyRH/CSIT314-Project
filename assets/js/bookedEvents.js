@@ -15,16 +15,19 @@ async function getUserEvents() {
     allEvents = JSON.parse(allEvents);
     console.log(allEvents.events);
 
-    GetEvents(allEvents);
+    GetEvents(allEvents.events);
 }
 
 function GetEvents(Events){
-    const pastEvents = GetPastEvents(Events);
+    let pastEvents = GetPastEvents(Events);
+    console.log("Past:");
     console.log(pastEvents);
-    const upcomingEvents = GetUpcomingEvents(Events);
+    let upcomingEvents = GetUpcomingEvents(Events);
+    console.log("Future:");
     console.log(upcomingEvents);
-
-
+    console.log(upcomingEvents[0]);
+    upcomingEvents = orderEventsAscending(upcomingEvents);
+    console.log(upcomingEvents);
 }
 
 function GetPastEvents(allEvents){
@@ -33,8 +36,8 @@ function GetPastEvents(allEvents){
     for (let i = 0; i < allEvents.length; i++) {
         event = allEvents[i];
         let convertedDate = convertToDatetimeLocalFormat(event.event_date);
-        console.log(convertedDate);
-        if (convertedDate < Now) {
+        console.log(Date(convertedDate));
+        if (new Date(convertedDate) < new Date(Now)) {
             resultArray.push(event);
         };
     };
@@ -48,7 +51,7 @@ function GetUpcomingEvents(allEvents){
         event = allEvents[i];
         convertedDate = convertToDatetimeLocalFormat(event.event_date);
         console.log(convertedDate);
-        if (convertedDate > Now) {
+        if (new Date(convertedDate) > new Date(Now)) {
             resultArray.push(event);
         };
     };
@@ -62,7 +65,6 @@ function convertToDatetimeLocalFormat(input) {
     }
     const [date, time] = input.split(" ");
     const [hours, minutes] = time.split(":");
-    console.log(`${date}T${hours}:${minutes}`);
     return `${date}T${hours}:${minutes}`;
 }
 
@@ -76,19 +78,22 @@ function getNow(){
     const mins = String(today.getMinutes()).padStart(2, '0');
 
     const now = `${yyyy}-${mm}-${dd}T${hh}:${mins}`;
-    console.log(now);
     return now;
 }
 
 
 function orderEventsAscending(events){
     let len = events.length;
+    let date1;
+    let date2;
     let swapped;
-
+    console.log(events)
     do {
         swapped = false;
         for (let i = 0; i < len - 1; i++) {
-            if (events[i] > events[i + 1]) {
+            date1 = convertToDatetimeLocalFormat(events[i].event_date);
+            date2 = convertToDatetimeLocalFormat(events[i+1].event_date);
+            if (date1 > date2) {
                 // Swap elements
                 [events[i], events[i + 1]] = [events[i + 1], events[i]];
                 swapped = true;
@@ -116,5 +121,4 @@ function orderEventsDescending(events){
     } while (swapped);
     return events;
 }
-
 
