@@ -113,12 +113,12 @@
 					<div class="w-full min-w-[300px] bg-(--secondary) rounded-xl p-6 shadow flex flex-col">
 						<!-- ticket selector -->
 						<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
-							<input type="number" min="1" value="1"
+							<input data-amount="" type="number" min="1" value="1"
 								class="w-full sm:w-20 border border-(--text) rounded px-2 py-1">
 							<select id="ticketSelect" class="w-full flex-1 bg-(--secondary) border border-(--text) rounded px-2 py-1">
 								<option value="">Select Ticket</option>
 							</select>
-							<button class="sm:w-auto w-full px-4 py-1 bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) rounded text-lg font-bold cursor-pointer">
+							<button id="addToCartBtn" class="sm:w-auto w-full px-4 py-1 bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) rounded text-lg font-bold cursor-pointer">
 								+
 							</button>
 						</div>
@@ -141,9 +141,21 @@
 							</table>
 						</div>
 
+						<template id="ticketRowTemplate">
+							<tr>
+								<td data-amount="" class="py-2">1</td>
+								<td data-name=""></td>
+								<td data-description=""></td>
+								<td data-price=""></td>
+								<td>
+									<button>Remove</button>
+								</td>
+							</tr>
+						</template>
+
 						<!-- purchase button -->
 						<div class="mt-auto pt-6">
-							<button id="addToCartBtn" class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer py-2 px-4 rounded ">
+							<button class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer py-2 px-4 rounded ">
 								Purchase
 							</button>
 						</div>

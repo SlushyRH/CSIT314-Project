@@ -224,13 +224,20 @@ function openEventModal(eventId) {
     const ticketSelect = eventElement.querySelector('#ticketSelect');
     ticketSelect.innerHTML = '';
 
+    // reset ticket table
+    const tableBody = eventElement.querySelector('#ticketTableBody');
+    tableBody.innerHTML = "";
+
     // append all ticket options
     event.ticket_types.forEach(ticket => {
         ticketSelect.appendChild(new Option(ticket.name, ticket.ticket_type_id));
     });
 
+    // make add to cart functionaliity
     const cartBtn = eventElement.querySelector('#addToCartBtn');
-    cartBtn.onclick = addTicketToCart(event);
+    cartBtn.onclick = function () {
+        addTicketToCart(event, ticketSelect.value, eventElement.querySelector('[data-amount]').value)
+    };
 
     // make internal function so clicking background or clicking escape closes modal window
     const hideModalOnEscape = function(e) {
@@ -250,6 +257,33 @@ function openEventModal(eventId) {
     document.body.appendChild(eventElement);
 }
 
-function addTicketToCart(event) {
-    alert(event.event_id);
+function addTicketToCart(event, ticketTypeId, ticketAmount) {
+    // find ticket and dont add if doesnt exist
+    const ticket = event.ticket_types.find(t => t.ticket_type_id == ticketTypeId);
+
+    if (!ticket) {
+        return;
+    }
+
+    // get table body and clone the template
+    const tableBody = document.getElementById("ticketTableBody");
+    const ticketRow = document.getElementById("ticketRowTemplate").content.cloneNode(true);
+
+    // add data to new ticket row
+    ticketRow.querySelector('[data-amount]').textContent = ticketAmount;
+    ticketRow.querySelector('[data-name]').textContent = ticket.name;
+    ticketRow.querySelector('[data-description]').textContent = ticket.name;
+    ticketRow.querySelector('[data-price]').textContent = ticket.price;
+
+    // add remove button functionality
+    ticketRow.querySelector("button").addEventListener("click", function() {
+        const row = this.closest("tr");
+
+        if (row) {
+            row.remove();
+        }
+    });
+
+    // add ticket roww to table
+    tableBody.appendChild(ticketRow);
 }
