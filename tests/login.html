@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Tests</title>
+    
+    <link rel="stylesheet" href="/assets/css/main.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="/assets/js/testsHelper.js"></script>
+    <script src="/assets/js/global.js"></script>
+    <script src="/assets/js/login.js"></script>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <main class="flex-grow flex flex-col gap-10 items-center justify-center">
+        <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer px-6 py-3 rounded-lg" onclick="resetTestOutcome(); runTests();">
+            Run Tests
+        </button>
+        <p class="text-center">
+            <b>Test Outcome</b>
+            <span id="testOutcome">
+                <!-- test outcome is written here -->
+            </span>
+        </p>
+    </main>
+
+    <script>
+        function runTests()
+        {
+            login("valid@example.com", "password").then(() =>
+            {
+                assert(localStorage.getItem("user") === "1", "Login failed");
+            });
+        }
+    </script>
+</body>
+</html>
