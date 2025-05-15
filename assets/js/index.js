@@ -23,7 +23,6 @@ async function initEvents() {
 
                 // cache if success
                 localStorage.setItem("cached_events", JSON.stringify(events));
-                localStorage.setItem("cached_events_timestamp", Date.now().toString());
 
                 eventContainer.innerHTML = '';
                 renderEvents(events);
