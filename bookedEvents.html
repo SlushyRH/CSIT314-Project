@@ -3,6 +3,13 @@
   all upcoming events, as well as past events. The user can navigate to the event
   page by clicking a button on the event, or the event.
 
+
+bookedEvents.html
+createEvent.html
+eventAdminPanel.html
+organisedEvents.html
+
+
   Ideas: show all upcoming events first? grey out all past events (should still be able to see)?
   if the user clicks on event (or button on event) go to event page,
   so maybe show ticket book info? or not? idk? maybe order list based on date?
@@ -29,15 +36,11 @@
   <body class="min-h-screen flex flex-col">
     <div id="header"></div>
       <main class="flex-grow">
-          <ul id="upcoming"></ul>
+          <div id="upcoming"></div>
           <br />
           <br/>
-          <ul id="PastEvents"></ul>
-          <br />
-          <br/><br />
-          <br/><br />
-          <br/>
-          <button onclick="getUserEvents()">Getevents</button>
+          <div id="PastEvents"></div>
+
 
       </main>
     <div id="footer"></div>
