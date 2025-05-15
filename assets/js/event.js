@@ -1,9 +1,22 @@
-let eventId;
-
 window.addEventListener("DOMContentLoaded", () =>
 {
     const urlParams = new URLSearchParams(window.location.search);
-    eventId = urlParams.get("id");
+    let eventId = urlParams.get("id");
 
-    document.getElementById("eventIdTemp").innerHTML = eventId;
+    eventObj = getEvent(eventId);
+
+    if (!eventObj)
+    {
+        console.log("No event data that matched!");
+        return;
+    }
+
+    loadEventData();
 });
+
+let eventObj;
+
+function loadEventData()
+{
+    document.getElementById("eventIdTemp").innerHTML = eventObj.title;
+}

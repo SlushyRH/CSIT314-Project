@@ -19,12 +19,138 @@
     <div id="header"></div>
 
     <main class="flex-grow">
-        <!-- old event list <div id="event-list" class="w-full max-w-6xl mx-auto my-4 px-4 space-x-4"> -->
+
+        <!-- event filters -->
+        <div class="w-full max-w-6xl mx-auto px-4 mt-4">
+            <form id="eventFilter" class="bg-(--secondary) p-4 rounded-xl shadow-md space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                  <div>
+                  <label for="filterStartDate" class="block mb-1 text-sm font-medium">Start Date</label>
+                  <input type="date" id="filterStartDate" name="filterStartDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+                </div>
+
+                <div>
+                  <label for="filterEndDate" class="block mb-1 text-sm font-medium">End Date</label>
+                  <input type="date" id="filterEndDate" name="filterEndDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+                </div>
+
+                  <div>
+                    <label for="filterCategory" class="block mb-1 text-sm font-medium">Category</label>
+                    <select id="filterCategory" name="filterCategory" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+                        <!-- categories loaded dynamically -->
+                    </select>
+                  </div>
+
+                  <div>
+                    <label for="filterLocation" class="block mb-1 text-sm font-medium">Location</label>
+                    <select id="filterLocation" name="filterLocation" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+                        <!-- locations loaded dynamically -->
+                    </select>
+                  </div>
+
+                  <div>
+                  <label for="filterMinPrice" class="block mb-1 text-sm font-medium">Min Price</label>
+                  <input type="number" placeholder="0" id="filterMinPrice" name="filterMinPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+                  </div>
+
+                  <div>
+                    <label for="filterMaxPrice" class="block mb-1 text-sm font-medium">Max Price</label>
+                    <input type="number" placeholder="0" id="filterMaxPrice" name="filterMaxPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+                  </div>
+
+                  <div class="flex w-full max-w gap-2 items-center self-end">
+                    <button type="reset" id="filterClearBtn" class="flex-1 cursor-pointer bg-(--bg) hover:bg-(--tertiary) text-(--text) px-4 py-2 rounded shadow">
+                      Clear
+                    </button>
+                    <button type="button" id="filterSubmitBtn" class="flex-1 cursor-pointer bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded shadow">
+                      Apply
+                    </button>
+                  </div>
+
+                </div>
+            </form>
+        </div>
+
         <div id="eventList" class="w-full max-w-6xl mx-auto my-4 px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
 
-          <!-- event template goes here -->
+			<template id="eventTemplate">
+				<div class="bg-(--secondary) shadow-xl rounded-lg overflow-hidden cursor-pointer max-w-xs w-full transition hover:scale-110">
+					<div class="p-4 space-y-3">
+						<h2 data-title class="text-lg font-bold text-(--text) truncate">{{title}}</h2>
+						<div class="flex items-center justify-between text-xs text-(--text)">
+							<span data-date>{{date}}</span>
+							<span data-category class="font-medium">{{category}}</span>
+						</div>
+						<p data-description class="text-sm text-(--text)">
+							{{description}}
+						</p>
+					</div>
+				</div>
+			</template>
 
         </div>
+
+		<template id="eventModalTemplate">
+			<div id="modalOverlay" class="fixed inset-0 bg-black/75 flex justify-center items-center p-6 z-50">	
+				<div class="w-full max-w-[1000px] flex flex-col items-center gap-4">
+
+					<!-- event info panel -->
+					<div class="w-full min-w-[300px] bg-(--secondary) rounded-xl p-6 shadow">
+						<div>
+							<h2 data-title="" class="text-2xl text-(--text) font-bold">Event Title</h2>
+							<p data-date="" class="text-(--hover-text) mt-1">Event Date</p>
+						</div>
+						<div class="mt-4">
+							<p data-description class="text-(--text)">Event Description</p>
+						</div>
+						<div class="mt-6 text-sm text-(--hover-text)">
+							<span class="font-medium">Location:</span><p data-location>Event Location</p>
+						</div>
+					</div>
+
+					<!-- ticketing panel -->
+					<div class="w-full min-w-[300px] bg-(--secondary) rounded-xl p-6 shadow flex flex-col">
+						<!-- ticket selector -->
+						<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
+							<input type="number" min="1" value="1"
+								class="w-full sm:w-20 border border-(--text) rounded px-2 py-1">
+							<select id="ticketSelect" class="w-full flex-1 bg-(--secondary) border border-(--text) rounded px-2 py-1">
+								<option value="">Select Ticket</option>
+							</select>
+							<button class="sm:w-auto w-full px-4 py-1 bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) rounded text-lg font-bold cursor-pointer">
+								+
+							</button>
+						</div>
+
+						<!-- ticket table -->
+						<div class="overflow-x-auto">
+							<table class="w-full text-sm border-collapse">
+								<thead>
+									<tr class="text-left border-b border-(--text)">
+										<th class="py-2">Amount</th>
+										<th>Ticket Name</th>
+										<th>Description</th>
+										<th>Price</th>
+										<th>Remove</th>
+									</tr>
+								</thead>
+								<tbody id="ticketTableBody">
+									<!-- ticket rows are inserted dynamicaly -->
+								</tbody>
+							</table>
+						</div>
+
+						<!-- purchase button -->
+						<div class="mt-auto pt-6">
+							<button id="addToCartBtn" class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer py-2 px-4 rounded ">
+								Purchase
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
     </main>
 
     <div id="footer"></div>

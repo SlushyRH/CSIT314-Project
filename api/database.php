@@ -237,20 +237,104 @@ function getAllEvents($pdo)
                 e.location,
                 DATE_FORMAT(e.event_date, '%H:%i %d/%m/%Y') AS event_date,
                 e.category_id,
-                ec.name AS category_name
+                ec.name AS category_name,
+                tt.ticket_type_id,
+                tt.name AS ticket_name,
+                tt.price,
+                tt.benefits,
+                tt.quantity_available,
+                tt.tickets_left,
+                price_stats.min_price,
+                price_stats.max_price
             FROM Events e
             LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
-            ORDER BY e.event_date ASC
+            LEFT JOIN TicketTypes tt ON e.event_id = tt.event_id
+            LEFT JOIN (
+                SELECT 
+                    event_id,
+                    MIN(price) AS min_price,
+                    MAX(price) AS max_price
+                FROM TicketTypes
+                GROUP BY event_id
+            ) AS price_stats ON price_stats.event_id = e.event_id
+            ORDER BY e.event_date ASC, tt.price ASC
         ");
 
         $stmt->execute();
-        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rawEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $groupedEvents = [];
+
+        foreach ($rawEvents as $row)
+        {
+            $eventId = $row['event_id'];
+
+            if (!isset($groupedEvents[$eventId]))
+            {
+                $groupedEvents[$eventId] = [
+                    'event_id' => $row['event_id'],
+                    'organiser_id' => $row['organiser_id'],
+                    'title' => $row['title'],
+                    'description' => $row['description'],
+                    'location' => $row['location'],
+                    'event_date' => $row['event_date'],
+                    'category_id' => $row['category_id'],
+                    'category_name' => $row['category_name'],
+                    'min_price' => $row['min_price'],
+                    'max_price' => $row['max_price'],
+                    'ticket_types' => []
+                ];
+            }
+
+            if (!empty($row['ticket_type_id']))
+            {
+                $groupedEvents[$eventId]['ticket_types'][] = [
+                    'ticket_type_id' => $row['ticket_type_id'],
+                    'name' => $row['ticket_name'],
+                    'price' => $row['price'],
+                    'benefits' => $row['benefits'],
+                    'quantity_available' => $row['quantity_available'],
+                    'tickets_left' => $row['tickets_left']
+                ];
+            }
+        }
+
+        $events = array_values($groupedEvents);
 
         send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }
     catch (Exception $e)
     {
         send_response('error', 'Could not fetch events. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function getFilterData($pdo)
+{
+    try
+    {
+        $stmt = $pdo->prepare("
+            SELECT
+                JSON_ARRAYAGG(DISTINCT e.location) AS locations,
+                JSON_ARRAYAGG(DISTINCT c.name) AS categories
+            FROM Events e
+            JOIN EventCategories c ON e.category_id = c.category_id
+            WHERE e.location IS NOT NULL AND e.location != ''
+        ");
+
+        $stmt->execute();
+        $results = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $filterData = [
+            'locations' => json_decode($results['locations'], true),
+            'categories' => json_decode($results['categories'], true)
+        ];
+
+        send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Could not fetch filter data. Error: ' . $e->getMessage(), 500);
     }
 }
 
@@ -327,7 +411,8 @@ function getBookedEvents($pdo, $data)
         $stmt->execute(['user_id' => $userId]);
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        send_response('success', 'Successfully got all booked events', 200, $events);
+        //send_response('success', 'Successfully got all booked events', 200, $events);
+        send_response('success', 'Successfully got all booked events', 200, json_encode(['events' => $events]));
     }
     catch (Exception $e)
     {
@@ -363,7 +448,7 @@ try {
             userLogIn($pdo, $data);
         } else if ($action === "RESET_PASSWORD") {
             resetPassword($pdo, $data);
-        } else if ($action === "CREATE_EVENT") {
+        }else if ($action === "CREATE_EVENT") {
             createEvent($pdo, $data);
         } else if ($action === "GET_BOOKED_EVENTS") {
             getBookedEvents($pdo, $data);
@@ -371,10 +456,12 @@ try {
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
             getAllEvents($pdo);
-        }
-    } else {
-        send_response('error', 'Invalid request method.', 405);
+        } else if ($action === "GET_FILTER_DATA") {
+            getFilterData($pdo);
+        } 
     }
+
+    send_response('error', 'Invalid request method.', 405);
 } catch (Exception $e) {
     send_response('error', 'Database Error: ' . $e->getMessage(), 500);
 }
