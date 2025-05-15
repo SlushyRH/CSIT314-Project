@@ -18,6 +18,7 @@ function create(){
    const location = document.getElementById("location").value;
    const event_date = document.getElementById("eventDate").value;
     // Check data that is a requirement
+    console.log("event Date: " + event_date);
    const validationResult = validateCategoryID(category_id);
    const dateValidation = checkDate(event_date);
    // personal checking thing
@@ -53,6 +54,14 @@ function validateCategoryID(category_id) {
         return 2;
     } else if (category_id == "3"){
         return 3;
+    } else if (category_id == "4"){
+        
+    } else if (category_id == "5"){
+
+    } else if (category_id == "6"){
+
+    } else if (category_id == "7"){
+
     } else {
         return "invalid";
     }

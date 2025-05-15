@@ -33,7 +33,8 @@ function GetEvents(Events){
     console.log(upcomingEvents);
     pastEvents = orderEventsDescending(pastEvents);
 
-    displayEvents("upcoming",upcomingEvents)
+    displayEvents("upcoming",upcomingEvents);
+    displayEvents("PastEvents",pastEvents);
 
 }
 
