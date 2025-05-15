@@ -2,6 +2,8 @@ let eventContainer;
 let eventTemplate;
 let eventModalWindowTemplate;
 
+let currentTicketCart;
+
 async function initEvents() {
     eventContainer = document.getElementById('eventList');
     eventTemplate = document.getElementById('eventTemplate');
@@ -204,8 +206,11 @@ function renderEvents(events) {
 }
 
 function openEventModal(eventId) {
+    // get event and reset cart
     const event = getEvent(eventId);
+    currentTicketCart = null;
 
+    // get event modal window template
     const eventClone = eventModalWindowTemplate.content.cloneNode(true);
     const eventElement = eventClone.firstElementChild;
 
@@ -224,7 +229,10 @@ function openEventModal(eventId) {
         ticketSelect.appendChild(new Option(ticket.name, ticket.ticket_type_id));
     });
 
-    // make internal function so clicking background or clicking escape closes window
+    const cartBtn = eventElement.querySelector('#addToCartBtn');
+    cartBtn.onclick = addTicketToCart(event);
+
+    // make internal function so clicking background or clicking escape closes modal window
     const hideModalOnEscape = function(e) {
         if (e.key === 'Escape' || e.target.id === 'modalOverlay') {
             // remove event listeners
@@ -232,7 +240,6 @@ function openEventModal(eventId) {
             document.removeEventListener('click', hideModalOnEscape);
 
             eventElement.remove();
-            console.log("Hidden Modal Window");
         }
     }
 
@@ -241,4 +248,8 @@ function openEventModal(eventId) {
     eventElement.addEventListener('click', hideModalOnEscape);
 
     document.body.appendChild(eventElement);
+}
+
+function addTicketToCart(event) {
+    alert(event.event_id);
 }
