@@ -376,50 +376,30 @@ function createEvent($pdo, $data)
 
 function updateEventDetails($pdo, $data)
 {
-    // only proceed if event_id is provided
-    if (!isset($data['event_id']))
-    {
-        send_response('error', 'Missing event_id', 400);
-    }
-
-    // fields to update
-    $fields = [
-        'organiser_id',
-        'title',
-        'description',
-        'category_id',
-        'location',
-        'event_date'
-    ];
-
-    $updates = [];
-    $params = [];
-
-    // go through all fields and only assign to updates if not null
-    foreach ($fields as $field)
-    {
-        if (isset($data[$field]) && $data[$field] !== null)
-        {
-            $updates[] = "$field = :$field";
-            $params[$field] = $data[$field];
-        }
-    }
-
-    // only proceed if at least one field needs to be updated
-    if (empty($updates))
-    {
-        send_response('error', 'No valid fields to update', 400);
-    }
-
-    // create sql statement with all update fields
-    $sql = "UPDATE Events SET " . implode(", ", $updates) . " WHERE event_id = :eventId";
+    send_response('success', 'Data return', 200, $data);
 
     try
     {
-        $stmt = $pdo->prepare($sql);
+        $stmt = $pdo->prepare("
+            UPDATE Events
+            SET
+                organiser_id = :organiser_id,
+                title = :title,
+                description = :description,
+                category_id = :category_id,
+                location = :location,
+                event_date = :event_date
+            WHERE event_id = :event_id
+        ");
 
         $stmt->execute([
-            'eventId' => $data['event_id']
+            'organiser_id' => $data['organiser_id'],
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'category_id' => $data['category_id'],
+            'location' => $data['location'],
+            'event_date' => $data['event_date'],
+            'event_id' => $data['event_id']
         ]);
 
         send_response('success', 'Successfully updated event details', 200);
@@ -429,7 +409,6 @@ function updateEventDetails($pdo, $data)
         send_response('error', 'Could not update event details: ' . $e->getMessage(), 500);
     }
 }
-
 
 function getBookedEvents($pdo, $data)
 {
