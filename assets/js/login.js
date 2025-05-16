@@ -75,6 +75,9 @@ async function submitBtn(event)
             email.value,
             password.value
         );
+        
+        // switch to login page so user can log in
+        toggleLogInType();
     }
     else
     {
@@ -193,9 +196,6 @@ async function signup(name, dob, phoneNumber, email, password)
             console.error("Signup Failed:", response.message);
             return;
         }
-        
-        // switch to login page so user can log in
-        toggleLogInType();
     }
     catch (error)
     {

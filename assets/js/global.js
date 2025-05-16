@@ -20,7 +20,7 @@ function initComponent(component, id, callback) {
     }
 }
 
-function attachHeaderScripts(hideNav, hideSearch) {
+function attachHeaderScripts(hideNav, showSearch) {
     const profileButton = document.getElementById('profileButton');
     const profileDropdown = document.getElementById('profileDropdown');
     const hamburger = document.getElementById('hamburger');
@@ -55,6 +55,18 @@ function attachHeaderScripts(hideNav, hideSearch) {
         }
     });
 
+    window.addEventListener('keydown', (e) => 
+    {
+        if (e.key === 'Escape' && !searchBar?.classList.contains('hidden'))
+        {
+            searchBar.classList.add('hidden');
+            if (searchInput)
+            {
+                searchInput.value = '';
+            }
+        }
+    });
+
     const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
     const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
     const headerSettingsBtn = document.getElementById('headerSettingsBtn');
@@ -65,8 +77,8 @@ function attachHeaderScripts(hideNav, hideSearch) {
         document.getElementById('mobileNavLinks').classList.add('hidden');
     }
 
-    if (hideSearch)
-        searchIcon.classList.add('hidden');
+    if (showSearch)
+        searchIcon.classList.remove('hidden');
 
     const userId = localStorage.getItem('user');
 
@@ -160,8 +172,20 @@ function getCachedEvents() {
         return JSON.parse(cached);
 }
 
-function forceEventCacheReset() {
+async function forceEventCacheReset() {
+    // get all events again
+    sqlRequest("GET", "ALL_EVENTS").then(() => {
+        const response = getLastResponse();
 
+        // cache events
+        if (response.status == "success") {
+            const events = JSON.parse(response.data);
+            localStorage.setItem("cached_events", JSON.stringify(events));
+        }
+        else {
+            console.error("Failed to fetch events from API:", response.message);
+        }
+    });
 }
 
 let lastSqlResponse = null;
@@ -185,15 +209,16 @@ async function sqlRequest(method, action, data = null) {
         // send request to url
         document.body.style.cursor = 'wait';
         const response = await fetch(url, options);
-        lastSqlResponse = response;
 
         // check if response was sent successully
         if (!response.ok)
             throw new Error(`Request failed with status ${response.status}`);
 
-        // return response as json
         document.body.style.cursor = 'default';
-        return await response.json();
+
+        // return response as json
+        lastSqlResponse = await response.json();
+        return lastSqlResponse;
     }
     catch (error) {
         // throw error

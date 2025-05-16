@@ -309,35 +309,6 @@ function getAllEvents($pdo)
     }
 }
 
-function getFilterData($pdo)
-{
-    try
-    {
-        $stmt = $pdo->prepare("
-            SELECT
-                JSON_ARRAYAGG(DISTINCT e.location) AS locations,
-                JSON_ARRAYAGG(DISTINCT c.name) AS categories
-            FROM Events e
-            JOIN EventCategories c ON e.category_id = c.category_id
-            WHERE e.location IS NOT NULL AND e.location != ''
-        ");
-
-        $stmt->execute();
-        $results = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        $filterData = [
-            'locations' => json_decode($results['locations'], true),
-            'categories' => json_decode($results['categories'], true)
-        ];
-
-        send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
-    }
-    catch (Exception $e)
-    {
-        send_response('error', 'Could not fetch filter data. Error: ' . $e->getMessage(), 500);
-    }
-}
-
 function createEvent($pdo, $data)
 {
     $required = ['title', 'user_id', 'description', 'category_id', 'location', 'event_date'];
@@ -501,9 +472,7 @@ try {
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
             getAllEvents($pdo);
-        } else if ($action === "GET_FILTER_DATA") {
-            getFilterData($pdo);
-        } 
+        }
     }
 
     send_response('error', 'Invalid request method.', 405);

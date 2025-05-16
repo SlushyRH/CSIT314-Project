@@ -161,6 +161,9 @@ function applyFilterOnEvents(reset = false) {
 function getUrlFilterQuery() {
     // get url query
     const query = window.location.search.substring(1);
+    
+    if (!query)
+        return;
 
     if (query === "Upcoming") {
         // get the date today
@@ -178,6 +181,8 @@ function getUrlFilterQuery() {
         document.getElementById("filterCategory").value = query;
         console.log("Set the value in category");
     }
+
+    history.replaceState(null, "", window.location.pathname);
 }
 
 function renderEvents(events) {
@@ -190,11 +195,19 @@ function renderEvents(events) {
         const eventClone = eventTemplate.content.cloneNode(true);
         const eventElement = eventClone.firstElementChild;
 
+        const maxLength = 80;
+        let description = event.description;
+
+        // limit description length
+        if (description.length > maxLength) {    
+            description = description.slice(0, maxLength) + '...';
+        }
+
         // replace data wiht the actual event date
         eventElement.querySelector('[data-title]').textContent = event.title;
         eventElement.querySelector('[data-date]').textContent = event.event_date;
         eventElement.querySelector('[data-category]').textContent = event.category_name;
-        eventElement.querySelector('[data-description]').textContent = event.description;
+        eventElement.querySelector('[data-description]').textContent = description;
 
         // open modal window on click
         eventElement.onclick = function() {
