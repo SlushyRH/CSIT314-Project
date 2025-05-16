@@ -3,13 +3,11 @@ const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https:/
 function initFooter() { initComponent('footer', 'footer'); }
 function initHeader(hideNav = false, hideSearch = false) { initComponent('header', 'header', () => attachHeaderScripts(hideNav, hideSearch)); }
 
-function initComponent(component, id, callback)
-{
+function initComponent(component, id, callback) {
     // get doc element
     var element = document.getElementById(id);
 
-    if (element != null)
-    {
+    if (element != null) {
         // load component
         fetch(`./assets/components/${component}.html`)
             .then(response => response.text())
@@ -32,8 +30,7 @@ function attachHeaderScripts(hideNav, hideSearch) {
     const searchBar = document.getElementById('searchBar');
     const searchInput = searchBar?.querySelector('input');
     
-    searchIcon?.addEventListener('click', (e) =>
-    {
+    searchIcon?.addEventListener('click', (e) => {
         e.stopPropagation();
         searchBar?.classList.toggle('hidden');
     
@@ -43,13 +40,11 @@ function attachHeaderScripts(hideNav, hideSearch) {
         }
     });
     
-    searchBar?.addEventListener('click', (e) =>
-    {
+    searchBar?.addEventListener('click', (e) => {
         e.stopPropagation();
     });
     
-    window.addEventListener('click', () =>
-    {
+    window.addEventListener('click', () => {
         if (!searchBar?.classList.contains('hidden'))
         {
             searchBar.classList.add('hidden');
@@ -65,8 +60,7 @@ function attachHeaderScripts(hideNav, hideSearch) {
     const headerSettingsBtn = document.getElementById('headerSettingsBtn');
     const logoutBtn = document.getElementById('headerLogoutBtn');
 
-    if (hideNav)
-    {
+    if (hideNav) {
         document.getElementById('navLinks').classList.add('hidden');
         document.getElementById('mobileNavLinks').classList.add('hidden');
     }
@@ -131,12 +125,10 @@ function attachHeaderScripts(hideNav, hideSearch) {
     }
 }
 
-function navToPage(page, redirectURL = null)
-{
+function navToPage(page, redirectURL = null) {
     let url = page;
 
-    if (redirectURL)
-    {
+    if (redirectURL) {
         const encodedRedirect = encodeURIComponent(redirectURL);
         url += `?redirect=${encodedRedirect}`;
     }
@@ -144,8 +136,7 @@ function navToPage(page, redirectURL = null)
     window.location.href = url;
 }
 
-function getEvent(eventId)
-{
+function getEvent(eventId) {
     // check for cached events and load if needed
     const cachedEvents = getCachedEvents();
 
@@ -153,8 +144,7 @@ function getEvent(eventId)
         return null;
 
     // find the evvent in the cached events
-    for (const event of cachedEvents)
-    {
+    for (const event of cachedEvents) {
         if (event.event_id == eventId)
             return event;
     }
@@ -162,8 +152,7 @@ function getEvent(eventId)
     return null;
 }
 
-function getCachedEvents()
-{
+function getCachedEvents() {
     // check for cached events and load if needed
     const cached = localStorage.getItem("cached_events");
     
@@ -171,15 +160,17 @@ function getCachedEvents()
         return JSON.parse(cached);
 }
 
+function forceEventCacheReset() {
+
+}
+
 let lastSqlResponse = null;
 
-function getLastResponse()
-{
+function getLastResponse() {
     return lastSqlResponse;
 }
 
-async function sqlRequest(method, action, data = null)
-{
+async function sqlRequest(method, action, data = null) {
     // sets url and options
     const url = `${URL}api/database.php?action=${action}`;
     const options = {
@@ -190,8 +181,7 @@ async function sqlRequest(method, action, data = null)
         body: data ? JSON.stringify(data) : null
     };
 
-    try
-    {
+    try {
         // send request to url
         document.body.style.cursor = 'wait';
         const response = await fetch(url, options);
@@ -205,8 +195,7 @@ async function sqlRequest(method, action, data = null)
         document.body.style.cursor = 'default';
         return await response.json();
     }
-    catch (error)
-    {
+    catch (error) {
         // throw error
         document.body.style.cursor = 'default';
         throw new Error(error.message || "Network error");
