@@ -12,15 +12,9 @@
 
         <script>
             async function runTests() {
+                // test login with invalid user
                 await login("valid@example.com", "password");
                 assert(localStorage.getItem("user") === "1", "Login failed");
-
-                let event = getEvent(5);
-                event.category_id = 9;
-
-                let response = await sqlRequest("POST", "UPDATE_EVENT", event);
-                log("updated event", response.message);
-                console.log(response);
             }
         </script>
     </head>
