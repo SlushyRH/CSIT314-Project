@@ -378,6 +378,15 @@ function updateEventDetails($pdo, $data)
 {
     try
     {
+        $date = DateTime::createFromFormat('H:i d/m/Y', $data['event_date']);
+
+        if (!$date)
+        {
+            send_response('error', 'Invalid date format', 400);
+        }
+
+        $formattedDate = $date->format('Y-m-d H:i:s');
+
         $stmt = $pdo->prepare("
             UPDATE Events
             SET
@@ -396,7 +405,7 @@ function updateEventDetails($pdo, $data)
             'description' => $data['description'],
             'category_id' => $data['category_id'],
             'location' => $data['location'],
-            'event_date' => $data['event_date'],
+            'event_date' => $formattedDate,
             'event_id' => $data['event_id']
         ]);
 
