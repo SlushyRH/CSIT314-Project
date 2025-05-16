@@ -376,8 +376,6 @@ function createEvent($pdo, $data)
 
 function updateEventDetails($pdo, $data)
 {
-    send_response('success', 'Data return', 200, $data);
-
     try
     {
         $stmt = $pdo->prepare("
