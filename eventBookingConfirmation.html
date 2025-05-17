@@ -19,12 +19,98 @@
     <div id="header"></div>
       <main class="flex-grow">
 
+		<div class="max-w-6xl mx-auto px-4 py-6 flex flex-col justify-center items-center min-h-[calc(100vh-100px)]">
+          <h1 id="eventTitle" class="text-2xl text-center font-bold text-(--text) mb-6">Event Title</h1>
+
+          <div class="flex flex-col lg:flex-row gap-6">
+              <!-- ticket info -->
+              <div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow space-y-4">
+                  <h2 class="text-xl text-center font-semibold text-(--text)">Ticket Information</h2>
+                  <table class="w-full text-(--text)">
+                      <thead>
+                          <tr class="border-b border-(--form-focus-outline)">
+                              <th class="text-left p-2">Quantity</th>
+                              <th class="text-left p-2">Name</th>
+                              <th class="text-left p-2">Description</th>
+                              <th class="text-left p-2">Price</th>
+                          </tr>
+                      </thead>
+                      <tbody id="ticketTableBody">
+                          <tr>
+                            
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+
+				<template id="ticketRowTemplate">
+					<tr class=" border-b">
+						<td class="text-left p-2" data-amount=""></td>
+						<td class="text-left p-2" data-name=""></td>
+						<td class="text-left p-2" data-description=""></td>
+						<td class="text-left p-2" data-price=""></td>
+					</tr>
+				</template>
+
+              <!-- payment info -->
+              <div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow flex flex-col">
+				<h2 class="text-xl text-center font-semibold text-(--text) mb-4">Payment Summary</h2>
+
+				<div class="text-(--text) space-y-4">
+					<div>
+						<label for="cardNumber" class="block mb-1">Card Number</label>
+						<input id="cardNumber" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="1234 5678 9012 3456">
+					</div>
+
+					<div>
+						<label for="cardHolder" class="block mb-1">Card Holder Name</label>
+						<input id="cardHolder" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="John Doe">
+					</div>
+
+					<div class="flex gap-4">
+						<div class="flex-1">
+							<label for="expiryDate" class="block mb-1">Expiry Date</label>
+							<input id="expiryDate" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="MM/YY">
+						</div>
+						<div class="flex-1">
+							<label for="cardCode" class="block mb-1">Card Code</label>
+							<input id="cardCode" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="CVV">
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-auto space-y-4 text-(--text) pt-4">
+					<div class="space-y-2">
+						<div class="flex justify-between">
+							<span>Subtotal</span>
+							<span id="subtotalAmount">$0.00</span>
+						</div>
+						<div class="flex justify-between">
+							<span id="feePercent">Fee (5%)</span>
+							<span id="feeAmount">$0.00</span>
+						</div>
+						<div class="flex justify-between font-bold">
+							<span>Total</span>
+							<span id="totalAmount">$0.00</span>
+						</div>
+					</div>
+
+					<button class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) py-2 px-4 rounded shadow">
+						Confirm Purchase
+					</button>
+				</div>
+			</div>
+          </div>
+      </div>
+
       </main>
     <div id="footer"></div>
 
     <script>
         initHeader();      
         initFooter();
+
+        getParamData();
     </script>
   </body>  
 </html>

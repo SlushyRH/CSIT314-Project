@@ -125,14 +125,14 @@ function applyFilterOnEvents(reset = false) {
             const locationMatch = !locationInput || event.location.includes(locationInput);
 
             // ensure the min/maax price of at least 1 ticket is within the price range
-            const minPriceMatch = isNaN(minPriceInput) || event.min_price >= minPriceInput;
-            const maxPriceMatch = isNaN(maxPriceInput) || event.max_price <= maxPriceInput;
+            const priceMatch =
+                (isNaN(minPriceInput) && isNaN(maxPriceInput)) ||
+                (isNaN(minPriceInput) && event.min_price <= maxPriceInput) ||
+                (isNaN(maxPriceInput) && event.max_price >= minPriceInput) ||
+                (event.max_price >= minPriceInput && event.min_price <= maxPriceInput);
 
-            if (!currentSearchValue) {
-                return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch;
-            } else {
-                return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch && event.title.toLowerCase().includes(currentSearchValue.toLowerCase());
-            }
+            return dateMatch && categoryMatch && locationMatch && priceMatch && 
+                (!currentSearchValue || event.title.toLowerCase().includes(currentSearchValue.toLowerCase()));
         });
 
         renderEvents(filteredEvents);
@@ -204,10 +204,11 @@ function renderEvents(events) {
 
 function openEventModal(eventId) {
     const event = getEvent(eventId);
-    currentTicketCart = null;
+    let currentTicketCart = {};
 
     const eventClone = eventModalWindowTemplate.content.cloneNode(true);
     const eventElement = eventClone.firstElementChild;
+    const purchaseBtn = eventElement.querySelector('#purchaseBtn');
 
     eventElement.querySelector('[data-title]').textContent = event.title;
     eventElement.querySelector('[data-date]').textContent = event.event_date;
@@ -234,13 +235,21 @@ function openEventModal(eventId) {
 
         amountInput.oninput = () =>
         {
+            const ticketId = amountInput.getAttribute('data-ticket-id');
             const value = parseInt(amountInput.value) || 0;
-            console.log(`Selected ${value} for ${ticket.name}`);
 
-            // update the cart array here
+            if (value > 0) {
+                currentTicketCart[ticketId] = value;
+            } else {
+                delete currentTicketCart[ticketId];
+            }
         };
 
         tableBody.appendChild(row);
+    });
+
+    purchaseBtn.addEventListener('click', (e) => {
+        openPurchaseConfirmPage(eventId, currentTicketCart);
     });
 
     const hideModalOnEscape = function (e) {
@@ -258,24 +267,14 @@ function openEventModal(eventId) {
     document.body.appendChild(eventElement);
 }
 
-function addTicketToCart(event, ticketTypeId, ticketAmount) {
-    // find ticket and dont add if doesnt exist
-    const ticket = event.ticket_types.find(t => t.ticket_type_id == ticketTypeId);
+function openPurchaseConfirmPage(eventId, tickets) {
+    const params = new URLSearchParams();
+    params.append('eventId', eventId);
+    console.log(tickets);
 
-    if (!ticket) {
-        return;
+    for (const [type, count] of Object.entries(tickets)) {
+        params.append(`ticket[${type}]`, count);
     }
 
-    // get table body and clone the template
-    const tableBody = document.getElementById("ticketTableBody");
-    const ticketRow = document.getElementById("ticketRowTemplate").content.cloneNode(true);
-
-    // add data to new ticket row
-    ticketRow.querySelector('[data-amount]').textContent = ticketAmount;
-    ticketRow.querySelector('[data-name]').textContent = ticket.name;
-    ticketRow.querySelector('[data-description]').textContent = ticket.name;
-    ticketRow.querySelector('[data-price]').textContent = ticket.price;
-
-    // add ticket roww to table
-    tableBody.appendChild(ticketRow);
+    navToPage('eventBookingConfirmation.html?' + params.toString());
 }

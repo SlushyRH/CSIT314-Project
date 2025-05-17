@@ -69,7 +69,7 @@ function attachHeaderScripts(hideNav, showSearch) {
             }
         }
     });
-
+    
     const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
     const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
     const logoutBtn = document.getElementById('headerLogoutBtn');
@@ -83,6 +83,8 @@ function attachHeaderScripts(hideNav, showSearch) {
         searchIcon.classList.remove('hidden');
 
     const userId = localStorage.getItem('user');
+    
+    document.getElementById('profileName').innerText = 
 
     headerOrgEventsBtn.onclick = function() {
         navToPage('organisedEvents.html');

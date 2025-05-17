@@ -81,10 +81,10 @@
 					
 					<div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-center gap-2 items-center">
 						<button type="reset" id="filterClearBtn" onclick="applyFilterOnEvents(true);" class="flex-1 cursor-pointer bg-(--bg) hover:bg-(--tertiary) text-(--text) px-4 py-2 rounded shadow">
-						Clear
+							Clear
 						</button>
 						<button type="button" id="filterSubmitBtn" onclick="applyFilterOnEvents();" class="flex-1 cursor-pointer bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded shadow">
-						Apply
+							Apply
 						</button>
 					</div>
 
@@ -137,7 +137,7 @@
 							<table class="w-full text-sm border-collapse">
 								<thead>
 									<tr class="text-left border-b border-(--text)">
-										<th class="py-2">Amount</th>
+										<th class="py-2">Quantity</th>
 										<th>Ticket Name</th>
 										<th>Description</th>
 										<th>Price</th>
@@ -150,7 +150,7 @@
 						</div>
 
 						<template id="ticketRowTemplate">
-							<tr>
+							<tr class=" border-b">
 								<td class="py-2">
 									<input type="number" min="0" value="0" class="w-16 border border-(--text) rounded px-2 py-1 ticket-amount-input">
 								</td>
@@ -162,7 +162,7 @@
 
 						<!-- purchase button -->
 						<div class="mt-auto pt-6">
-							<button class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer py-2 px-4 rounded ">
+							<button id="purchaseBtn" class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer py-2 px-4 rounded ">
 								Purchase
 							</button>
 						</div>

@@ -159,8 +159,10 @@ async function login(email, password)
         }
 
         // log userID to local storage
+        console.log(response.data);
         const userId = response.data.user_id;
         localStorage.setItem("user", userId);
+        localStorage.setItem("user_details", user);
 
         // naviaget to index unless there was aa url give to direcct to
         if (redirectUrl)
