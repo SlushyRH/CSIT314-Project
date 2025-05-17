@@ -1,8 +1,33 @@
 let eventContainer;
 let eventTemplate;
 let eventModalWindowTemplate;
+let currentSearchValue;
 
-let currentTicketCart;
+function initSearchBar() {
+    const searchBarText = document.getElementById('searchBarText');
+
+    searchBarText.addEventListener('input', handleSearchBarInput);
+}
+
+function handleSearchBarInput(e) {
+    const searchValue = e.target.value;
+    const cachedEvents = getCachedEvents();
+
+    // render all if search bar is empty
+    if (!searchValue) {
+        renderEvents(cachedEvents);
+        return;
+    }
+
+    currentSearchValue = searchValue.toLowerCase();
+
+    // filter events through title and search bar
+    let filteredEvents = cachedEvents.filter(event => {
+        return event.title.toLowerCase().includes(searchValue.toLowerCase());
+    });
+
+    renderEvents(filteredEvents);
+}
 
 async function initEvents() {
     eventContainer = document.getElementById('eventList');
@@ -38,52 +63,6 @@ async function initEvents() {
     catch (error) {
         console.error("Failed to initialize events:", error);
     }
-
-    initFilterData();
-}
-
-async function initFilterData() {
-    try {
-        const filterData = await getCachedFilterData();
-
-        const locations = filterData.locations;
-        const categories = filterData.categories;
-
-        const locationSelect = document.getElementById("filterLocation");
-        const categorySelect = document.getElementById("filterCategory");
-
-        const resetBtn = document.getElementById("filterClearBtn");
-        const applyBtn = document.getElementById("filterSubmitBtn");
-
-        resetBtn.onclick = function () {
-            applyFilterOnEvents(true);
-        };
-
-        applyBtn.onclick = function () {
-            applyFilterOnEvents();
-        };
-
-        locationSelect.innerHTML = "";
-        categorySelect.innerHTML = "";
-
-        locationSelect.appendChild(new Option("Select Location", ""));
-        categorySelect.appendChild(new Option("Select Category", ""));
-
-        locations.forEach(location => {
-            locationSelect.appendChild(new Option(location, location));
-        });
-
-        // populate categories
-        categories.forEach(category => {
-            categorySelect.appendChild(new Option(category, category));
-        });
-        console.log("Loaded the values in category");
-
-        applyFilterOnEvents();
-    }
-    catch (error) {
-        console.error("Failed to initialize filter daata:", error);
-    }
 }
 
 async function getCachedFilterData() {
@@ -114,6 +93,7 @@ function applyFilterOnEvents(reset = false) {
         const cachedEvents = getCachedEvents();
 
         if (reset) {
+            document.getElementById('searchBarText').value = '';
             renderEvents(cachedEvents);
             return;
         }
@@ -141,14 +121,18 @@ function applyFilterOnEvents(reset = false) {
             const dateMatch = startDateMatch && endDateMatch;
 
             // check for category and location match
-            const categoryMatch = !categoryInput || event.category_name === categoryInput;
-            const locationMatch = !locationInput || event.location === locationInput;
+            const categoryMatch = !categoryInput || event.category_name.includes(categoryInput);
+            const locationMatch = !locationInput || event.location.includes(locationInput);
 
             // ensure the min/maax price of at least 1 ticket is within the price range
             const minPriceMatch = isNaN(minPriceInput) || event.min_price >= minPriceInput;
             const maxPriceMatch = isNaN(maxPriceInput) || event.max_price <= maxPriceInput;
 
-            return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch;
+            if (!currentSearchValue) {
+                return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch;
+            } else {
+                return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch && event.title.toLowerCase().includes(currentSearchValue.toLowerCase());
+            }
         });
 
         renderEvents(filteredEvents);
@@ -219,51 +203,55 @@ function renderEvents(events) {
 }
 
 function openEventModal(eventId) {
-    // get event and reset cart
     const event = getEvent(eventId);
     currentTicketCart = null;
 
-    // get event modal window template
     const eventClone = eventModalWindowTemplate.content.cloneNode(true);
     const eventElement = eventClone.firstElementChild;
 
-    // replace ddata with actual event date
     eventElement.querySelector('[data-title]').textContent = event.title;
     eventElement.querySelector('[data-date]').textContent = event.event_date;
     eventElement.querySelector('[data-description]').textContent = event.description;
     eventElement.querySelector('[data-location]').textContent = event.location;
 
-    // reset ticket options
-    const ticketSelect = eventElement.querySelector('#ticketSelect');
-    ticketSelect.innerHTML = '';
-
-    // reset ticket table
     const tableBody = eventElement.querySelector('#ticketTableBody');
-    tableBody.innerHTML = "";
+    const rowTemplate = eventElement.querySelector('#ticketRowTemplate');
 
-    // append all ticket options
-    event.ticket_types.forEach(ticket => {
-        ticketSelect.appendChild(new Option(ticket.name, ticket.ticket_type_id));
+    tableBody.innerHTML = '';
+
+    event.ticket_types.forEach(ticket =>
+    {
+        const rowClone = rowTemplate.content.cloneNode(true);
+        const row = rowClone.querySelector('tr');
+
+        row.querySelector('[data-name]').textContent = ticket.name;
+        row.querySelector('[data-description]').textContent = ticket.benefits;
+        row.querySelector('[data-price]').textContent = ticket.price;
+
+        const amountInput = row.querySelector('.ticket-amount-input');
+        amountInput.value = 0;
+        amountInput.setAttribute('data-ticket-id', ticket.ticket_type_id);
+
+        amountInput.oninput = () =>
+        {
+            const value = parseInt(amountInput.value) || 0;
+            console.log(`Selected ${value} for ${ticket.name}`);
+
+            // update the cart array here
+        };
+
+        tableBody.appendChild(row);
     });
 
-    // make add to cart functionaliity
-    const cartBtn = eventElement.querySelector('#addToCartBtn');
-    cartBtn.onclick = function () {
-        addTicketToCart(event, ticketSelect.value, eventElement.querySelector('[data-amount]').value)
-    };
-
-    // make internal function so clicking background or clicking escape closes modal window
-    const hideModalOnEscape = function(e) {
-        if (e.key === 'Escape' || e.target.id === 'modalOverlay') {
-            // remove event listeners
+    const hideModalOnEscape = function (e) {
+        if (e.key === 'Escape' || e.target.id === 'modalOverlay')
+        {
             document.removeEventListener('keydown', hideModalOnEscape);
             document.removeEventListener('click', hideModalOnEscape);
-
             eventElement.remove();
         }
-    }
+    };
 
-    // add hide function to the events
     document.addEventListener('keydown', hideModalOnEscape);
     eventElement.addEventListener('click', hideModalOnEscape);
 
@@ -287,15 +275,6 @@ function addTicketToCart(event, ticketTypeId, ticketAmount) {
     ticketRow.querySelector('[data-name]').textContent = ticket.name;
     ticketRow.querySelector('[data-description]').textContent = ticket.name;
     ticketRow.querySelector('[data-price]').textContent = ticket.price;
-
-    // add remove button functionality
-    ticketRow.querySelector("button").addEventListener("click", function() {
-        const row = this.closest("tr");
-
-        if (row) {
-            row.remove();
-        }
-    });
 
     // add ticket roww to table
     tableBody.appendChild(ticketRow);

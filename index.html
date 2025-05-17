@@ -25,50 +25,68 @@
             <form id="eventFilter" class="bg-(--secondary) p-4 rounded-xl shadow-md space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     
-                  <div>
-                  <label for="filterStartDate" class="block mb-1 text-sm font-medium">Start Date</label>
-                  <input type="date" id="filterStartDate" name="filterStartDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
-                </div>
+					<div>
+					<label for="filterStartDate" class="block mb-1 text-sm font-medium">Start Date</label>
+					<input type="date" id="filterStartDate" name="filterStartDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+					</div>
 
-                <div>
-                  <label for="filterEndDate" class="block mb-1 text-sm font-medium">End Date</label>
-                  <input type="date" id="filterEndDate" name="filterEndDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
-                </div>
+					<div>
+					<label for="filterEndDate" class="block mb-1 text-sm font-medium">End Date</label>
+					<input type="date" id="filterEndDate" name="filterEndDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+					</div>
 
-                  <div>
-                    <label for="filterCategory" class="block mb-1 text-sm font-medium">Category</label>
-                    <select id="filterCategory" name="filterCategory" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
-						<option value="">Select Category</option>
-                        <!-- categories loaded dynamically -->
-                    </select>
-                  </div>
+					<div>
+						<label for="filterCategory" class="block mb-1 text-sm font-medium">Category</label>
+						<select id="filterCategory" name="filterCategory" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+							<option value="">Select Category</option>
+							<option value="Comedy">Comedy</option>
+							<option value="Concert">Concert</option>
+							<option value="Conference">Conference</option>
+							<option value="Lesson">Lesson</option>
+							<option value="Musical">Musical</option>
+							<option value="Showcase">Showcase</option>
+							<option value="Sport">Sport</option>
+							<option value="Other">Other</option>
+						</select>
+					</div>
 
-                  <div>
-                    <label for="filterLocation" class="block mb-1 text-sm font-medium">Location</label>
-                    <select id="filterLocation" name="filterLocation" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
-						<option value="">Select Location</option>
-                        <!-- locations loaded dynamically -->
-                    </select>
-                  </div>
+					<div>
+						<label for="filterLocation" class="block mb-1 text-sm font-medium">Location</label>
+						<select id="filterLocation" name="filterLocation" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+							<option value="">Select Location</option>
+							<option value="Beerwah">Beerwah</option>
+							<option value="Coffs Harbour">Coffs Harbour</option>
+							<option value="Darwin">Darwin</option>
+							<option value="Melbourne">Melbourne</option>
+							<option value="Newcastle">Newcastle</option>
+							<option value="Perth">Perth</option>
+							<option value="Sydney">Sydney</option>
+							<option value="Germany">Germany</option>
+							<option value="Poland">Poland</option>
+							<option value="Spain">Spain</option>
+							<option value="United Kingdom">United Kingdom</option>
+							<option value="USA">USA</option>
+						</select>
+					</div>
 
-                  <div>
-                  <label for="filterMinPrice" class="block mb-1 text-sm font-medium">Min Price</label>
-                  <input type="number" placeholder="0" id="filterMinPrice" name="filterMinPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
-                  </div>
+                  	<div>
+						<label for="filterMinPrice" class="block mb-1 text-sm font-medium">Min Price</label>
+						<input type="number" placeholder="0" id="filterMinPrice" name="filterMinPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+					</div>
 
-                  <div>
-                    <label for="filterMaxPrice" class="block mb-1 text-sm font-medium">Max Price</label>
-                    <input type="number" placeholder="0" id="filterMaxPrice" name="filterMaxPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
-                  </div>
-
-                  <div class="flex w-full max-w gap-2 items-center self-end">
-                    <button type="reset" id="filterClearBtn" class="flex-1 cursor-pointer bg-(--bg) hover:bg-(--tertiary) text-(--text) px-4 py-2 rounded shadow">
-                      Clear
-                    </button>
-                    <button type="button" id="filterSubmitBtn" class="flex-1 cursor-pointer bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded shadow">
-                      Apply
-                    </button>
-                  </div>
+					<div>
+						<label for="filterMaxPrice" class="block mb-1 text-sm font-medium">Max Price</label>
+						<input type="number" placeholder="0" id="filterMaxPrice" name="filterMaxPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+					</div>
+					
+					<div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-center gap-2 items-center">
+						<button type="reset" id="filterClearBtn" onclick="applyFilterOnEvents(true);" class="flex-1 cursor-pointer bg-(--bg) hover:bg-(--tertiary) text-(--text) px-4 py-2 rounded shadow">
+						Clear
+						</button>
+						<button type="button" id="filterSubmitBtn" onclick="applyFilterOnEvents();" class="flex-1 cursor-pointer bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded shadow">
+						Apply
+						</button>
+					</div>
 
                 </div>
             </form>
@@ -113,17 +131,6 @@
 
 					<!-- ticketing panel -->
 					<div class="w-full min-w-[300px] bg-(--secondary) rounded-xl p-6 shadow flex flex-col">
-						<!-- ticket selector -->
-						<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
-							<input data-amount="" type="number" min="1" value="1"
-								class="w-full sm:w-20 border border-(--text) rounded px-2 py-1">
-							<select id="ticketSelect" class="w-full flex-1 bg-(--secondary) border border-(--text) rounded px-2 py-1">
-								<option value="">Select Ticket</option>
-							</select>
-							<button id="addToCartBtn" class="sm:w-auto w-full px-4 py-1 bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) rounded text-lg font-bold cursor-pointer">
-								+
-							</button>
-						</div>
 
 						<!-- ticket table -->
 						<div class="overflow-x-auto">
@@ -134,7 +141,6 @@
 										<th>Ticket Name</th>
 										<th>Description</th>
 										<th>Price</th>
-										<th>Remove</th>
 									</tr>
 								</thead>
 								<tbody id="ticketTableBody">
@@ -145,13 +151,12 @@
 
 						<template id="ticketRowTemplate">
 							<tr>
-								<td data-amount="" class="py-2">1</td>
+								<td class="py-2">
+									<input type="number" min="0" value="0" class="w-16 border border-(--text) rounded px-2 py-1 ticket-amount-input">
+								</td>
 								<td data-name=""></td>
 								<td data-description=""></td>
 								<td data-price=""></td>
-								<td>
-									<button>Remove</button>
-								</td>
 							</tr>
 						</template>
 
@@ -170,7 +175,7 @@
     <div id="footer"></div>
 
     <script>
-        initHeader(false, true);
+        initHeader(false, true, () => initSearchBar());
         initFooter();
 
         initEvents();

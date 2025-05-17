@@ -1,7 +1,14 @@
 const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https://mediumslateblue-toad-454408.hostingersite.com/
 
 function initFooter() { initComponent('footer', 'footer'); }
-function initHeader(hideNav = false, hideSearch = false) { initComponent('header', 'header', () => attachHeaderScripts(hideNav, hideSearch)); }
+function initHeader(hideNav = false, hideSearch = false, onLoaded = null) {
+	initComponent('header', 'header', () => {
+		attachHeaderScripts(hideNav, hideSearch);
+        
+		if (onLoaded)
+			onLoaded();
+	});
+}
 
 function initComponent(component, id, callback) {
     // get doc element
@@ -48,10 +55,6 @@ function attachHeaderScripts(hideNav, showSearch) {
         if (!searchBar?.classList.contains('hidden'))
         {
             searchBar.classList.add('hidden');
-            if (searchInput)
-            {
-                searchInput.value = '';
-            }
         }
     });
 
@@ -69,7 +72,6 @@ function attachHeaderScripts(hideNav, showSearch) {
 
     const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
     const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
-    const headerSettingsBtn = document.getElementById('headerSettingsBtn');
     const logoutBtn = document.getElementById('headerLogoutBtn');
 
     if (hideNav) {
@@ -88,10 +90,6 @@ function attachHeaderScripts(hideNav, showSearch) {
 
     headerUserEventsBtn.onclick = function() {
         navToPage('bookedEvents.html');
-    };
-
-    headerSettingsBtn.onclick = function() {
-        navToPage('settings.html');
     };
 
     logoutBtn.onclick = function() {
