@@ -1,5 +1,13 @@
 const websiteFeeCharge = 2.5;
 
+function isValid() {
+    const userId = localStorage.getItem('user');
+
+    if (!userId) {
+        navToPage('login.html', window.location);
+    }
+}
+
 function getParamData() {
     const params = new URLSearchParams(window.location.search);
 
@@ -30,6 +38,8 @@ function getParamData() {
 
 function displayEventDetails(event) {
     document.getElementById('eventTitle').innerText = event.title + ' - ' + event.event_date;
+    document.getElementById('eventDescription').innerText = event.description;
+    document.getElementById('eventLocation').innerText = event.location;
 }
 
 function displayTicketSummary(event, ticketsIds) {

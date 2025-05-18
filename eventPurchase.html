@@ -12,7 +12,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="assets/js/global.js"></script>
-    <script src="assets/js/eventBookingConfirmation.js"></script>
+    <script src="assets/js/eventPurchase.js"></script>
+
+	<script>isValid();</script>
   </head>
 
   <body class="min-h-screen flex flex-col">
@@ -20,7 +22,9 @@
       <main class="flex-grow">
 
 		<div class="max-w-6xl mx-auto px-4 py-6 flex flex-col justify-center items-center min-h-[calc(100vh-100px)]">
-          <h1 id="eventTitle" class="text-2xl text-center font-bold text-(--text) mb-6">Event Title</h1>
+          <h1 id="eventTitle" class="text-2xl text-center font-bold text-(--text) mb-2">Event Title</h1>
+          <h1 id="eventDescription" class="text-center text-(--text) mb-1">Event Description</h1>
+          <h1 id="eventLocation" class="text-center text-(--text) mb-4">Event Location</h1>
 
           <div class="flex flex-col lg:flex-row gap-6">
               <!-- ticket info -->
@@ -95,7 +99,7 @@
 						</div>
 					</div>
 
-					<button class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) py-2 px-4 rounded shadow">
+					<button class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) py-2 px-4 rounded shadow cursor-pointer">
 						Confirm Purchase
 					</button>
 				</div>

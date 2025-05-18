@@ -82,9 +82,12 @@ function attachHeaderScripts(hideNav, showSearch) {
     if (showSearch)
         searchIcon.classList.remove('hidden');
 
+    const user = JSON.parse(localStorage.getItem('user_details'));
     const userId = localStorage.getItem('user');
-    
-    document.getElementById('profileName').innerText = 
+
+    if (user) {
+        document.getElementById('profileName').innerText = user.name;
+    }
 
     headerOrgEventsBtn.onclick = function() {
         navToPage('organisedEvents.html');
@@ -95,7 +98,11 @@ function attachHeaderScripts(hideNav, showSearch) {
     };
 
     logoutBtn.onclick = function() {
+        // delete uuser data from local storage
         localStorage.removeItem('user');
+        localStorage.removeItem('user_details');
+
+        // redirect to login page
         navToPage('login.html');
     };
     

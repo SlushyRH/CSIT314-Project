@@ -276,5 +276,5 @@ function openPurchaseConfirmPage(eventId, tickets) {
         params.append(`ticket[${type}]`, count);
     }
 
-    navToPage('eventBookingConfirmation.html?' + params.toString());
+    navToPage('eventPurchase.html?' + params.toString());
 }
