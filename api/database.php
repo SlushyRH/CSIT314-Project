@@ -140,9 +140,7 @@ function userSignUp($pdo, $data)
         $stmt->execute(['email' => $data['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        send_response('success', 'User logged in successfully.', 200, [
-            'user_id' => $user['user_id']
-        ]);
+        send_response('success', 'User logged in successfully.', 200, json_encode($user));
     }
     catch (Exception $e)
     {
@@ -178,9 +176,7 @@ function userLogIn($pdo, $data)
             send_response('error', 'Incorrect password.', 401);
         }
 
-        send_response('success', 'User logged in successfully.', 200, [
-            'user_id' => $user['user_id']
-        ]);
+        send_response('success', 'User logged in successfully.', 200, json_encode($user));
     }
     catch (Exception $e)
     {
