@@ -1,5 +1,0 @@
-- add getUser in api
-- save user details to local storage
-- make user name show on profile dropdown
-- make so on purchaseConfirm load, it checks if user is logged in and then redirects to login with redirect back after successful login
-- add api call for purchase success
