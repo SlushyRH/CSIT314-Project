@@ -135,7 +135,7 @@ function userSignUp($pdo, $data)
         ]);
 
         $stmt = $pdo->prepare("
-            SELECT user_id, password FROM Users WHERE email = :email
+            SELECT * FROM Users WHERE email = :email
         ");
         $stmt->execute(['email' => $data['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -161,7 +161,7 @@ function userLogIn($pdo, $data)
     try
     {
         $stmt = $pdo->prepare("
-            SELECT user_id, password FROM Users WHERE email = :email
+            SELECT * FROM Users WHERE email = :email
         ");
         $stmt->execute(['email' => $data['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
