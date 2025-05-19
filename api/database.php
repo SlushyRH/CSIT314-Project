@@ -430,6 +430,11 @@ function getBookedEvents($pdo, $data)
     }
 }
 
+function getRegistrationInfo($pdo, $data)
+{
+
+}
+
 try {
     // establish connection to sql database
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
@@ -464,6 +469,8 @@ try {
             getBookedEvents($pdo, $data);
         } else if ($action === "UPDATE_EVENT") {
             updateEventDetails($pdo, $data);
+        } else if ($action === "GET_REGISTRATION") {
+            getRegistrationInfo($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
