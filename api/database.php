@@ -97,7 +97,6 @@ function createTablesIfNeeded($pdo)
             registration_id INT NOT NULL,
             ticket_type_id INT NOT NULL,
             quantity INT NOT NULL,
-            total_paid DECIMAL(10, 2) NOT NULL,
             FOREIGN KEY (registration_id) REFERENCES Registrations(registration_id),
             FOREIGN KEY (ticket_type_id) REFERENCES TicketTypes(ticket_type_id)
         );
@@ -105,7 +104,6 @@ function createTablesIfNeeded($pdo)
 
     $pdo->exec($createTestTable);
 }
-
 
 function userSignUp($pdo, $data)
 {
@@ -442,7 +440,7 @@ function getBookedEvents($pdo, $data)
 
 function addRegistrationInfo($pdo, $data)
 {
-    $required = ['user_id', 'event_id', 'tickets'];
+    $required = ['user_id', 'event_id', 'tickets', 'total_payment'];
 
     foreach ($required as $field)
     {
@@ -460,10 +458,10 @@ function addRegistrationInfo($pdo, $data)
     $userId = $data['user_id'];
     $eventId = $data['event_id'];
     $tickets = $data['tickets'];
+    $totalPayment = $data['total_payment'];
 
     try
     {
-        // Create ONE registration
         $stmt = $pdo->prepare("
             INSERT INTO Registrations (user_id, event_id)
             VALUES (:user_id, :event_id)
@@ -476,38 +474,35 @@ function addRegistrationInfo($pdo, $data)
 
         $registrationId = $pdo->lastInsertId();
 
-        // Loop through tickets and insert into RegistrationTickets + Payments
         foreach ($tickets as $ticket)
         {
-            if (empty($ticket['ticketTypeId']) || !isset($ticket['amount']) || !isset($ticket['totalPaid']))
+            if (empty($ticket['ticketTypeId']) || !isset($ticket['amount']))
                 continue;
 
             $ticketTypeId = $ticket['ticketTypeId'];
             $amount = $ticket['amount'];
-            $totalPaid = $ticket['totalPaid'];
 
             $stmt = $pdo->prepare("
-                INSERT INTO RegistrationTickets (registration_id, ticket_type_id, quantity, total_paid)
-                VALUES (:registration_id, :ticket_type_id, :quantity, :total_paid)
+                INSERT INTO RegistrationTickets (registration_id, ticket_type_id, quantity)
+                VALUES (:registration_id, :ticket_type_id, :quantity)
             ");
 
             $stmt->execute([
                 'registration_id' => $registrationId,
                 'ticket_type_id' => $ticketTypeId,
-                'quantity' => $amount,
-                'total_paid' => $totalPaid
-            ]);
-
-            $stmt = $pdo->prepare("
-                INSERT INTO Payments (registration_id, amount)
-                VALUES (:registration_id, :amount)
-            ");
-
-            $stmt->execute([
-                'registration_id' => $registrationId,
-                'amount' => $totalPaid
+                'quantity' => $amount
             ]);
         }
+
+        $stmt = $pdo->prepare("
+            INSERT INTO Payments (registration_id, amount)
+            VALUES (:registration_id, :amount)
+        ");
+
+        $stmt->execute([
+            'registration_id' => $registrationId,
+            'amount' => $totalPayment
+        ]);
 
         send_response('success', 'Registration completed successfully!', 200, ['reg_id' => $registrationId]);
     }
