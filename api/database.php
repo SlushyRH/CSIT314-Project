@@ -103,10 +103,12 @@ function createTablesIfNeeded($pdo) {
             FOREIGN KEY (ticket_type_id) REFERENCES TicketTypes(ticket_type_id)
         );
 
+        ALTER TABLE `Registrations` DROP FOREIGN KEY `ticket_type_id`; 
+
         ALTER TABLE `Registrations`
             DROP COLUMN `ticket_type_id`,
             DROP COLUMN `quantity`;
-    ";
+        ";
 
     $pdo->exec($createTestTable);
 }
