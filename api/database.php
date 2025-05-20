@@ -93,7 +93,19 @@ function createTablesIfNeeded($pdo) {
             FOREIGN KEY (user_id) REFERENCES Users(user_id)
         );
 
-        ALTER TABLE `Registrations` ADD `quantity` INT NOT NULL AFTER `ticket_type_id`;
+        CREATE TABLE IF NOT EXISTS RegistrationTickets (
+            reg_ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+            registration_id INT NOT NULL,
+            ticket_type_id INT NOT NULL,
+            quantity INT NOT NULL,
+            total_paid DECIMAL(10, 2) NOT NULL,
+            FOREIGN KEY (registration_id) REFERENCES Registrations(registration_id),
+            FOREIGN KEY (ticket_type_id) REFERENCES TicketTypes(ticket_type_id)
+        );
+
+        ALTER TABLE `Registrations`
+            DROP COLUMN `ticket_type_id`,
+            DROP COLUMN `quantity`;
     ";
 
     $pdo->exec($createTestTable);
@@ -439,11 +451,15 @@ function addRegistrationInfo($pdo, $data)
     foreach ($required as $field)
     {
         if (empty($data[$field]))
+        {
             send_response('error', $field . ' is required!', 400);
+        }
     }
 
     if (!is_array($data['tickets']) || count($data['tickets']) == 0)
+    {
         send_response('error', 'At least one ticket must be added!', 400);
+    }
 
     $userId = $data['user_id'];
     $eventId = $data['event_id'];
@@ -451,29 +467,41 @@ function addRegistrationInfo($pdo, $data)
 
     try
     {
+        // Create ONE registration
+        $stmt = $pdo->prepare("
+            INSERT INTO Registrations (user_id, event_id)
+            VALUES (:user_id, :event_id)
+        ");
+
+        $stmt->execute([
+            'user_id' => $userId,
+            'event_id' => $eventId
+        ]);
+
+        $registrationId = $pdo->lastInsertId();
+
+        // Loop through tickets and insert into RegistrationTickets + Payments
         foreach ($tickets as $ticket)
         {
-            if (empty($ticket['ticket_type_id']) || !isset($ticket['amount']))
+            if (empty($ticket['ticketTypeId']) || !isset($ticket['amount']) || !isset($ticket['totalPaid']))
                 continue;
 
-            $ticketTypeId = $ticket['ticket_type_id'];
+            $ticketTypeId = $ticket['ticketTypeId'];
             $amount = $ticket['amount'];
+            $totalPaid = $ticket['totalPaid'];
 
-            // registrations sql
             $stmt = $pdo->prepare("
-                INSERT INTO Registrations (user_id, event_id, ticket_type_id)
-                VALUES (:user_id, :event_id, :ticket_type_id)
+                INSERT INTO RegistrationTickets (registration_id, ticket_type_id, quantity, total_paid)
+                VALUES (:registration_id, :ticket_type_id, :quantity, :total_paid)
             ");
 
             $stmt->execute([
-                'user_id' => $userId,
-                'event_id' => $eventId,
-                'ticket_type_id' => $ticketTypeId
+                'registration_id' => $registrationId,
+                'ticket_type_id' => $ticketTypeId,
+                'quantity' => $amount,
+                'total_paid' => $totalPaid
             ]);
 
-            $registrationId = $pdo->lastInsertId();
-
-            // payments sql
             $stmt = $pdo->prepare("
                 INSERT INTO Payments (registration_id, amount)
                 VALUES (:registration_id, :amount)
@@ -481,11 +509,11 @@ function addRegistrationInfo($pdo, $data)
 
             $stmt->execute([
                 'registration_id' => $registrationId,
-                'amount' => $amount
+                'amount' => $totalPaid
             ]);
         }
 
-        send_response('success', 'All registrations and payments are successfull!', 200, ['reg_id' => $registrationId]);
+        send_response('success', 'Registration completed successfully!', 200, ['reg_id' => $registrationId]);
     }
     catch (Exception $e)
     {
