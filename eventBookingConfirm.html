@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="assets/js/global.js"></script>
     <script src="assets/js/eventBookingConfirm.js"></script>
+    <script src="assets/js/eventPurchase.js"></script>
   </head>
 
   <body class="min-h-screen flex flex-col">
@@ -21,12 +22,13 @@
 
 		<div class="max-w-6xl mx-auto px-4 py-6 flex flex-col justify-center items-center min-h-[calc(100vh-100px)]">
           <h1 id="eventTitle" class="text-2xl text-center font-bold text-(--text) mb-2">Event Title</h1>
-          <h1 class="text-center text-(--text) mb-4">Show this to the staff at the gate at the event</h1>
+          <h1 id="eventDescription" class="text-center text-(--text) mb-1">Event Description</h1>
+          <h1 id="eventLocation" class="text-center text-(--text) mb-4">Event Location</h1>
 
           <div class="flex flex-col lg:flex-row gap-6">
-            <!-- payment info -->
-            <div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow flex flex-col">
-                        <h2 class="text-xl text-center font-semibold text-(--text)">Ticket Information</h2>
+              <!-- ticket info -->
+              <div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow space-y-4">
+                  <h2 class="text-xl text-center font-semibold text-(--text)">Ticket Information</h2>
                   <table class="w-full text-(--text)">
                       <thead>
                           <tr class="border-b border-(--form-focus-outline)">
@@ -42,16 +44,30 @@
                           </tr>
                       </tbody>
                   </table>
-			</div>
+              </div>
 
-            <!-- ticket info -->
-            <div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow flex flex-col">
-                <p class="text-center mb-4">
-                    Show the QR code below to gain access to the event.
-                </p>
-                <img src="content/qr-example.png" alt="Gate Pass" class="flex-1 w-full object-contain rounded-lg" />
+				<template id="ticketRowTemplate">
+					<tr class=" border-b">
+						<td class="text-left p-2" data-amount=""></td>
+						<td class="text-left p-2" data-name=""></td>
+						<td class="text-left p-2" data-description=""></td>
+						<td class="text-left p-2" data-price=""></td>
+					</tr>
+				</template>
 
-                <div class="mt-auto space-y-4 text-(--text) pt-4">
+              <!-- payment info -->
+              <div class="flex-1 bg-(--secondary) p-4 rounded-xl max-w-[400px] shadow flex flex-col">                
+				<div id="qrCode" class="flex flex-col justify-center items-center w-full">
+					<p class="text-center mb-4">
+                    	Show the QR code below to gain access to the event.
+                	</p>
+
+					<span class="w-full max-w-[250px] flex justify-center">
+						<img src="/content/qr-example.png" alt="Gate Pass" class="object-contain" />
+					</span>
+				</div>
+
+				<div class="mt-auto space-y-4 text-(--text) pt-4">
 					<div class="space-y-2">
 						<div class="flex justify-between">
 							<span>Subtotal</span>
@@ -67,28 +83,18 @@
 						</div>
 					</div>
 				</div>
-            </div>
-
-            <template id="ticketRowTemplate">
-                <tr class=" border-b">
-                    <td class="text-left p-2" data-amount=""></td>
-                    <td class="text-left p-2" data-name=""></td>
-                    <td class="text-left p-2" data-description=""></td>
-                    <td class="text-left p-2" data-price=""></td>
-                </tr>
-            </template>
+			</div>
           </div>
       </div>
 
       </main>
-
     <div id="footer"></div>
 
     <script>
-        initHeader(false, false);
+        initHeader();      
         initFooter();
 
         getRegistration();
     </script>
-  </body>  
+  </body>    
 </html>

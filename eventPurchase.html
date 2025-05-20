@@ -57,31 +57,43 @@
 				</template>
 
               <!-- payment info -->
-              <div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow flex flex-col">
-				<h2 class="text-xl text-center font-semibold text-(--text) mb-4">Payment Summary</h2>
+              <div class="flex-1 bg-(--secondary) p-4 rounded-xl max-w-[400px] shadow flex flex-col">                
+				<div id="qrCode" class="hidden flex flex-col justify-center items-center w-full">
+					<p class="text-center mb-4">
+                    	Show the QR code below to gain access to the event.
+                	</p>
 
-				<div class="text-(--text) space-y-4">
-					<div>
-						<label for="cardNumber" class="block mb-1">Card Number</label>
-						<input id="cardNumber" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="1234 5678 9012 3456">
-					</div>
-
-					<div>
-						<label for="cardHolder" class="block mb-1">Card Holder Name</label>
-						<input id="cardHolder" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="John Doe">
-					</div>
-
-					<div class="flex gap-4">
-						<div class="flex-1">
-							<label for="expiryDate" class="block mb-1">Expiry Date</label>
-							<input id="expiryDate" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="MM/YY">
-						</div>
-						<div class="flex-1">
-							<label for="cardCode" class="block mb-1">Card Code</label>
-							<input id="cardCode" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="CVV">
-						</div>
-					</div>
+					<span class="w-full max-w-[250px] flex justify-center">
+						<img src="/content/qr-example.png" alt="Gate Pass" class="object-contain" />
+					</span>
 				</div>
+
+				<span id="paymentInfo" class="">
+					<h2 class="text-xl text-center font-semibold text-(--text) mb-4">Payment Summary</h2>
+
+					<div class="text-(--text) space-y-4">
+						<div>
+							<label for="cardNumber" class="block mb-1">Card Number</label>
+							<input id="cardNumber" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="1234 5678 9012 3456">
+						</div>
+
+						<div>
+							<label for="cardHolder" class="block mb-1">Card Holder Name</label>
+							<input id="cardHolder" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="John Doe">
+						</div>
+
+						<div class="flex gap-4">
+							<div class="flex-1">
+								<label for="expiryDate" class="block mb-1">Expiry Date</label>
+								<input id="expiryDate" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="MM/YY">
+							</div>
+							<div class="flex-1">
+								<label for="cardCode" class="block mb-1">Card Code</label>
+								<input id="cardCode" type="text" class="w-full p-2 rounded bg-(--bg) text-(--text)" placeholder="CVV">
+							</div>
+						</div>
+					</div>
+				</span>
 
 				<div class="mt-auto space-y-4 text-(--text) pt-4">
 					<div class="space-y-2">

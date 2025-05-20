@@ -408,7 +408,6 @@ function getBookedEvents($pdo, $data)
 
     try
     {
-        // Get all registrations with event and payment info
         $stmt = $pdo->prepare("
             SELECT
                 r.registration_id,
@@ -436,7 +435,6 @@ function getBookedEvents($pdo, $data)
         {
             $registrationId = $registration['registration_id'];
 
-            // Get ticket types and quantities for each registration
             $ticketStmt = $pdo->prepare("
                 SELECT
                     tt.name AS ticket_type,
@@ -451,6 +449,7 @@ function getBookedEvents($pdo, $data)
             $tickets = $ticketStmt->fetchAll(PDO::FETCH_ASSOC);
 
             $events[] = [
+                'registration_id' => $registration['registration_id'],
                 'event_id' => $registration['event_id'],
                 'title' => $registration['title'],
                 'description' => $registration['description'],

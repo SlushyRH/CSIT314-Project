@@ -111,20 +111,24 @@ function displayTicketSummary(event, ticketsIds) {
     const totalLabel = document.getElementById('totalAmount');
     totalLabel.textContent = totalAmount;
 
-    document.getElementById('confirmPurchaseBtn').onclick = () => {
-        const eventId = event.event_id;
-        const userId = localStorage.getItem('user');
+    const confirmPurchaseBtn  = document.getElementById('confirmPurchaseBtn');
+    
+    if (confirmPurchaseBtn) {
+        confirmPurchaseBtn.onclick = () => {
+            const eventId = event.event_id;
+            const userId = localStorage.getItem('user');
 
-        onPurchaseConfirm(eventId, userId, totalAmountWithFee, detailedTickets);
-    };
+            onPurchaseConfirm(eventId, userId, totalAmountWithFee, detailedTickets, ticketsIds);
+        };
+    }
 }
 
-async function onPurchaseConfirm(eventId, userId, totalPaid, tickets) {
+async function onPurchaseConfirm(eventId, userId, totalPaid, detailedTickets, tickets) {
     const data = {
         'user_id': userId,
         'event_id': eventId,
         'total_payment': totalPaid,
-        'tickets': tickets
+        'tickets': detailedTickets
     };
     
     // send request to api to confirm registration and get registration id
@@ -134,13 +138,15 @@ async function onPurchaseConfirm(eventId, userId, totalPaid, tickets) {
     if (response.status !== 'success')
         return;
 
-    const responseData = response.data;
-    console.log(JSON.parse(responseData));
-    const regId = responseData['regId'];
-    console.log("RegId:" + regId);
+    const regId = JSON.parse(response.data)['reg_id'];
     
     const params = new URLSearchParams();
-    params.append("regId", regId);
+    params.append("eventId", eventId);
 
-    //navToPage('eventBookingConfirm.html?' + params.toString());
+        // add each ticket type and value
+    for (const [type, count] of Object.entries(tickets)) {
+        params.append(`ticket[${type}]`, count);
+    }
+
+    navToPage('eventBookingConfirm.html?' + params.toString());
 }
