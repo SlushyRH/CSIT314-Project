@@ -430,6 +430,67 @@ function getBookedEvents($pdo, $data)
     }
 }
 
+function addRegistrationInfo($pdo, $data)
+{
+    $required = ['user_id', 'event_id', 'tickets'];
+
+    foreach ($required as $field)
+    {
+        if (empty($data[$field]))
+            send_response('error', $field . ' is required!', 400);
+    }
+
+    if (!is_array($data['tickets']) || count($data['tickets']) == 0)
+        send_response('error', 'At least one ticket must be added!', 400);
+
+    $userId = $data['user_id'];
+    $eventId = $data['event_id'];
+    $tickets = $data['tickets'];
+
+    try
+    {
+        foreach ($tickets as $ticket)
+        {
+            if (empty($ticket['ticket_type_id']) || !isset($ticket['amount']))
+                continue;
+
+            $ticketTypeId = $ticket['ticket_type_id'];
+            $amount = $ticket['amount'];
+
+            // registrations sql
+            $stmt = $pdo->prepare("
+                INSERT INTO Registrations (user_id, event_id, ticket_type_id)
+                VALUES (:user_id, :event_id, :ticket_type_id)
+            ");
+
+            $stmt->execute([
+                'user_id' => $userId,
+                'event_id' => $eventId,
+                'ticket_type_id' => $ticketTypeId
+            ]);
+
+            $registrationId = $pdo->lastInsertId();
+
+            // payments sql
+            $stmt = $pdo->prepare("
+                INSERT INTO Payments (registration_id, amount)
+                VALUES (:registration_id, :amount)
+            ");
+
+            $stmt->execute([
+                'registration_id' => $registrationId,
+                'amount' => $amount
+            ]);
+        }
+
+        send_response('success', 'All registrations and payments are successfull!', 200);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to register. Error: ' . $e->getMessage(), 500);
+    }
+}
+
 function getRegistrationInfo($pdo, $data)
 {
 
@@ -469,6 +530,8 @@ try {
             getBookedEvents($pdo, $data);
         } else if ($action === "UPDATE_EVENT") {
             updateEventDetails($pdo, $data);
+        } else if ($action === "ADD_REGISTRATION") {
+            addRegistrationInfo($pdo, $data);
         } else if ($action === "GET_REGISTRATION") {
             getRegistrationInfo($pdo, $data);
         }
