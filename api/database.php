@@ -547,7 +547,51 @@ function addRegistrationInfo($pdo, $data)
 
 function getRegistrationInfo($pdo, $data)
 {
+    if (empty($data['regId']))
+        send_response('error', 'regId is required!', 400);
 
+    $regId = $data['regId'];
+
+    try
+    {
+        $stmt = $pdo->prepare("
+            SELECT 
+                r.event_id,
+                rt.ticket_type_id,
+                rt.quantity
+            FROM Registrations r
+            LEFT JOIN RegistrationTickets rt ON r.registration_id = rt.registration_id
+            WHERE r.registration_id = :regId
+        ");
+
+        $stmt->execute(['regId' => $regId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rows))
+            send_response('error', 'Registration not found or has no tickets.', 404);
+
+        $eventId = $rows[0]['event_id'];
+        $tickets = [];
+
+        foreach ($rows as $row)
+        {
+            $tickets[] = [
+                'ticket_type_id' => $row['ticket_type_id'],
+                'quantity' => $row['quantity']
+            ];
+        }
+
+        $result = [
+            'event_id' => $eventId,
+            'tickets' => $tickets
+        ];
+
+        send_response('success', 'Registration info fetched.', 200, $result);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to get registration info. Error: ' . $e->getMessage(), 500);
+    }
 }
 
 try {
