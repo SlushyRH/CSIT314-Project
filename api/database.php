@@ -483,7 +483,7 @@ function addRegistrationInfo($pdo, $data)
             ]);
         }
 
-        send_response('success', 'All registrations and payments are successfull!', 200);
+        send_response('success', 'All registrations and payments are successfull!', 200, ['reg_id' => $registrationId]);
     }
     catch (Exception $e)
     {
