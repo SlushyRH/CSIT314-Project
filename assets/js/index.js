@@ -183,7 +183,7 @@ function renderEvents(events) {
         const eventClone = eventTemplate.content.cloneNode(true);
         const eventElement = eventClone.firstElementChild;
 
-        const maxLength = 80;
+        const maxLength = 75;
         let description = event.description;
 
         // limit description length

@@ -30,8 +30,12 @@ function getParamData() {
 
 function displayEventDetails(event) {
     document.getElementById('eventTitle').innerText = event.title + ' - ' + event.event_date;
-    document.getElementById('eventDescription').innerText = event.description;
     document.getElementById('eventLocation').innerText = event.location;
+    
+    const description = document.getElementById('eventDescription');
+    
+    if (description)
+        description.innerText = event.description;
 }
 
 function displayTicketSummary(event, ticketsIds) {
