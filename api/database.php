@@ -24,7 +24,8 @@ function send_response($status, $message, $code, $data = null) {
 }
 
 // create all tables in database if needed
-function createTablesIfNeeded($pdo) {
+function createTablesIfNeeded($pdo)
+{
     $createTestTable = "
         CREATE TABLE IF NOT EXISTS Users (
             user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -68,12 +69,10 @@ function createTablesIfNeeded($pdo) {
             registration_id INT PRIMARY KEY AUTO_INCREMENT,
             user_id INT NOT NULL,
             event_id INT NOT NULL,
-            ticket_type_id INT NOT NULL,
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
             FOREIGN KEY (user_id) REFERENCES Users(user_id),
-            FOREIGN KEY (event_id) REFERENCES Events(event_id),
-            FOREIGN KEY (ticket_type_id) REFERENCES TicketTypes(ticket_type_id)
+            FOREIGN KEY (event_id) REFERENCES Events(event_id)
         );
 
         CREATE TABLE IF NOT EXISTS Payments (
@@ -102,16 +101,11 @@ function createTablesIfNeeded($pdo) {
             FOREIGN KEY (registration_id) REFERENCES Registrations(registration_id),
             FOREIGN KEY (ticket_type_id) REFERENCES TicketTypes(ticket_type_id)
         );
-
-        ALTER TABLE `Registrations` DROP FOREIGN KEY `ticket_type_id`; 
-
-        ALTER TABLE `Registrations`
-            DROP COLUMN `ticket_type_id`,
-            DROP COLUMN `quantity`;
-        ";
+    ";
 
     $pdo->exec($createTestTable);
 }
+
 
 function userSignUp($pdo, $data)
 {
