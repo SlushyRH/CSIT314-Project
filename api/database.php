@@ -92,6 +92,8 @@ function createTablesIfNeeded($pdo) {
             sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES Users(user_id)
         );
+
+        ALTER TABLE `Registrations` ADD `quantity` INT NOT NULL AFTER `ticket_type_id`;
     ";
 
     $pdo->exec($createTestTable);
