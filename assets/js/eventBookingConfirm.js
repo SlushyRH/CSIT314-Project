@@ -32,5 +32,20 @@ async function getRegistration() {
 }
 
 async function getDetailsFromRegId(regId) {
-    return [regId, null];
+    const response = await sqlRequest("POST", "GET_REGISTRATION", { 'regId': regId });
+
+    if (response.status !== 'success') {
+        return;
+    }
+
+    const data = response.data;
+    const rawTickets = data['tickets'];
+
+    const tickets = {};
+    for (const ticket of rawTickets) {
+        tickets[ticket.ticket_type_id] = ticket.quantity;
+    }
+
+    console.log(tickets);
+    return [data['event_id'], tickets];
 }
