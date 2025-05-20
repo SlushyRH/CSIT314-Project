@@ -399,37 +399,70 @@ function getBookedEvents($pdo, $data)
     foreach ($required as $field)
     {
         if (empty($data[$field]))
+        {
             send_response('error', $field . ' is required!', 400);
+        }
     }
 
     $userId = $data['user_id'];
 
     try
     {
+        // Get all registrations with event and payment info
         $stmt = $pdo->prepare("
             SELECT
-                Events.event_id,
-                Events.title,
-                Events.description,
-                Events.location,
-                Events.event_date,
-                EventCategories.name as category_name,
-                TicketTypes.name as ticket_type,
-                TicketTypes.price,
-                Registrations.status,
-                Payments.payment_status
-            FROM Registrations
-            JOIN Events on Registrations.event_id = Events.event_id
-            JOIN TicketTypes on Registrations.ticket_type_id = TicketTypes.ticket_type_id
-            LEFT JOIN Payments ON Payments.registration_id = Registrations.registration_id
-            LEFT JOIN EventCategories ON Events.category_id = EventCategories.category_id
-            WHERE Registrations.user_id = :user_id
+                r.registration_id,
+                e.event_id,
+                e.title,
+                e.description,
+                e.location,
+                e.event_date,
+                ec.name AS category_name,
+                r.status AS registration_status,
+                p.payment_status
+            FROM Registrations r
+            JOIN Events e ON r.event_id = e.event_id
+            LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
+            LEFT JOIN Payments p ON r.registration_id = p.registration_id
+            WHERE r.user_id = :user_id
         ");
 
         $stmt->execute(['user_id' => $userId]);
-        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $registrations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        //send_response('success', 'Successfully got all booked events', 200, $events);
+        $events = [];
+
+        foreach ($registrations as $registration)
+        {
+            $registrationId = $registration['registration_id'];
+
+            // Get ticket types and quantities for each registration
+            $ticketStmt = $pdo->prepare("
+                SELECT
+                    tt.name AS ticket_type,
+                    tt.price,
+                    rt.quantity
+                FROM RegistrationTickets rt
+                JOIN TicketTypes tt ON rt.ticket_type_id = tt.ticket_type_id
+                WHERE rt.registration_id = :registration_id
+            ");
+
+            $ticketStmt->execute(['registration_id' => $registrationId]);
+            $tickets = $ticketStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $events[] = [
+                'event_id' => $registration['event_id'],
+                'title' => $registration['title'],
+                'description' => $registration['description'],
+                'location' => $registration['location'],
+                'event_date' => $registration['event_date'],
+                'category_name' => $registration['category_name'],
+                'registration_status' => $registration['registration_status'],
+                'payment_status' => $registration['payment_status'],
+                'tickets' => $tickets
+            ];
+        }
+
         send_response('success', 'Successfully got all booked events', 200, json_encode(['events' => $events]));
     }
     catch (Exception $e)
