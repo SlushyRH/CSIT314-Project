@@ -62,8 +62,7 @@ function displayTicketSummary(event, ticketsIds) {
 
             detailedTickets.push({
                 ticketTypeId: parseInt(ticketTypeId),
-                amount,
-                totalPaid
+                amount
             });
 
             // fill out data
@@ -116,18 +115,17 @@ function displayTicketSummary(event, ticketsIds) {
         const eventId = event.event_id;
         const userId = localStorage.getItem('user');
 
-        onPurchaseConfirm(eventId, userId, detailedTickets);
+        onPurchaseConfirm(eventId, userId, totalAmountWithFee, detailedTickets);
     };
 }
 
-async function onPurchaseConfirm(eventId, userId, tickets) {
+async function onPurchaseConfirm(eventId, userId, totalPaid, tickets) {
     const data = {
         'user_id': userId,
         'event_id': eventId,
+        'total_payment': totalPaid,
         'tickets': tickets
     };
-
-    console.log(data);
     
     // send request to api to confirm registration and get registration id
     const response = await sqlRequest('POST', 'ADD_REGISTRATION', data);
@@ -136,12 +134,13 @@ async function onPurchaseConfirm(eventId, userId, tickets) {
     if (response.status !== 'success')
         return;
 
-    console.log(response.data);
-    console.log(JSON.parse(response.data));
-    const regId = JSON.parse(response.data)['regId'];
+    const responseData = response.data;
+    console.log(JSON.parse(responseData));
+    const regId = responseData['regId'];
+    console.log("RegId:" + regId);
     
     const params = new URLSearchParams();
     params.append("regId", regId);
 
-    navToPage('eventBookingConfirm.html?' + params.toString());
+    //navToPage('eventBookingConfirm.html?' + params.toString());
 }

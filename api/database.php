@@ -469,7 +469,7 @@ function addRegistrationInfo($pdo, $data)
 
         $stmt->execute([
             'user_id' => $userId,
-            'event_id' => $eventId
+            'event_id' => $eventId,
         ]);
 
         $registrationId = $pdo->lastInsertId();
@@ -495,16 +495,17 @@ function addRegistrationInfo($pdo, $data)
         }
 
         $stmt = $pdo->prepare("
-            INSERT INTO Payments (registration_id, amount)
-            VALUES (:registration_id, :amount)
+            INSERT INTO Payments (registration_id, amount, payment_status)
+            VALUES (:registration_id, :amount, :status)
         ");
 
         $stmt->execute([
             'registration_id' => $registrationId,
-            'amount' => $totalPayment
+            'amount' => $totalPayment,
+            'status' => 'completed',
         ]);
 
-        send_response('success', 'Registration completed successfully!', 200, ['reg_id' => $registrationId]);
+        send_response('success', 'Registration completed successfully!', 200, json_encode(['reg_id' => $registrationId]));
     }
     catch (Exception $e)
     {
