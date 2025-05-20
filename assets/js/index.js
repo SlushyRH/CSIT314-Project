@@ -131,7 +131,7 @@ function applyFilterOnEvents(reset = false) {
                 (isNaN(maxPriceInput) && event.max_price >= minPriceInput) ||
                 (event.max_price >= minPriceInput && event.min_price <= maxPriceInput);
 
-            return dateMatch && categoryMatch && locationMatch && priceMatch && 
+            return dateMatch && categoryMatch && locationMatch && priceMatch &&
                 (!currentSearchValue || event.title.toLowerCase().includes(currentSearchValue.toLowerCase()));
         });
 
@@ -145,7 +145,7 @@ function applyFilterOnEvents(reset = false) {
 function getUrlFilterQuery() {
     // get url query
     const query = window.location.search.substring(1);
-    
+
     if (!query)
         return;
 
@@ -175,7 +175,11 @@ function renderEvents(events) {
 
     // go through each event and render it
     events.forEach(event => {
-        // create template and replace the placeholders with the event data
+        // format current date to check if event is in past or not
+        if (formatEventDate(event) < Date.now())
+            return;
+
+        // create event visual from event template
         const eventClone = eventTemplate.content.cloneNode(true);
         const eventElement = eventClone.firstElementChild;
 
@@ -183,21 +187,21 @@ function renderEvents(events) {
         let description = event.description;
 
         // limit description length
-        if (description.length > maxLength) {    
+        if (description.length > maxLength) {
             description = description.slice(0, maxLength) + '...';
         }
 
-        // replace data wiht the actual event date
+        // set data wiht the actual event date
         eventElement.querySelector('[data-title]').textContent = event.title;
         eventElement.querySelector('[data-date]').textContent = event.event_date;
         eventElement.querySelector('[data-category]').textContent = event.category_name;
         eventElement.querySelector('[data-description]').textContent = description;
 
         // open modal window on click
-        eventElement.onclick = function() {
+        eventElement.onclick = function () {
             openEventModal(event.event_id);
         };
-        
+
         eventContainer.appendChild(eventElement);
     });
 }
@@ -210,6 +214,7 @@ function openEventModal(eventId) {
     const eventElement = eventClone.firstElementChild;
     const purchaseBtn = eventElement.querySelector('#purchaseBtn');
 
+    // set data in modal window
     eventElement.querySelector('[data-title]').textContent = event.title;
     eventElement.querySelector('[data-date]').textContent = event.event_date;
     eventElement.querySelector('[data-description]').textContent = event.description;
@@ -220,11 +225,11 @@ function openEventModal(eventId) {
 
     tableBody.innerHTML = '';
 
-    event.ticket_types.forEach(ticket =>
-    {
+    event.ticket_types.forEach(ticket => {
         const rowClone = rowTemplate.content.cloneNode(true);
         const row = rowClone.querySelector('tr');
 
+        // set data in ticket row
         row.querySelector('[data-name]').textContent = ticket.name;
         row.querySelector('[data-description]').textContent = ticket.benefits;
         row.querySelector('[data-price]').textContent = ticket.price;
@@ -233,8 +238,7 @@ function openEventModal(eventId) {
         amountInput.value = 0;
         amountInput.setAttribute('data-ticket-id', ticket.ticket_type_id);
 
-        amountInput.oninput = () =>
-        {
+        amountInput.oninput = () => {
             const ticketId = amountInput.getAttribute('data-ticket-id');
             const value = parseInt(amountInput.value) || 0;
 
@@ -252,15 +256,16 @@ function openEventModal(eventId) {
         openPurchaseConfirmPage(eventId, currentTicketCart);
     });
 
+    // handle closing modal window
     const hideModalOnEscape = function (e) {
-        if (e.key === 'Escape' || e.target.id === 'modalOverlay')
-        {
+        if (e.key === 'Escape' || e.target.id === 'modalOverlay') {
             document.removeEventListener('keydown', hideModalOnEscape);
             document.removeEventListener('click', hideModalOnEscape);
             eventElement.remove();
         }
     };
 
+    // maake modal window hide on escape or click off
     document.addEventListener('keydown', hideModalOnEscape);
     eventElement.addEventListener('click', hideModalOnEscape);
 
@@ -268,13 +273,22 @@ function openEventModal(eventId) {
 }
 
 function openPurchaseConfirmPage(eventId, tickets) {
+    // ensure there is at least one ticket type
+    if (Object.entries(tickets).length <= 0) {
+        alert("Please add at least one ticket before continuing");
+        return;
+    }
+    
+    // construct params and parse eventId
     const params = new URLSearchParams();
     params.append('eventId', eventId);
     console.log(tickets);
 
+    // add each ticket type and value
     for (const [type, count] of Object.entries(tickets)) {
         params.append(`ticket[${type}]`, count);
     }
 
+    // nav to page with params attached
     navToPage('eventPurchase.html?' + params.toString());
 }

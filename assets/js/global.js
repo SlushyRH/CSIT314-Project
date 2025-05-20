@@ -27,6 +27,26 @@ function initComponent(component, id, callback) {
     }
 }
 
+// ensures the user is logged in
+function isValid() {
+    const userId = localStorage.getItem('user');
+
+    // if not logged in, redirect to login page with a redirect page to current page
+    if (!userId) {
+        navToPage('login.html', window.location);
+    }
+}
+
+function formatEventDate(event) {
+    // get data from event date string in event
+    const [time, date] = event.event_date.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    const [day, month, year] = date.split('/').map(Number);
+
+    // construct into date object
+    return new Date(year, month - 1, day, hours, minutes);
+}
+
 function attachHeaderScripts(hideNav, showSearch) {
     const profileButton = document.getElementById('profileButton');
     const profileDropdown = document.getElementById('profileDropdown');

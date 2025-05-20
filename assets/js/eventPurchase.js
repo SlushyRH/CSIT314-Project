@@ -1,13 +1,5 @@
 const websiteFeeCharge = 2.5;
 
-function isValid() {
-    const userId = localStorage.getItem('user');
-
-    if (!userId) {
-        navToPage('login.html', window.location);
-    }
-}
-
 function getParamData() {
     const params = new URLSearchParams(window.location.search);
 
@@ -29,7 +21,7 @@ function getParamData() {
         }
     }
 
-    // get event and display details along with ticket
+    // get event from id
     const event = getEvent(eventId);
 
     displayEventDetails(event);
@@ -43,14 +35,13 @@ function displayEventDetails(event) {
 }
 
 function displayTicketSummary(event, ticketsIds) {
-    // get template for ticket row
+    // get template for ticket row, and get and clear ticket info table
     const ticketRowTemplate = document.getElementById('ticketRowTemplate');
-
-    // get and clear ticket info table
     const ticketTableBody = document.getElementById('ticketTableBody');
-    ticketTableBody.innerHTML = '';
 
+    ticketTableBody.innerHTML = '';
     let subTotal = 0;
+    const detailedTickets = [];
 
     for (const ticketTypeId in ticketsIds) {
         // get ticket and its amount
@@ -63,9 +54,16 @@ function displayTicketSummary(event, ticketsIds) {
             const row = rowClone.querySelector('tr');
 
             // calculate price for ticket type
-            const price = (ticket.price * amount).toLocaleString('en-AU', {
+            const totalPaid = ticket.price * amount;
+            const price = totalPaid.toLocaleString('en-AU', {
                 style: 'currency',
                 currency: 'AUD'
+            });
+
+            detailedTickets.push({
+                ticketTypeId: parseInt(ticketTypeId),
+                amount,
+                totalPaid
             });
 
             // fill out data
@@ -113,4 +111,37 @@ function displayTicketSummary(event, ticketsIds) {
     // set total amount
     const totalLabel = document.getElementById('totalAmount');
     totalLabel.textContent = totalAmount;
+
+    document.getElementById('confirmPurchaseBtn').onclick = () => {
+        const eventId = event.event_id;
+        const userId = localStorage.getItem('user');
+
+        onPurchaseConfirm(eventId, userId, detailedTickets);
+    };
+}
+
+async function onPurchaseConfirm(eventId, userId, tickets) {
+    const data = {
+        'user_id': userId,
+        'event_id': eventId,
+        'tickets': tickets
+    };
+
+    console.log(data);
+    
+    // send request to api to confirm registration and get registration id
+    const response = await sqlRequest('POST', 'ADD_REGISTRATION', data);
+    console.log(response);
+
+    if (response.status !== 'success')
+        return;
+
+    console.log(response.data);
+    console.log(JSON.parse(response.data));
+    const regId = JSON.parse(response.data)['regId'];
+    
+    const params = new URLSearchParams();
+    params.append("regId", regId);
+
+    navToPage('eventBookingConfirm.html?' + params.toString());
 }
