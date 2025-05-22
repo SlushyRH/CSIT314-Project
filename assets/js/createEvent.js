@@ -121,6 +121,7 @@ function checkDate(event_date) {
         // return a string saying invalid
         return "invalid";
    }
+   return "valid"
 }
 
 // adds event data to database
