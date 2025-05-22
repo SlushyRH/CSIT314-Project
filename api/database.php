@@ -427,13 +427,83 @@ function createEvent($pdo, $data)
             }
         }
 
+        $stmt = $pdo->prepare("
+            SELECT 
+                e.event_id,
+                e.organiser_id,
+                e.title,
+                e.description,
+                e.location,
+                DATE_FORMAT(e.event_date, '%H:%i %d/%m/%Y') AS event_date,
+                e.category_id,
+                ec.name AS category_name,
+                tt.ticket_type_id,
+                tt.name AS ticket_name,
+                tt.price,
+                tt.benefits,
+                tt.quantity_available,
+                tt.tickets_left,
+                price_stats.min_price,
+                price_stats.max_price
+            FROM Events e
+            LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
+            LEFT JOIN TicketTypes tt ON e.event_id = tt.event_id
+            LEFT JOIN (
+                SELECT 
+                    event_id,
+                    MIN(price) AS min_price,
+                    MAX(price) AS max_price
+                FROM TicketTypes
+                GROUP BY event_id
+            ) AS price_stats ON price_stats.event_id = e.event_id
+            WHERE e.event_id = ?
+            ORDER BY tt.price ASC
+        ");
+
+        $stmt->execute([$eventId]);
+        $rawEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rawEvents))
+            send_response('error', 'Event not found after creation.', 404);
+
+        $row = $rawEvents[0];
+
+        $event = [
+            'event_id' => $row['event_id'],
+            'organiser_id' => $row['organiser_id'],
+            'title' => $row['title'],
+            'description' => $row['description'],
+            'location' => $row['location'],
+            'event_date' => $row['event_date'],
+            'category_id' => $row['category_id'],
+            'category_name' => $row['category_name'],
+            'min_price' => $row['min_price'],
+            'max_price' => $row['max_price'],
+            'ticket_types' => []
+        ];
+
+        foreach ($rawEvents as $row)
+        {
+            if (!empty($row['ticket_type_id']))
+            {
+                $event['ticket_types'][] = [
+                    'ticket_type_id' => $row['ticket_type_id'],
+                    'name' => $row['ticket_name'],
+                    'price' => $row['price'],
+                    'benefits' => $row['benefits'],
+                    'quantity_available' => $row['quantity_available'],
+                    'tickets_left' => $row['tickets_left']
+                ];
+            }
+        }
+
         $pdo->commit();
-        send_response('success', 'Event and tickets processed successfully.', 200, json_encode(['event_id' => $eventId]));
+        send_response('success', 'Event and tickets created/updated successfully.', 200, json_encode($event));
     }
     catch (Exception $e)
     {
         $pdo->rollBack();
-        send_response('error', 'Error processing event: ' . $e->getMessage(), 500);
+        send_response('error', 'Error creating/updatingevent: ' . $e->getMessage(), 500);
     }
 }
 
