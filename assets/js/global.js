@@ -191,6 +191,10 @@ function getEvent(eventId) {
     return null;
 }
 
+function addEventToCache(event) {
+    
+}
+
 function getCachedEvents() {
     // check for cached events and load if needed
     const cached = localStorage.getItem("cached_events");

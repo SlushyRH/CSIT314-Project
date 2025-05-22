@@ -17,12 +17,35 @@
                     eventId: -1,
                     title: 'Event Title',
                     description: 'Event Description',
+                    location: 'Event Location',
                     category: 12,
-                    date: ''
+                    date: '16:30 24/09/2025',
+                    tickets: [
+                        {
+                            id: -1,
+                            name: 'Ticket Name 1',
+                            price: '100.00',
+                            benefits: 'Ticket Description 1',
+                            quantity_available: 150,
+                            tickets_left: 139
+                        },
+                        {
+                            id: -1,
+                            name: 'Ticket Name 2',
+                            price: '150.00',
+                            benefits: 'Ticket Description 2',
+                            quantity_available: 50,
+                            tickets_left: 21
+                        },
+                    ]
                 };
 
                 const response = await sqlRequest('POST', 'UPDATE_EVENT', data);
-                console.log(response);
+
+                if (response.status === 'success') {
+                    const event = response.data;
+                    addEventToCache(event);
+                }
             }
 
             async function runTests2() {
