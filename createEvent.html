@@ -28,39 +28,48 @@
 
   <body class="min-h-screen flex flex-col">
     <div id="header"></div>
-      <main class="flex-grow flex justify-center items-center">
-        <div class="w-full max-w-md p-4">
-          <p>Event Creation Form: </p>
+      <main class="flex items-center justify-center h-screen">
+        <div class="bg-(--secondary) shadow-2xl rounded-xl p-8 w-full max-w-md">
+          <h2 id="titleText" class="text-2xl font-semibold text-center mb-6">Event Creation Form: </h2>
+          <form class="space-y-4">
+            <div class="flex items-center space-x-4">
+              <label class="w-28 text-right">Title:</label>
+              <input type="text" id="eventTitle" name="eventTitle" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none">
+              <p id="titleMissing"></p>
+            </div>
 
-          <label>Title:</label>
-          <input type="text" id="eventTitle" name="eventTitle" style="color: black; background-color: #eee;">
-          <p id="titleMissing"></p>
-          <br/>
+            <div class="flex items-center space-x-4">
+              <label class="w-28 text-right">Description:</label>
+              <input type="text" id="description" name="description" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none">
+              <p id="descMissing"></p>
+            </div>
+            <div class="flex items-center space-x-4">
+              <label class="w-28 text-right">Event Type:</label>
+              <select  id="category" name="category" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none">
+                <option value="N/A">No Selection</option>
+                <option value="1">Conference</option>
+                <option value="2">Music Concert</option>
+                <option value="3">Networking Session</option>
+              </select>
+              <p id="catInvalRes"></p>
+            </div>
 
-          <label>Description:</label>
-          <input type="text" id="description" name="description" style="color: black; background-color: #eee;">
-          <p id="descMissing"></p>
-          <br />
+            <div class="flex items-center space-x-4">
+              <label class="w-28 text-right">Location:</label>
+              <input type="text" id="location" name="location" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none">
+              <p id="locMissing"></p>
+            </div>
 
-          <label>Event Type:</label>
-          <select  id="category" name="category" style="color: black; background-color: #eee;">
-            <option value="N/A">No Selection</option>
-            <option value="1">Conference</option>
-            <option value="2">Music Concert</option>
-            <option value="3">Networking Session</option>
-          </select>
-          <p id="catInvalRes"></p>
-          <br />
+            <div class="flex items-center space-x-4">
+              <label class="w-28 text-right">Event Date:</label>
+              <input type="date" id="eventDate" class="border border-(--form-outline) focus:border-(--form-focus-outline) w-full px-4 py-2 rounded-md focus:outline-none">
+              <p id="eventInvalRes"></p>
+            </div>
 
-          <label>Location:</label>
-          <input type="text" id="location" name="location" style="color: black; background-color: #eee;">
-          <p id="locMissing"></p>
-          <br/>
-          <label>Event Date:</label>
-          <input type="date" id="eventDate">
-          <p id="eventInvalRes"></p>
-          <br/>
-          <button onclick="create()" style="color: black; background-color: #eee;">Submit</button>
+            <div class="flex justify-center mt-6 space-x-4">
+              <button type="button" onclick="create()" class="w-1/2 bg-gray-200 cursor-pointer text-gray-800 py-2 rounded-md hover:bg-gray-300 transition-colors">Submit</button>
+            </div>
+          </form>
         </div>
       </main>
     <div id="footer"></div>

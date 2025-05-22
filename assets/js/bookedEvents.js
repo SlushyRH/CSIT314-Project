@@ -3,41 +3,49 @@
 document.addEventListener("DOMContentLoaded", function() {
     getUserEvents();
 });
-
+// function to het user events and converts them from string to dictionary
 async function getUserEvents() {
     //var user_id = localStorage("user_id");
+    // Test user stuff
     const userSearchId = {
         "user_id":2
     };
     console.log(userSearchId);
+    // Gets events booked by the user
     const userResponse = await sqlRequest("POST", "GET_BOOKED_EVENTS", userSearchId);
-
+    // Converts the response from request into the json dictionary contain all events
     let allEvents = userResponse.data; // this being a json object
     console.log(allEvents);
     console.log("Test text");
+    // Converts string to dictionary
     allEvents = JSON.parse(allEvents);
     console.log(allEvents.events);
-
+    // Sends events to be sorted
     GetEvents(allEvents.events);
 }
-
+// Sorts events based on if they are in the future or the past
 function GetEvents(Events){
+    // gets all events a user has booked that are in the past
     let pastEvents = GetPastEvents(Events);
     console.log("Past:");
     console.log(pastEvents);
+    // gets all events a user has booked that are in the future
     let upcomingEvents = GetUpcomingEvents(Events);
     console.log("Future:");
     console.log(upcomingEvents);
     console.log(upcomingEvents[0]);
+    // sorts the upcoming events by their dates in ascending order
     upcomingEvents = orderEventsAscending(upcomingEvents);
     console.log(upcomingEvents);
+    // sorts the upcoming events by their dates in descending order
     pastEvents = orderEventsDescending(pastEvents);
-
+    // displays the upcoming events on webpage
     displayEvents("upcoming",upcomingEvents);
+    // displays the past events on webpage
     displayEvents("PastEvents",pastEvents);
 
 }
-
+// checks events date to determine if they are in the past and are added to past events
 function GetPastEvents(allEvents){
     const Now=getNow();
     const resultArray = [];
@@ -134,7 +142,7 @@ function displayEvents(containerID, events){
     const container = document.getElementById(containerID);
 
     if (!container) {
-        console.warn(`Container with id "${containerId}" not found.`);
+        console.warn(`Container with id "${containerID}" not found.`);
         return;
     }
 
@@ -142,32 +150,38 @@ function displayEvents(containerID, events){
     container.innerHTML = "";
 
     if (events.length === 0) {
-        container.innerHTML = "<p>No events found.</p>";
+        container.innerHTML = "<p class='text-white'>No events found.</p>";
         return;
     }
 
-    const ul = document.createElement("ul");
-
     events.forEach((event, index) => {
-        const li = document.createElement("li");
-        li.textContent = `${event.title} on ${event.event_date}`;
+        const card = document.createElement("div");
 
-        // Add a data attribute to store the event index or ID
-        li.setAttribute("data-index", index);
-        li.style.cursor = "pointer"; // Indicate it's clickable
+        card.className = `
+            bg-[#121e33] text-white p-6 rounded-xl shadow-lg
+            hover:bg-[#1a2a48] transition-all duration-200
+        `;
 
-        // Add click handler
-        li.addEventListener("click", () => {
-            // Store the whole event object in localStorage
+        card.innerHTML = `
+            <h3 class="text-xl font-bold mb-2">${event.title}</h3>
+            <div class="text-sm text-gray-300 flex justify-between mb-2">
+                <span>${event.event_date}</span>
+                <span class="font-semibold">${event.category_name}</span>
+            </div>
+            <p class="text-gray-200">${event.description}</p>
+        `;
+
+        // Make clickable
+        card.setAttribute("data-index", index);
+        card.style.cursor = "pointer";
+
+        card.addEventListener("click", () => {
             localStorage.setItem("selected_event", JSON.stringify(event));
             console.log("Event saved to localStorage:", event);
-
-            // Optional: Redirect to another page
+            // Optional: redirect
             // window.location.href = "event_details.html";
         });
 
-        ul.appendChild(li);
+        container.appendChild(card);
     });
-
-    container.appendChild(ul);
 }
