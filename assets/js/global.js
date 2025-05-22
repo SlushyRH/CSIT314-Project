@@ -192,7 +192,7 @@ function getEvent(eventId) {
 }
 
 function addEventToCache(event) {
-    
+    console.log(event);
 }
 
 function getCachedEvents() {
