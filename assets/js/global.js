@@ -1,15 +1,20 @@
 const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https://mediumslateblue-toad-454408.hostingersite.com/
 
 function initFooter() { initComponent('footer', 'footer'); }
-function initHeader(hideNav = false, hideSearch = false) { initComponent('header', 'header', () => attachHeaderScripts(hideNav, hideSearch)); }
+function initHeader(hideNav = false, hideSearch = false, onLoaded = null) {
+	initComponent('header', 'header', () => {
+		attachHeaderScripts(hideNav, hideSearch);
+        
+		if (onLoaded)
+			onLoaded();
+	});
+}
 
-function initComponent(component, id, callback)
-{
+function initComponent(component, id, callback) {
     // get doc element
     var element = document.getElementById(id);
 
-    if (element != null)
-    {
+    if (element != null) {
         // load component
         fetch(`./assets/components/${component}.html`)
             .then(response => response.text())
@@ -22,7 +27,27 @@ function initComponent(component, id, callback)
     }
 }
 
-function attachHeaderScripts(hideNav, hideSearch) {
+// ensures the user is logged in
+function isValid() {
+    const userId = localStorage.getItem('user');
+
+    // if not logged in, redirect to login page with a redirect page to current page
+    if (!userId) {
+        navToPage('login.html', window.location);
+    }
+}
+
+function formatEventDate(event) {
+    // get data from event date string in event
+    const [time, date] = event.event_date.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    const [day, month, year] = date.split('/').map(Number);
+
+    // construct into date object
+    return new Date(year, month - 1, day, hours, minutes);
+}
+
+function attachHeaderScripts(hideNav, showSearch) {
     const profileButton = document.getElementById('profileButton');
     const profileDropdown = document.getElementById('profileDropdown');
     const hamburger = document.getElementById('hamburger');
@@ -32,8 +57,7 @@ function attachHeaderScripts(hideNav, hideSearch) {
     const searchBar = document.getElementById('searchBar');
     const searchInput = searchBar?.querySelector('input');
     
-    searchIcon?.addEventListener('click', (e) =>
-    {
+    searchIcon?.addEventListener('click', (e) => {
         e.stopPropagation();
         searchBar?.classList.toggle('hidden');
     
@@ -43,14 +67,20 @@ function attachHeaderScripts(hideNav, hideSearch) {
         }
     });
     
-    searchBar?.addEventListener('click', (e) =>
-    {
+    searchBar?.addEventListener('click', (e) => {
         e.stopPropagation();
     });
     
-    window.addEventListener('click', () =>
-    {
+    window.addEventListener('click', () => {
         if (!searchBar?.classList.contains('hidden'))
+        {
+            searchBar.classList.add('hidden');
+        }
+    });
+
+    window.addEventListener('keydown', (e) => 
+    {
+        if (e.key === 'Escape' && !searchBar?.classList.contains('hidden'))
         {
             searchBar.classList.add('hidden');
             if (searchInput)
@@ -59,22 +89,25 @@ function attachHeaderScripts(hideNav, hideSearch) {
             }
         }
     });
-
+    
     const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
     const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
-    const headerSettingsBtn = document.getElementById('headerSettingsBtn');
     const logoutBtn = document.getElementById('headerLogoutBtn');
 
-    if (hideNav)
-    {
+    if (hideNav) {
         document.getElementById('navLinks').classList.add('hidden');
         document.getElementById('mobileNavLinks').classList.add('hidden');
     }
 
-    if (hideSearch)
-        searchIcon.classList.add('hidden');
+    if (showSearch)
+        searchIcon.classList.remove('hidden');
 
+    const user = JSON.parse(localStorage.getItem('user_details'));
     const userId = localStorage.getItem('user');
+
+    if (user) {
+        document.getElementById('profileName').innerText = user.name;
+    }
 
     headerOrgEventsBtn.onclick = function() {
         navToPage('organisedEvents.html');
@@ -84,12 +117,12 @@ function attachHeaderScripts(hideNav, hideSearch) {
         navToPage('bookedEvents.html');
     };
 
-    headerSettingsBtn.onclick = function() {
-        navToPage('settings.html');
-    };
-
     logoutBtn.onclick = function() {
+        // delete uuser data from local storage
         localStorage.removeItem('user');
+        localStorage.removeItem('user_details');
+
+        // redirect to login page
         navToPage('login.html');
     };
     
@@ -131,12 +164,10 @@ function attachHeaderScripts(hideNav, hideSearch) {
     }
 }
 
-function navToPage(page, redirectURL = null)
-{
+function navToPage(page, redirectURL = null) {
     let url = page;
 
-    if (redirectURL)
-    {
+    if (redirectURL) {
         const encodedRedirect = encodeURIComponent(redirectURL);
         url += `?redirect=${encodedRedirect}`;
     }
@@ -144,8 +175,7 @@ function navToPage(page, redirectURL = null)
     window.location.href = url;
 }
 
-function getEvent(eventId)
-{
+function getEvent(eventId) {
     // check for cached events and load if needed
     const cachedEvents = getCachedEvents();
 
@@ -153,8 +183,7 @@ function getEvent(eventId)
         return null;
 
     // find the evvent in the cached events
-    for (const event of cachedEvents)
-    {
+    for (const event of cachedEvents) {
         if (event.event_id == eventId)
             return event;
     }
@@ -162,8 +191,7 @@ function getEvent(eventId)
     return null;
 }
 
-function getCachedEvents()
-{
+function getCachedEvents() {
     // check for cached events and load if needed
     const cached = localStorage.getItem("cached_events");
     
@@ -171,15 +199,29 @@ function getCachedEvents()
         return JSON.parse(cached);
 }
 
+async function forceEventCacheReset() {
+    // get all events again
+    sqlRequest("GET", "ALL_EVENTS").then(() => {
+        const response = getLastResponse();
+
+        // cache events
+        if (response.status == "success") {
+            const events = JSON.parse(response.data);
+            localStorage.setItem("cached_events", JSON.stringify(events));
+        }
+        else {
+            console.error("Failed to fetch events from API:", response.message);
+        }
+    });
+}
+
 let lastSqlResponse = null;
 
-function getLastResponse()
-{
+function getLastResponse() {
     return lastSqlResponse;
 }
 
-async function sqlRequest(method, action, data = null)
-{
+async function sqlRequest(method, action, data = null) {
     // sets url and options
     const url = `${URL}api/database.php?action=${action}`;
     const options = {
@@ -190,23 +232,22 @@ async function sqlRequest(method, action, data = null)
         body: data ? JSON.stringify(data) : null
     };
 
-    try
-    {
+    try {
         // send request to url
         document.body.style.cursor = 'wait';
         const response = await fetch(url, options);
-        lastSqlResponse = response;
 
         // check if response was sent successully
         if (!response.ok)
             throw new Error(`Request failed with status ${response.status}`);
 
-        // return response as json
         document.body.style.cursor = 'default';
-        return await response.json();
+
+        // return response as json
+        lastSqlResponse = await response.json();
+        return lastSqlResponse;
     }
-    catch (error)
-    {
+    catch (error) {
         // throw error
         document.body.style.cursor = 'default';
         throw new Error(error.message || "Network error");

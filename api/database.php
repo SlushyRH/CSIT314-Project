@@ -24,7 +24,8 @@ function send_response($status, $message, $code, $data = null) {
 }
 
 // create all tables in database if needed
-function createTablesIfNeeded($pdo) {
+function createTablesIfNeeded($pdo)
+{
     $createTestTable = "
         CREATE TABLE IF NOT EXISTS Users (
             user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -68,12 +69,10 @@ function createTablesIfNeeded($pdo) {
             registration_id INT PRIMARY KEY AUTO_INCREMENT,
             user_id INT NOT NULL,
             event_id INT NOT NULL,
-            ticket_type_id INT NOT NULL,
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
             FOREIGN KEY (user_id) REFERENCES Users(user_id),
-            FOREIGN KEY (event_id) REFERENCES Events(event_id),
-            FOREIGN KEY (ticket_type_id) REFERENCES TicketTypes(ticket_type_id)
+            FOREIGN KEY (event_id) REFERENCES Events(event_id)
         );
 
         CREATE TABLE IF NOT EXISTS Payments (
@@ -91,6 +90,15 @@ function createTablesIfNeeded($pdo) {
             message TEXT NOT NULL,
             sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS RegistrationTickets (
+            reg_ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+            registration_id INT NOT NULL,
+            ticket_type_id INT NOT NULL,
+            quantity INT NOT NULL,
+            FOREIGN KEY (registration_id) REFERENCES Registrations(registration_id),
+            FOREIGN KEY (ticket_type_id) REFERENCES TicketTypes(ticket_type_id)
         );
     ";
 
@@ -135,14 +143,12 @@ function userSignUp($pdo, $data)
         ]);
 
         $stmt = $pdo->prepare("
-            SELECT user_id, password FROM Users WHERE email = :email
+            SELECT * FROM Users WHERE email = :email
         ");
         $stmt->execute(['email' => $data['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        send_response('success', 'User logged in successfully.', 200, [
-            'user_id' => $user['user_id']
-        ]);
+        send_response('success', 'User logged in successfully.', 200, json_encode($user));
     }
     catch (Exception $e)
     {
@@ -163,7 +169,7 @@ function userLogIn($pdo, $data)
     try
     {
         $stmt = $pdo->prepare("
-            SELECT user_id, password FROM Users WHERE email = :email
+            SELECT * FROM Users WHERE email = :email
         ");
         $stmt->execute(['email' => $data['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -178,9 +184,7 @@ function userLogIn($pdo, $data)
             send_response('error', 'Incorrect password.', 401);
         }
 
-        send_response('success', 'User logged in successfully.', 200, [
-            'user_id' => $user['user_id']
-        ]);
+        send_response('success', 'User logged in successfully.', 200, json_encode($user));
     }
     catch (Exception $e)
     {
@@ -309,35 +313,6 @@ function getAllEvents($pdo)
     }
 }
 
-function getFilterData($pdo)
-{
-    try
-    {
-        $stmt = $pdo->prepare("
-            SELECT
-                JSON_ARRAYAGG(DISTINCT e.location) AS locations,
-                JSON_ARRAYAGG(DISTINCT c.name) AS categories
-            FROM Events e
-            JOIN EventCategories c ON e.category_id = c.category_id
-            WHERE e.location IS NOT NULL AND e.location != ''
-        ");
-
-        $stmt->execute();
-        $results = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        $filterData = [
-            'locations' => json_decode($results['locations'], true),
-            'categories' => json_decode($results['categories'], true)
-        ];
-
-        send_response('success', 'Filter data fetched successfully.', 200, json_encode($filterData));
-    }
-    catch (Exception $e)
-    {
-        send_response('error', 'Could not fetch filter data. Error: ' . $e->getMessage(), 500);
-    }
-}
-
 function createEvent($pdo, $data)
 {
     $required = ['title', 'user_id', 'description', 'category_id', 'location', 'event_date'];
@@ -374,6 +349,49 @@ function createEvent($pdo, $data)
     }
 }
 
+function updateEventDetails($pdo, $data)
+{
+    try
+    {
+        $date = DateTime::createFromFormat('H:i d/m/Y', $data['event_date']);
+
+        if (!$date)
+        {
+            send_response('error', 'Invalid date format', 400);
+        }
+
+        $formattedDate = $date->format('Y-m-d H:i:s');
+
+        $stmt = $pdo->prepare("
+            UPDATE Events
+            SET
+                organiser_id = :organiser_id,
+                title = :title,
+                description = :description,
+                category_id = :category_id,
+                location = :location,
+                event_date = :event_date
+            WHERE event_id = :event_id
+        ");
+
+        $stmt->execute([
+            'organiser_id' => $data['organiser_id'],
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'category_id' => $data['category_id'],
+            'location' => $data['location'],
+            'event_date' => $formattedDate,
+            'event_id' => $data['event_id']
+        ]);
+
+        send_response('success', 'Successfully updated event details', 200);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Could not update event details: ' . $e->getMessage(), 500);
+    }
+}
+
 function getBookedEvents($pdo, $data)
 {
     $required = ['user_id'];
@@ -381,7 +399,9 @@ function getBookedEvents($pdo, $data)
     foreach ($required as $field)
     {
         if (empty($data[$field]))
+        {
             send_response('error', $field . ' is required!', 400);
+        }
     }
 
     $userId = $data['user_id'];
@@ -390,33 +410,187 @@ function getBookedEvents($pdo, $data)
     {
         $stmt = $pdo->prepare("
             SELECT
-                Events.event_id,
-                Events.title,
-                Events.description,
-                Events.location,
-                Events.event_date,
-                EventCategories.name as category_name,
-                TicketTypes.name as ticket_type,
-                TicketTypes.price,
-                Registrations.status,
-                Payments.payment_status
-            FROM Registrations
-            JOIN Events on Registrations.event_id = Events.event_id
-            JOIN TicketTypes on Registrations.ticket_type_id = TicketTypes.ticket_type_id
-            LEFT JOIN Payments ON Payments.registration_id = Registrations.registration_id
-            LEFT JOIN EventCategories ON Events.category_id = EventCategories.category_id
-            WHERE Registrations.user_id = :user_id
+                r.registration_id,
+                e.event_id,
+                e.title,
+                e.description,
+                e.location,
+                e.event_date,
+                ec.name AS category_name,
+                r.status AS registration_status,
+                p.payment_status
+            FROM Registrations r
+            JOIN Events e ON r.event_id = e.event_id
+            LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
+            LEFT JOIN Payments p ON r.registration_id = p.registration_id
+            WHERE r.user_id = :user_id
         ");
 
         $stmt->execute(['user_id' => $userId]);
-        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $registrations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        //send_response('success', 'Successfully got all booked events', 200, $events);
+        $events = [];
+
+        foreach ($registrations as $registration)
+        {
+            $registrationId = $registration['registration_id'];
+
+            $ticketStmt = $pdo->prepare("
+                SELECT
+                    tt.name AS ticket_type,
+                    tt.price,
+                    rt.quantity
+                FROM RegistrationTickets rt
+                JOIN TicketTypes tt ON rt.ticket_type_id = tt.ticket_type_id
+                WHERE rt.registration_id = :registration_id
+            ");
+
+            $ticketStmt->execute(['registration_id' => $registrationId]);
+            $tickets = $ticketStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $events[] = [
+                'registration_id' => $registration['registration_id'],
+                'event_id' => $registration['event_id'],
+                'title' => $registration['title'],
+                'description' => $registration['description'],
+                'location' => $registration['location'],
+                'event_date' => $registration['event_date'],
+                'category_name' => $registration['category_name'],
+                'registration_status' => $registration['registration_status'],
+                'payment_status' => $registration['payment_status'],
+                'tickets' => $tickets
+            ];
+        }
+
         send_response('success', 'Successfully got all booked events', 200, json_encode(['events' => $events]));
     }
     catch (Exception $e)
     {
         send_response('error', 'Could not get user booked events. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function addRegistrationInfo($pdo, $data)
+{
+    $required = ['user_id', 'event_id', 'tickets', 'total_payment'];
+
+    foreach ($required as $field)
+    {
+        if (empty($data[$field]))
+        {
+            send_response('error', $field . ' is required!', 400);
+        }
+    }
+
+    if (!is_array($data['tickets']) || count($data['tickets']) == 0)
+    {
+        send_response('error', 'At least one ticket must be added!', 400);
+    }
+
+    $userId = $data['user_id'];
+    $eventId = $data['event_id'];
+    $tickets = $data['tickets'];
+    $totalPayment = $data['total_payment'];
+
+    try
+    {
+        $stmt = $pdo->prepare("
+            INSERT INTO Registrations (user_id, event_id)
+            VALUES (:user_id, :event_id)
+        ");
+
+        $stmt->execute([
+            'user_id' => $userId,
+            'event_id' => $eventId,
+        ]);
+
+        $registrationId = $pdo->lastInsertId();
+
+        foreach ($tickets as $ticket)
+        {
+            if (empty($ticket['ticketTypeId']) || !isset($ticket['amount']))
+                continue;
+
+            $ticketTypeId = $ticket['ticketTypeId'];
+            $amount = $ticket['amount'];
+
+            $stmt = $pdo->prepare("
+                INSERT INTO RegistrationTickets (registration_id, ticket_type_id, quantity)
+                VALUES (:registration_id, :ticket_type_id, :quantity)
+            ");
+
+            $stmt->execute([
+                'registration_id' => $registrationId,
+                'ticket_type_id' => $ticketTypeId,
+                'quantity' => $amount
+            ]);
+        }
+
+        $stmt = $pdo->prepare("
+            INSERT INTO Payments (registration_id, amount, payment_status)
+            VALUES (:registration_id, :amount, :status)
+        ");
+
+        $stmt->execute([
+            'registration_id' => $registrationId,
+            'amount' => $totalPayment,
+            'status' => 'completed',
+        ]);
+
+        send_response('success', 'Registration completed successfully!', 200, json_encode(['reg_id' => $registrationId]));
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to register. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function getRegistrationInfo($pdo, $data)
+{
+    if (empty($data['regId']))
+        send_response('error', 'regId is required!', 400);
+
+    $regId = $data['regId'];
+
+    try
+    {
+        $stmt = $pdo->prepare("
+            SELECT 
+                r.event_id,
+                rt.ticket_type_id,
+                rt.quantity
+            FROM Registrations r
+            LEFT JOIN RegistrationTickets rt ON r.registration_id = rt.registration_id
+            WHERE r.registration_id = :regId
+        ");
+
+        $stmt->execute(['regId' => $regId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rows))
+            send_response('error', 'Registration not found or has no tickets.', 404);
+
+        $eventId = $rows[0]['event_id'];
+        $tickets = [];
+
+        foreach ($rows as $row)
+        {
+            $tickets[] = [
+                'ticket_type_id' => $row['ticket_type_id'],
+                'quantity' => $row['quantity']
+            ];
+        }
+
+        $result = [
+            'event_id' => $eventId,
+            'tickets' => $tickets
+        ];
+
+        send_response('success', 'Registration info fetched.', 200, $result);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to get registration info. Error: ' . $e->getMessage(), 500);
     }
 }
 
@@ -452,13 +626,17 @@ try {
             createEvent($pdo, $data);
         } else if ($action === "GET_BOOKED_EVENTS") {
             getBookedEvents($pdo, $data);
+        } else if ($action === "UPDATE_EVENT") {
+            updateEventDetails($pdo, $data);
+        } else if ($action === "ADD_REGISTRATION") {
+            addRegistrationInfo($pdo, $data);
+        } else if ($action === "GET_REGISTRATION") {
+            getRegistrationInfo($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
             getAllEvents($pdo);
-        } else if ($action === "GET_FILTER_DATA") {
-            getFilterData($pdo);
-        } 
+        }
     }
 
     send_response('error', 'Invalid request method.', 405);

@@ -75,6 +75,9 @@ async function submitBtn(event)
             email.value,
             password.value
         );
+        
+        // switch to login page so user can log in
+        toggleLogInType();
     }
     else
     {
@@ -155,9 +158,9 @@ async function login(email, password)
             return;
         }
 
-        // log userID to local storage
-        const userId = response.data.user_id;
-        localStorage.setItem("user", userId);
+        // log userID to local storage        
+        localStorage.setItem("user", JSON.parse(response.data).user_id);
+        localStorage.setItem("user_details", response.data);
 
         // naviaget to index unless there was aa url give to direcct to
         if (redirectUrl)
@@ -193,9 +196,6 @@ async function signup(name, dob, phoneNumber, email, password)
             console.error("Signup Failed:", response.message);
             return;
         }
-        
-        // switch to login page so user can log in
-        toggleLogInType();
     }
     catch (error)
     {

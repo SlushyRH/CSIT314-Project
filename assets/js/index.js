@@ -1,8 +1,33 @@
 let eventContainer;
 let eventTemplate;
 let eventModalWindowTemplate;
+let currentSearchValue;
 
-let currentTicketCart;
+function initSearchBar() {
+    const searchBarText = document.getElementById('searchBarText');
+
+    searchBarText.addEventListener('input', handleSearchBarInput);
+}
+
+function handleSearchBarInput(e) {
+    const searchValue = e.target.value;
+    const cachedEvents = getCachedEvents();
+
+    // render all if search bar is empty
+    if (!searchValue) {
+        renderEvents(cachedEvents);
+        return;
+    }
+
+    currentSearchValue = searchValue.toLowerCase();
+
+    // filter events through title and search bar
+    let filteredEvents = cachedEvents.filter(event => {
+        return event.title.toLowerCase().includes(searchValue.toLowerCase());
+    });
+
+    renderEvents(filteredEvents);
+}
 
 async function initEvents() {
     eventContainer = document.getElementById('eventList');
@@ -38,52 +63,6 @@ async function initEvents() {
     catch (error) {
         console.error("Failed to initialize events:", error);
     }
-
-    initFilterData();
-}
-
-async function initFilterData() {
-    try {
-        const filterData = await getCachedFilterData();
-
-        const locations = filterData.locations;
-        const categories = filterData.categories;
-
-        const locationSelect = document.getElementById("filterLocation");
-        const categorySelect = document.getElementById("filterCategory");
-
-        const resetBtn = document.getElementById("filterClearBtn");
-        const applyBtn = document.getElementById("filterSubmitBtn");
-
-        resetBtn.onclick = function () {
-            applyFilterOnEvents(true);
-        };
-
-        applyBtn.onclick = function () {
-            applyFilterOnEvents();
-        };
-
-        locationSelect.innerHTML = "";
-        categorySelect.innerHTML = "";
-
-        locationSelect.appendChild(new Option("Select Location", ""));
-        categorySelect.appendChild(new Option("Select Category", ""));
-
-        locations.forEach(location => {
-            locationSelect.appendChild(new Option(location, location));
-        });
-
-        // populate categories
-        categories.forEach(category => {
-            categorySelect.appendChild(new Option(category, category));
-        });
-        console.log("Loaded the values in category");
-
-        applyFilterOnEvents();
-    }
-    catch (error) {
-        console.error("Failed to initialize filter daata:", error);
-    }
 }
 
 async function getCachedFilterData() {
@@ -114,6 +93,7 @@ function applyFilterOnEvents(reset = false) {
         const cachedEvents = getCachedEvents();
 
         if (reset) {
+            document.getElementById('searchBarText').value = '';
             renderEvents(cachedEvents);
             return;
         }
@@ -141,14 +121,18 @@ function applyFilterOnEvents(reset = false) {
             const dateMatch = startDateMatch && endDateMatch;
 
             // check for category and location match
-            const categoryMatch = !categoryInput || event.category_name === categoryInput;
-            const locationMatch = !locationInput || event.location === locationInput;
+            const categoryMatch = !categoryInput || event.category_name.includes(categoryInput);
+            const locationMatch = !locationInput || event.location.includes(locationInput);
 
             // ensure the min/maax price of at least 1 ticket is within the price range
-            const minPriceMatch = isNaN(minPriceInput) || event.min_price >= minPriceInput;
-            const maxPriceMatch = isNaN(maxPriceInput) || event.max_price <= maxPriceInput;
+            const priceMatch =
+                (isNaN(minPriceInput) && isNaN(maxPriceInput)) ||
+                (isNaN(minPriceInput) && event.min_price <= maxPriceInput) ||
+                (isNaN(maxPriceInput) && event.max_price >= minPriceInput) ||
+                (event.max_price >= minPriceInput && event.min_price <= maxPriceInput);
 
-            return dateMatch && categoryMatch && locationMatch && minPriceMatch && maxPriceMatch;
+            return dateMatch && categoryMatch && locationMatch && priceMatch &&
+                (!currentSearchValue || event.title.toLowerCase().includes(currentSearchValue.toLowerCase()));
         });
 
         renderEvents(filteredEvents);
@@ -161,6 +145,9 @@ function applyFilterOnEvents(reset = false) {
 function getUrlFilterQuery() {
     // get url query
     const query = window.location.search.substring(1);
+
+    if (!query)
+        return;
 
     if (query === "Upcoming") {
         // get the date today
@@ -178,6 +165,8 @@ function getUrlFilterQuery() {
         document.getElementById("filterCategory").value = query;
         console.log("Set the value in category");
     }
+
+    history.replaceState(null, "", window.location.pathname);
 }
 
 function renderEvents(events) {
@@ -186,70 +175,120 @@ function renderEvents(events) {
 
     // go through each event and render it
     events.forEach(event => {
-        // create template and replace the placeholders with the event data
+        // format current date to check if event is in past or not
+        if (formatEventDate(event) < Date.now())
+            return;
+
+        // create event visual from event template
         const eventClone = eventTemplate.content.cloneNode(true);
         const eventElement = eventClone.firstElementChild;
 
-        // replace data wiht the actual event date
+        const maxLength = 75;
+        let description = event.description;
+
+        // limit description length
+        if (description.length > maxLength) {
+            description = description.slice(0, maxLength) + '...';
+        }
+
+        // set data wiht the actual event date
         eventElement.querySelector('[data-title]').textContent = event.title;
         eventElement.querySelector('[data-date]').textContent = event.event_date;
         eventElement.querySelector('[data-category]').textContent = event.category_name;
-        eventElement.querySelector('[data-description]').textContent = event.description;
+        eventElement.querySelector('[data-description]').textContent = description;
 
         // open modal window on click
-        eventElement.onclick = function() {
+        eventElement.onclick = function () {
             openEventModal(event.event_id);
         };
-        
+
         eventContainer.appendChild(eventElement);
     });
 }
 
 function openEventModal(eventId) {
-    // get event and reset cart
     const event = getEvent(eventId);
-    currentTicketCart = null;
+    let currentTicketCart = {};
 
-    // get event modal window template
     const eventClone = eventModalWindowTemplate.content.cloneNode(true);
     const eventElement = eventClone.firstElementChild;
+    const purchaseBtn = eventElement.querySelector('#purchaseBtn');
 
-    // replace ddata with actual event date
+    // set data in modal window
     eventElement.querySelector('[data-title]').textContent = event.title;
     eventElement.querySelector('[data-date]').textContent = event.event_date;
     eventElement.querySelector('[data-description]').textContent = event.description;
     eventElement.querySelector('[data-location]').textContent = event.location;
 
-    // reset ticket options
-    const ticketSelect = eventElement.querySelector('#ticketSelect');
-    ticketSelect.innerHTML = '';
+    const tableBody = eventElement.querySelector('#ticketTableBody');
+    const rowTemplate = eventElement.querySelector('#ticketRowTemplate');
 
-    // append all ticket options
+    tableBody.innerHTML = '';
+
     event.ticket_types.forEach(ticket => {
-        ticketSelect.appendChild(new Option(ticket.name, ticket.ticket_type_id));
+        const rowClone = rowTemplate.content.cloneNode(true);
+        const row = rowClone.querySelector('tr');
+
+        // set data in ticket row
+        row.querySelector('[data-name]').textContent = ticket.name;
+        row.querySelector('[data-description]').textContent = ticket.benefits;
+        row.querySelector('[data-price]').textContent = ticket.price;
+
+        const amountInput = row.querySelector('.ticket-amount-input');
+        amountInput.value = 0;
+        amountInput.setAttribute('data-ticket-id', ticket.ticket_type_id);
+
+        amountInput.oninput = () => {
+            const ticketId = amountInput.getAttribute('data-ticket-id');
+            const value = parseInt(amountInput.value) || 0;
+
+            if (value > 0) {
+                currentTicketCart[ticketId] = value;
+            } else {
+                delete currentTicketCart[ticketId];
+            }
+        };
+
+        tableBody.appendChild(row);
     });
 
-    const cartBtn = eventElement.querySelector('#addToCartBtn');
-    cartBtn.onclick = addTicketToCart(event);
+    purchaseBtn.addEventListener('click', (e) => {
+        openPurchaseConfirmPage(eventId, currentTicketCart);
+    });
 
-    // make internal function so clicking background or clicking escape closes modal window
-    const hideModalOnEscape = function(e) {
+    // handle closing modal window
+    const hideModalOnEscape = function (e) {
         if (e.key === 'Escape' || e.target.id === 'modalOverlay') {
-            // remove event listeners
             document.removeEventListener('keydown', hideModalOnEscape);
             document.removeEventListener('click', hideModalOnEscape);
-
             eventElement.remove();
         }
-    }
+    };
 
-    // add hide function to the events
+    // maake modal window hide on escape or click off
     document.addEventListener('keydown', hideModalOnEscape);
     eventElement.addEventListener('click', hideModalOnEscape);
 
     document.body.appendChild(eventElement);
 }
 
-function addTicketToCart(event) {
-    alert(event.event_id);
+function openPurchaseConfirmPage(eventId, tickets) {
+    // ensure there is at least one ticket type
+    if (Object.entries(tickets).length <= 0) {
+        alert("Please add at least one ticket before continuing");
+        return;
+    }
+    
+    // construct params and parse eventId
+    const params = new URLSearchParams();
+    params.append('eventId', eventId);
+    console.log(tickets);
+
+    // add each ticket type and value
+    for (const [type, count] of Object.entries(tickets)) {
+        params.append(`ticket[${type}]`, count);
+    }
+
+    // nav to page with params attached
+    navToPage('eventPurchase.html?' + params.toString());
 }
