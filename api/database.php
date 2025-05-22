@@ -594,6 +594,26 @@ function getRegistrationInfo($pdo, $data)
     }
 }
 
+function sendNotification($pdo, $data)
+{
+    // this function should send notification to all users attending event
+}
+
+function getEventAdminDetails($pdo, $data)
+{
+    // get data needed to be shown in the event admin panel related to an event
+
+    // total tickets sold
+    // total money made
+    // total attendance
+    // all users registered to this event
+}
+
+function updateUserAttendance($pdo, $data)
+{
+    
+}
+
 try {
     // establish connection to sql database
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [

@@ -12,6 +12,20 @@
 
         <script>
             async function runTests() {
+                const data = {
+                    userId: 12,
+                    eventId: -1,
+                    title: 'Event Title',
+                    description: 'Event Description',
+                    category: 12,
+                    date: ''
+                };
+
+                const response = await sqlRequest('POST', 'UPDATE_EVENT', data);
+                console.log(response);
+            }
+
+            async function runTests2() {
                 await signup('Ava Richardson', '2000-03-24', '0482 119 382', 'avaRich2000@gmail.com', 'password123');
                 await signup('Marcus Bennett', '1987-11-03', '0456 203 190', 'mbennett87@gmail.com', 'marcus87');
                 await signup('Chloe Nguyen', '1998-01-22', '0479 448 200', 'QueenChloe98@gmail.com', 'chloeng98');

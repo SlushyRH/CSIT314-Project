@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function() {
     RetrieveFromLocalStorage();
 });
 
+// 
+
 function RetrieveFromLocalStorage(){
     const event = localStorage.getItem("Selected_event");
 
@@ -16,11 +18,7 @@ function RetrieveFromLocalStorage(){
 }
 
 function CatagoryInterpreter(catagoryID){
-    if (catagoryID == ) {
-
-    } else if () {
-
-    }
+    
 }
 
 
