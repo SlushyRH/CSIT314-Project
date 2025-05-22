@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Login Tests</title>
+        <title>Data Setup</title>
         
         <link rel="stylesheet" href="/assets/css/main.css">
         
@@ -11,6 +11,13 @@
 
         <script>
             async function setup() {
+                await signup('FIFA', '1958-09-07', '0202 234 114', 'football@fifa.com', 'AllWeWantIsMoney');
+                await signup('John Doe', '2000-01-01', '0423 144 923', 'johndoe@gmail.com', 'johndoe');
+                await signup('Jim Jones', '2010-01-15', '123 4245 233', 'jimjones@gmail.com', 'JimJonesPassword');
+                await signup('Harry Ape', '2012-04-25', '023 2222 139', 'harryApe888@gmail.com', 'HarryTheApe');
+                await signup('Heisenberg', '1958-09-07', '0103 923 877', 'walterwhite@outlook.com', 'Breaking@Bad');
+                await signup('William Zhao', '1991-03-30', '0435 884 920', 'wZhao91@outlook.com', 'willz91');
+                await signup('Isabella Martin', '1996-08-23', '0451 673 288', 'izzymartin96@outlook.com', 'bella96');        
                 await signup('Ava Richardson', '2000-03-24', '0482 119 382', 'avaRich2000@gmail.com', 'password123');
                 await signup('Marcus Bennett', '1987-11-03', '0456 203 190', 'mbennett87@gmail.com', 'marcus87');
                 await signup('Chloe Nguyen', '1998-01-22', '0479 448 200', 'QueenChloe98@gmail.com', 'chloeng98');
@@ -19,8 +26,6 @@
                 await signup('Lucas Patel', '1992-04-18', '0418 764 111', 'lucas.patel92@gmail.com', 'lucas92');
                 await signup('Grace Thompson', '1995-12-05', '0499 281 753', 'graceQueen95@yahoo.com', 'grace95');
                 await signup('Noah Murphy', '1988-02-17', '0402 597 640', 'nmurphy88@outlook.com', 'noah888');
-                await signup('Isabella Martin', '1996-08-23', '0451 673 288', 'izzymartin96@outlook.com', 'bella96');
-                await signup('William Zhao', '1991-03-30', '0435 884 920', 'wZhao91@outlook.com', 'willz91');
             }
 
             async function signup(name, dob, phoneNumber, email, password) {
@@ -40,15 +45,9 @@
     <body class="min-h-screen flex flex-col">
 
         <main class="flex-grow flex flex-col gap-10 items-center justify-center">
-            <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer px-6 py-3 rounded-lg" onclick="resetTestOutcome(); runTests();">
-                Run Tests
+            <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer px-6 py-3 rounded-lg" onclick="setup();">
+                Run Setup
             </button>
-            <p class="text-center">
-                <b>Test Outcome</b>
-                <span id="testOutcome">
-                    <!-- test outcome is written here -->
-                </span>
-            </p>
         </main>
     </body>
 </html>
