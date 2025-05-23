@@ -8,7 +8,7 @@ async function getUserEvents() {
     //var user_id = localStorage("user_id");
     // Test user stuff
     const userSearchId = {
-        "user_id":2
+        "user_id":1
     };
     console.log(userSearchId);
     // Gets events booked by the user
@@ -176,10 +176,10 @@ function displayEvents(containerID, events){
         card.style.cursor = "pointer";
 
         card.addEventListener("click", () => {
-            localStorage.setItem("selected_event", JSON.stringify(event));
-            console.log("Event saved to localStorage:", event);
-            // Optional: redirect
-            // window.location.href = "event_details.html";
+            const params = new URLSearchParams();
+            params.set("regId", event.registration_id);
+
+            window.location.href = 'eventBookingConfirm.html?' + params.toString();
         });
 
         container.appendChild(card);
