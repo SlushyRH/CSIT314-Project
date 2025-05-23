@@ -712,22 +712,110 @@ function getRegistrationInfo($pdo, $data)
 
 function sendNotification($pdo, $data)
 {
-    // this function should send notification to all users attending event
+    if (empty($data['msg']))
+        send_response('error', 'Notification message is required!', 400);
+
+    if (empty($data['users']) || !is_array($data['users']))
+        send_response('error', 'Users array is empty!', 400);
+
+    $message = $data['msg'];
+    $userIds = $data['users'];
+
+    try
+    {
+        // inserto new notifications
+        $stmt = $pdo->prepare("
+            INSERT INTO Notifications (user_id, message)
+            VALUES (:user_id, :message)
+        ");
+
+        // execute notifications for each user
+        foreach ($userIds as $userId)
+        {
+            $stmt->execute([
+                'user_id' => $userId,
+                'message' => $message
+            ]);
+        }
+
+        send_response('success', 'Notifications sent successfully.', 200);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to send notifications. Error: ' . $e->getMessage(), 500);
+    }
 }
 
 function getEventAdminDetails($pdo, $data)
 {
-    // get data needed to be shown in the event admin panel related to an event
+    if (empty($data['eventId']))
+        send_response('error', 'eventId is required!', 400);
 
-    // total tickets sold
-    // total money made
-    // total attendance
-    // all users registered to this event
+    $eventId = $data['eventId'];
+
+    try
+    {
+        // get total tickets sold and revenue
+        $stmt = $pdo->prepare("
+            SELECT 
+                SUM(rt.quantity) AS total_tickets_sold,
+                SUM(rt.quantity * tt.price) AS total_revenue
+            FROM RegistrationTickets rt
+            JOIN TicketTypes tt ON rt.ticket_type_id = tt.ticket_type_id
+            JOIN Registrations r ON rt.registration_id = r.registration_id
+            WHERE r.event_id = :eventId
+        ");
+
+        $stmt->execute(['eventId' => $eventId]);
+        $salesData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // get total attendance
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) AS attendance_count
+            FROM Registrations
+            WHERE event_id = :eventId AND status = 'approved'
+        ");
+
+        $stmt->execute(['eventId' => $eventId]);
+        $attendanceData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // get all registered users
+        $stmt = $pdo->prepare("
+            SELECT 
+                u.user_id,
+                u.name,
+                u.email,
+                r.registration_id,
+                r.status,
+                r.registration_date
+            FROM Registrations r
+            JOIN Users u ON r.user_id = u.user_id
+            WHERE r.event_id = :eventId
+        ");
+
+        $stmt->execute(['eventId' => $eventId]);
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // get results as data structure
+        $result = [
+            'total_tickets_sold' => (int) $salesData['total_tickets_sold'],
+            'total_revenue' => (float) $salesData['total_revenue'],
+            'attendance_count' => (int) $attendanceData['attendance_count'],
+            'registered_users' => $users
+        ];
+
+        send_response('success', 'Event admin details fetched successfully!', 200, json_encode($result));
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to get event admin details. Error: ' . $e->getMessage(), 500);
+    }
 }
 
-function updateUserAttendance($pdo, $data)
+function refundUser($pdo, $data)
 {
-    
+    // change user attendance
+    // refund user
 }
 
 try {
