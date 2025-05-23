@@ -9,6 +9,204 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("eventDate").setAttribute("min", minDate);
 });
 
+let ticketCounter = 0;
+
+// Function to create ticket type input fields
+function createTicketInput() {
+    const ticketDiv = document.createElement('div');
+    ticketDiv.className = 'p-4 border border-(--form-outline) rounded-md';
+    ticketDiv.innerHTML = `
+        <div class="space-y-2">
+        <div class="flex items-center space-x-2">
+            <input type="text" placeholder="Ticket Name" class="ticket-name border border-(--form-outline) px-2 py-1 rounded flex-1">
+            <input type="number" placeholder="Price" class="ticket-price border border-(--form-outline) px-2 py-1 rounded w-24">
+            <input type="number" placeholder="Quantity" class="ticket-quantity border border-(--form-outline) px-2 py-1 rounded w-24">
+            <button type="button" class="remove-ticket bg-red-500 text-white px-2 py-1 rounded">×</button>
+        </div>
+        <textarea placeholder="Ticket Benefits/Description" class="ticket-benefits border border-(--form-outline) px-2 py-1 rounded w-full"></textarea>
+        <p class="ticket-error text-red-500 text-xs italic"></p>
+        </div>
+    `;
+    
+    const ticketContainer = document.getElementById('ticketContainer');
+    ticketContainer.appendChild(ticketDiv);
+    
+    const removeBtn = ticketDiv.querySelector('.remove-ticket');
+    removeBtn.addEventListener('click', () => ticketDiv.remove());
+
+    ticketCounter++;
+}
+
+// Function to get event data from cache if updating
+function loadEventData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('eventId');
+
+    if (eventId) {
+        const events = getCachedEvents();
+        const event = events.find(e => e.event_id === parseInt(eventId));
+
+        if (event) {
+            document.getElementById('titleText').textContent = 'Update Event';
+            document.getElementById('submitBtn').textContent = 'Update Event';
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('description').value = event.description;
+            document.getElementById('category').value = event.category;
+            document.getElementById('location').value = event.location;
+            
+            // Convert date format from "HH:mm DD/MM/YYYY" to "YYYY-MM-DDTHH:mm"
+            const [time, date] = event.date.split(' ');
+            const [day, month, year] = date.split('/');
+            document.getElementById('eventDate').value = `${year}-${month}-${day}T${time}`;
+
+            // Load tickets
+            if (event.tickets) {
+                event.tickets.forEach(ticket => {
+                    createTicketInput();
+                    const lastTicket = document.getElementById('ticketContainer').lastElementChild;
+                    lastTicket.querySelector('.ticket-name').value = ticket.name;
+                    lastTicket.querySelector('.ticket-price').value = ticket.price;
+                    lastTicket.querySelector('.ticket-quantity').value = ticket.quantity_available;
+                    lastTicket.querySelector('.ticket-benefits').value = ticket.benefits;
+                });
+            }
+        }
+    }
+}
+
+// Handle form submission
+async function handleSubmit(e) {
+    e.preventDefault();
+    
+    // Reset error messages
+    document.querySelectorAll('.text-red-500').forEach(el => el.textContent = '');
+    
+    let isValid = validateForm();
+    if (!isValid) return;
+
+    const data = collectFormData();
+    
+    try {
+        const response = await sqlRequest('POST', 'CREATE_EVENT', data);
+        
+        if (response.status === 'success') {
+            addEventToCache(response.data);
+            window.location.href = 'organisedEvents.html';
+        } else {
+            alert('Error: ' + response.message);
+        }
+    } catch (error) {
+        alert('Error creating/updating event: ' + error.message);
+    }
+}
+
+function validateForm() {
+    let isValid = true;
+    
+    if (!document.getElementById('eventTitle').value.trim()) {
+        document.getElementById('titleError').textContent = 'Title is required';
+        isValid = false;
+    }
+
+    if (!document.getElementById('description').value.trim()) {
+        document.getElementById('descError').textContent = 'Description is required';
+        isValid = false;
+    }
+
+    if (!document.getElementById('location').value.trim()) {
+        document.getElementById('locationError').textContent = 'Location is required';
+        isValid = false;
+    }
+
+    const eventDate = document.getElementById('eventDate');
+    if (!eventDate.value) {
+        document.getElementById('dateError').textContent = 'Date is required';
+        isValid = false;
+    } else {
+        const selectedDate = new Date(eventDate.value);
+        const now = new Date();
+        if (selectedDate < now) {
+            document.getElementById('dateError').textContent = 'Date must be in the future';
+            isValid = false;
+        }
+    }
+
+    // Validate tickets
+    const ticketContainer = document.getElementById('ticketContainer');
+    const ticketDivs = ticketContainer.children;
+    if (ticketDivs.length === 0) {
+        isValid = false;
+        alert('At least one ticket type is required');
+    }
+
+    for (let ticketDiv of ticketDivs) {
+        const name = ticketDiv.querySelector('.ticket-name').value;
+        const price = ticketDiv.querySelector('.ticket-price').value;
+        const quantity = ticketDiv.querySelector('.ticket-quantity').value;
+        const benefits = ticketDiv.querySelector('.ticket-benefits').value;
+        const errorElement = ticketDiv.querySelector('.ticket-error');
+
+        if (!name || !price || !quantity || !benefits) {
+            errorElement.textContent = 'All ticket fields are required';
+            isValid = false;
+        } else if (price <= 0) {
+            errorElement.textContent = 'Price must be greater than 0';
+            isValid = false;
+        } else if (quantity <= 0) {
+            errorElement.textContent = 'Quantity must be greater than 0';
+            isValid = false;
+        }
+    }
+
+    return isValid;
+}
+
+function collectFormData() {
+    const eventDate = document.getElementById('eventDate');
+    const dateObj = new Date(eventDate.value);
+    const formattedDate = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')} ${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
+
+    const tickets = [];
+    const ticketDivs = document.getElementById('ticketContainer').children;
+    for (let ticketDiv of ticketDivs) {
+        const quantity = ticketDiv.querySelector('.ticket-quantity').value;
+        tickets.push({
+            id: -1, // New ticket
+            name: ticketDiv.querySelector('.ticket-name').value,
+            price: ticketDiv.querySelector('.ticket-price').value,
+            benefits: ticketDiv.querySelector('.ticket-benefits').value,
+            quantity_available: quantity,
+            tickets_left: quantity
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('eventId');
+
+    return {
+        userId: 12, // Should be replaced with actual logged in user ID
+        eventId: eventId ? parseInt(eventId) : -1,
+        title: document.getElementById('eventTitle').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        location: document.getElementById('location').value.trim(),
+        category: parseInt(document.getElementById('category').value),
+        date: formattedDate,
+        tickets: tickets
+    };
+}
+
+// Initialize event handlers when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const addTicketBtn = document.getElementById('addTicketBtn');
+    const eventForm = document.getElementById('eventForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    addTicketBtn.addEventListener('click', createTicketInput);
+    eventForm.addEventListener('submit', handleSubmit);
+    cancelBtn.addEventListener('click', () => window.location.href = 'organisedEvents.html');
+
+    loadEventData();
+});
 
 function create(){
     // get data from user inputs
