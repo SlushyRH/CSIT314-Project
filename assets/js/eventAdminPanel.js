@@ -1,3 +1,26 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('notificationModal');
+    const sendButton = document.getElementById('openNotificationWindow');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const sendBtn = document.getElementById('sendBtn');
+
+    sendButton.addEventListener('click', function() {
+        document.getElementById('notificationMessage').value = '';
+        modal.classList.remove('hidden');
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        modal.classList.add('hidden');
+    });
+
+    sendBtn.addEventListener('click', function() {
+        const message = document.getElementById('notificationMessage').value;
+        modal.classList.add('hidden');
+
+        console.log('Sending Notification:', message);
+    });
+});
+
 function getEventInfo() {
     const params  = new URLSearchParams(window.location.search);
     const eventId = params.get("eventId");
@@ -78,4 +101,5 @@ async function changeUserStatus(eventId, userId, newStatus, statusHtml) {
     };
 
     const response = await sqlRequest('POST', 'UPDATE_USER_STATUS', data);
+    console.log(response);
 }
