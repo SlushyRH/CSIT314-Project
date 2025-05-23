@@ -38,7 +38,15 @@
                     password: password
                 };
 
-                const response = await sqlRequest("POST", "USER_SIGN_UP", data);
+                await sqlRequest("POST", "USER_SIGN_UP", data);
+            }
+
+            async function createEvent() {
+                const data = {
+
+                };
+
+                await sqlRequest("POST", "CREATE_EVENT", data);
             }
         </script>
     </head>

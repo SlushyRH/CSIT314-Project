@@ -17,38 +17,67 @@
 
     <body class="min-h-screen flex flex-col bg-(--bg)">
         <div id="header"></div>
-        <main class="flex-grow flex items-center justify-center ">
-            <div class="max-w-4xl mx-auto bg-(--secondary) rounded px-4 py-8 flex flex-col items-left justify-center">
+        <main class="flex-grow flex-col items-center justify-center">
+            <div class="max-w-4xl mx-auto bg-(--secondary) rounded-lg px-4 py-8 flex flex-col items-left justify-center">
                 <h1 class="text-3xl font-bold text-left text-(--text) mb-2">
-                    <span>Event Title</span>
-                    <span class="font-semibold text-(--hover-text)">Event Date</span>
+                    <span data-event-title=""></span>
+                    <span class="font-semibold text-xl text-(--hover-text)" data-event-category=""></span>
                 </h1>
                 <p class="text-lg text-left text-(--hover-text) mb-6">
-                    <span>Category</span>
-                    <span>Location</span>
+                    <span data-event-location=""></span>
+                    @
+                    <span data-event-date=""></span>
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4 mb-6">
-                    <div class="bg-(--bg) text-(--text) px-6 py-4 rounded-2xl flex items-center gap-3 shadow">
+                    <div class="bg-(--bg) text-(--text) px-6 py-4 rounded-lg flex items-center gap-3 shadow">
                         <i class="fa-solid fa-ticket text-xl text-(--icon)"></i>
-                        <span>Total Tickets Sold: 120</span>
+                        <span>Total Tickets Sold: <span data-total-tickets=""></span></span>
                     </div>
-                    <div class="bg-(--bg) text-(--text) px-6 py-4 rounded-2xl flex items-center gap-3 shadow">
+                    <div class="bg-(--bg) text-(--text) px-6 py-4 rounded-lg flex items-center gap-3 shadow">
                         <i class="fa-solid fa-dollar-sign text-xl text-(--icon)"></i>
-                        <span>Total Money Made: $2,400</span>
+                        <span>Total Money Made: <span data-total-money=""></span></span>
                     </div>
-                    <button class="bg-(--bg) text-(--text) px-6 py-4 rounded-2xl flex items-center gap-3 cursor-pointer shadow hover:bg-(--tertiary)">
-                        <i class="fa-solid fa-users text-xl text-(--icon)"></i>
-                        <span>Attending: 110</span>
-                        <i class="fa-solid fa-pen ml-2 text-(--hover-icon)"></i>
-                    </button>
                 </div>
 
                 <div class="flex gap-4 flex-wrap justify-center">
-                    <button class="bg-(--book-btn) text-white px-5 py-2 rounded-xl hover:bg-(--hover-book-btn)">Edit</button>
-                    <button class="bg-(--secondary) text-(--text) px-5 py-2 rounded-xl hover:bg-(--tertiary)">Notify</button>
-                    <button class="bg-red-600 text-white px-5 py-2 rounded-xl hover:bg-red-700">Cancel</button>
+                    <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-white px-5 py-2 rounded-lg cursor-pointer">Edit</button>
+                    <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-white px-5 py-2 rounded-lg cursor-pointer">Notify</button>
+                    <button class="bg-red-600 hover:bg-red-800 text-white px-5 py-2 rounded-lg cursor-pointer">Cancel</button>
                 </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto bg-(--secondary) rounded-lg px-4 py-8 flex flex-col items-left justify-center mt-4">
+                <div>
+                    <h2 class="text-xl font-bold text-(--text) mb-4">Approved Attendees: <span data-total-attendees=""></span></h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-(--bg) text-(--text) rounded-lg shadow">
+                            <thead>
+                                <tr class="bg-(--bg)">
+                                    <th class="text-left px-4 py-2">Name</th>
+                                    <th class="text-left px-4 py-2">Email</th>
+                                    <th class="text-left px-4 py-2">Status</th>
+                                    <th class="text-left px-4 py-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>                                
+                                <!-- attendees here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <template id="attendeeRow">
+                    <tr class="border-t border-(--hover-text)">
+                        <td class="px-4 py-2" data-attendee-name=""></td>
+                        <td class="px-4 py-2" data-attendee-email=""=""></td>
+                        <td class="px-4 py-2" data-attendee-status=""></td>
+                        <td class="px-4 py-2">
+                            <button data-approve-btn="" class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded-lg cursor-pointer">Approve</button>
+                            <button data-reject-btn="" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded-lg cursor-pointer">Reject</button>
+                        </td>
+                    </tr>
+                </template>
             </div>
         </main>
 
@@ -57,6 +86,8 @@
         <script>
             initHeader();
             initFooter();
+
+            getEventInfo();
         </script>
     </body>
 </html>

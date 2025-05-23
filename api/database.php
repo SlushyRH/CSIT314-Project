@@ -70,7 +70,7 @@ function createTablesIfNeeded($pdo)
             user_id INT NOT NULL,
             event_id INT NOT NULL,
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
             FOREIGN KEY (user_id) REFERENCES Users(user_id),
             FOREIGN KEY (event_id) REFERENCES Events(event_id)
         );
@@ -80,7 +80,7 @@ function createTablesIfNeeded($pdo)
             registration_id INT NOT NULL,
             amount DECIMAL(10, 2) NOT NULL,
             payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+            payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'completed',
             FOREIGN KEY (registration_id) REFERENCES Registrations(registration_id)
         );
 
@@ -812,10 +812,71 @@ function getEventAdminDetails($pdo, $data)
     }
 }
 
-function refundUser($pdo, $data)
+function changeUserStatus($pdo, $data)
 {
-    // change user attendance
-    // refund user
+    if (empty($data['eventId']) || empty($data['userId']) || empty($data['newStatus']))
+        send_response('error', 'eventId, userId and newStatus are required!', 400);
+
+    $eventId = $data['eventId'];
+    $userId = $data['userId'];
+    $newStatus = $data['newStatus'];
+
+    try
+    {
+        // get registration ID
+        $stmt = $pdo->prepare("
+            SELECT registration_id
+            FROM Registrations
+            WHERE event_id = :eventId AND user_id = :userId
+        ");
+
+        $stmt->execute([
+            'eventId' => $eventId,
+            'userId' => $userId
+        ]);
+
+        $registration = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$registration)
+            send_response('error', 'Registration not found for given event and user.', 404);
+
+        $registrationId = $registration['registration_id'];
+
+        // update registration status
+        $stmt = $pdo->prepare("
+            UPDATE Registrations
+            SET status = :newStatus
+            WHERE registration_id = :registrationId
+        ");
+
+        $stmt->execute([
+            'newStatus' => $newStatus,
+            'registrationId' => $registrationId
+        ]);
+
+        // update payment status accordingly
+        $paymentStatus = ($newStatus === 'approved') ? 'completed' : (($newStatus === 'rejected') ? 'refunded' : null);
+
+        if ($paymentStatus)
+        {
+            $stmt = $pdo->prepare("
+                UPDATE Payments
+                SET payment_status = :paymentStatus
+                WHERE registration_id = :registrationId
+            ");
+
+            $stmt->execute([
+                'paymentStatus' => $paymentStatus,
+                'registrationId' => $registrationId
+            ]);
+        }
+
+        send_response('success', 'User status updated successfully!', 200);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to update user status. Error: ' . $e->getMessage(), 500);
+    }
 }
 
 try {
@@ -858,6 +919,8 @@ try {
             getEventAdminDetails($pdo, $data);
         } else if ($action === "SEND_NOTIFICATIONS") {
             sendNotifications($pdo, $data);
+        } else if ($action === "UPDATE_USER_STATUS") {
+            changeUserStatus($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
