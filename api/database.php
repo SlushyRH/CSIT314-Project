@@ -426,6 +426,8 @@ function createEvent($pdo, $data)
                 ]);
             }
         }
+        
+        $pdo->commit();
 
         $stmt = $pdo->prepare("
             SELECT 
@@ -497,7 +499,6 @@ function createEvent($pdo, $data)
             }
         }
 
-        $pdo->commit();
         send_response('success', 'Event and tickets created/updated successfully.', 200, json_encode($event));
     }
     catch (Exception $e)
