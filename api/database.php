@@ -456,11 +456,11 @@ function createEvent($pdo, $data)
                 FROM TicketTypes
                 GROUP BY event_id
             ) AS price_stats ON price_stats.event_id = e.event_id
-            WHERE e.event_id = ?
+            WHERE e.event_id = :eventId
             ORDER BY tt.price ASC
         ");
 
-        $stmt->execute([$eventId]);
+        $stmt->execute(['eventId' => $eventId]);
         $rawEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($rawEvents))
