@@ -710,7 +710,7 @@ function getRegistrationInfo($pdo, $data)
     }
 }
 
-function sendNotification($pdo, $data)
+function sendNotifications($pdo, $data)
 {
     if (empty($data['msg']))
         send_response('error', 'Notification message is required!', 400);
@@ -854,6 +854,10 @@ try {
             addRegistrationInfo($pdo, $data);
         } else if ($action === "GET_REGISTRATION") {
             getRegistrationInfo($pdo, $data);
+        } else if ($action === "GET_ADMIN_DETAILS") {
+            getEventAdminDetails($pdo, $data);
+        } else if ($action === "SEND_NOTIFICATIONS") {
+            sendNotifications($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
