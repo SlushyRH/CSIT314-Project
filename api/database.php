@@ -553,7 +553,6 @@ function getBookedEvents($pdo, $data)
 
             $ticketStmt = $pdo->prepare("
                 SELECT
-                    tt.ticket_type_id
                     tt.name AS ticket_type,
                     tt.price,
                     rt.quantity
