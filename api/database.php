@@ -946,7 +946,7 @@ try {
             sendNotifications($pdo, $data);
         } else if ($action === "UPDATE_USER_STATUS") {
             changeUserStatus($pdo, $data);
-        } else if ($actiion === "GET_NOTIFICATIONS") {
+        } else if ($action === "GET_NOTIFICATIONS") {
             getUserNotifications($pdo, $data);
         }
     } else if ($method === "GET") {
