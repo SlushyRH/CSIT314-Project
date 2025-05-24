@@ -12,6 +12,44 @@
 
         <script>
             async function runTests() {
+                const data = {
+                    userId: 12,
+                    eventId: -1,
+                    title: 'Test Event Title',
+                    description: 'Event Description',
+                    location: 'Event Location 31',
+                    category: 7,
+                    date: '16:30 24/09/2025',
+                    tickets: [
+                        {
+                            id: 48,
+                            name: 'Ticket Name 1',
+                            price: '150.00',
+                            benefits: 'Ticket Description 1',
+                            quantity_available: 150,
+                            tickets_left: 111
+                        },
+                        {
+                            id: 49,
+                            name: 'Ticket Name 4',
+                            price: '250.00',
+                            benefits: 'Ticket Description 2',
+                            quantity_available: 50,
+                            tickets_left: 16
+                        },
+                    ]
+                };
+
+                const response = await sqlRequest('POST', 'CREATE_EVENT', data);
+                log(response.message);
+
+                if (response.status === 'success') {
+                    const event = response.data;
+                    addEventToCache(event);
+                }
+            }
+
+            async function runTests2() {
                 await signup('Ava Richardson', '2000-03-24', '0482 119 382', 'avaRich2000@gmail.com', 'password123');
                 await signup('Marcus Bennett', '1987-11-03', '0456 203 190', 'mbennett87@gmail.com', 'marcus87');
                 await signup('Chloe Nguyen', '1998-01-22', '0479 448 200', 'QueenChloe98@gmail.com', 'chloeng98');

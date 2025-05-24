@@ -191,6 +191,25 @@ function getEvent(eventId) {
     return null;
 }
 
+function addEventToCache(event) {
+    // get cached events and index
+    const cachedEvents = getCachedEvents() || [];
+    const eventIndex = cachedEvents.findIndex(e => e.event_id === event.event_id);
+
+    console.log(event);
+    const jsonEvent = JSON.parse(event);
+
+    // overwrite event if exists, otherwise add it to cache
+    if (eventIndex !== -1)
+        cachedEvents[eventIndex] = jsonEvent;
+    else
+        cachedEvents.push(jsonEvent);
+
+    // set cached events in storage
+    localStorage.setItem("cached_events", JSON.stringify(cachedEvents));
+    console.log("Successful cache!");
+}
+
 function getCachedEvents() {
     // check for cached events and load if needed
     const cached = localStorage.getItem("cached_events");

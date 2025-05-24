@@ -98,8 +98,6 @@ function applyFilterOnEvents(reset = false) {
             return;
         }
 
-        getUrlFilterQuery();
-
         // get values for filter data
         const startDateInput = document.getElementById("filterStartDate").value;
         const endDateInput = document.getElementById("filterEndDate").value;
@@ -166,6 +164,7 @@ function getUrlFilterQuery() {
         console.log("Set the value in category");
     }
 
+    applyFilterOnEvents();
     history.replaceState(null, "", window.location.pathname);
 }
 
@@ -278,7 +277,7 @@ function openPurchaseConfirmPage(eventId, tickets) {
         alert("Please add at least one ticket before continuing");
         return;
     }
-    
+
     // construct params and parse eventId
     const params = new URLSearchParams();
     params.append('eventId', eventId);

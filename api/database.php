@@ -70,7 +70,7 @@ function createTablesIfNeeded($pdo)
             user_id INT NOT NULL,
             event_id INT NOT NULL,
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
             FOREIGN KEY (user_id) REFERENCES Users(user_id),
             FOREIGN KEY (event_id) REFERENCES Events(event_id)
         );
@@ -80,7 +80,7 @@ function createTablesIfNeeded($pdo)
             registration_id INT NOT NULL,
             amount DECIMAL(10, 2) NOT NULL,
             payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+            payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'completed',
             FOREIGN KEY (registration_id) REFERENCES Registrations(registration_id)
         );
 
@@ -315,80 +315,196 @@ function getAllEvents($pdo)
 
 function createEvent($pdo, $data)
 {
-    $required = ['title', 'user_id', 'description', 'category_id', 'location', 'event_date'];
+    $required = ['title', 'userId', 'description', 'category', 'location', 'date', 'eventId'];
 
     foreach ($required as $field)
     {
-        if (empty($data[$field]))
+        if (!isset($data[$field]) || empty($data[$field]))
             send_response('error', $field . ' is required!', 400);
     }
 
+    if (!isset($data['tickets']) || !is_array($data['tickets']))
+        send_response('error', 'Tickets data is missing or invalid!', 400);
+
     try
     {
-        $stmt = $pdo->prepare("
-            INSERT INTO Events (user_id, title, description, category_id, location, event_date)
-            VALUES (:userId, :title, :description, :categoryId, :location, :eventDate)
-        ");
+        $pdo->beginTransaction();
 
-        $stmt->execute([
-            'userId' => $data['user_id'],
-            'title' => $data['title'],
-            'description' => $data['description'],
-            'categoryId' => $data['category_id'],
-            'location' => $data['location'],
-            'eventDate' => $data['event_date']
-        ]);
-
-        $eventId = $pdo->lastInsertId();
-
-        send_response('success', 'Event successfully created.', 200, json_encode(['event_id' => $eventId]));
-    }
-    catch (Exception $e)
-    {
-        send_response('error', 'Could not create a new event. Error: ' . $e->getMessage(), 500);
-    }
-}
-
-function updateEventDetails($pdo, $data)
-{
-    try
-    {
-        $date = DateTime::createFromFormat('H:i d/m/Y', $data['event_date']);
-
-        if (!$date)
+        if ((int)$data['eventId'] === -1)
         {
-            send_response('error', 'Invalid date format', 400);
+            $stmt = $pdo->prepare("
+                INSERT INTO Events (organiser_id, title, description, category_id, location, event_date)
+                VALUES (:userId, :title, :description, :categoryId, :location, :eventDate)
+            ");
+
+            $stmt->execute([
+                'userId' => $data['userId'],
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'categoryId' => $data['category'],
+                'location' => $data['location'],
+                'eventDate' => $data['date']
+            ]);
+
+            $eventId = $pdo->lastInsertId();
+        }
+        else
+        {
+            $stmt = $pdo->prepare("
+                UPDATE Events
+                SET organiser_id = :userId,
+                    title = :title,
+                    description = :description,
+                    category_id = :categoryId,
+                    location = :location,
+                    event_date = :eventDate
+                WHERE event_id = :eventId
+            ");
+
+            $stmt->execute([
+                'userId' => $data['userId'],
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'categoryId' => $data['category'],
+                'location' => $data['location'],
+                'eventDate' => $data['date'],
+                'eventId' => $data['eventId']
+            ]);
+
+            $eventId = $data['eventId'];
         }
 
-        $formattedDate = $date->format('Y-m-d H:i:s');
+        foreach ($data['tickets'] as $ticket)
+        {
+            $requiredTicketFields = ['name', 'price', 'benefits', 'quantity_available', 'tickets_left'];
+
+            foreach ($requiredTicketFields as $field)
+            {
+                if (!isset($ticket[$field]))
+                {
+                    $pdo->rollBack();
+                    send_response('error', 'Missing field in ticket: ' . $field, 400);
+                }
+            }
+
+            if (!isset($ticket['id']) || (int)$ticket['id'] === -1)
+            {
+                $stmt = $pdo->prepare("
+                    INSERT INTO TicketTypes (event_id, name, price, benefits, quantity_available, tickets_left)
+                    VALUES (:eventId, :name, :price, :benefits, :quantityAvailable, :ticketsLeft)
+                ");
+
+                $stmt->execute([
+                    'eventId' => $eventId,
+                    'name' => $ticket['name'],
+                    'price' => $ticket['price'],
+                    'benefits' => $ticket['benefits'],
+                    'quantityAvailable' => $ticket['quantity_available'],
+                    'ticketsLeft' => $ticket['tickets_left']
+                ]);
+            }
+            else
+            {
+                $stmt = $pdo->prepare("
+                    UPDATE TicketTypes
+                    SET name = :name,
+                        price = :price,
+                        benefits = :benefits,
+                        quantity_available = :quantityAvailable,
+                        tickets_left = :ticketsLeft
+                    WHERE ticket_type_id = :ticketId AND event_id = :eventId
+                ");
+
+                $stmt->execute([
+                    'ticketId' => $ticket['id'],
+                    'eventId' => $eventId,
+                    'name' => $ticket['name'],
+                    'price' => $ticket['price'],
+                    'benefits' => $ticket['benefits'],
+                    'quantityAvailable' => $ticket['quantity_available'],
+                    'ticketsLeft' => $ticket['tickets_left']
+                ]);
+            }
+        }
+        
+        $pdo->commit();
 
         $stmt = $pdo->prepare("
-            UPDATE Events
-            SET
-                organiser_id = :organiser_id,
-                title = :title,
-                description = :description,
-                category_id = :category_id,
-                location = :location,
-                event_date = :event_date
-            WHERE event_id = :event_id
+            SELECT 
+                e.event_id,
+                e.organiser_id,
+                e.title,
+                e.description,
+                e.location,
+                DATE_FORMAT(e.event_date, '%H:%i %d/%m/%Y') AS event_date,
+                e.category_id,
+                ec.name AS category_name,
+                tt.ticket_type_id,
+                tt.name AS ticket_name,
+                tt.price,
+                tt.benefits,
+                tt.quantity_available,
+                tt.tickets_left,
+                price_stats.min_price,
+                price_stats.max_price
+            FROM Events e
+            LEFT JOIN EventCategories ec ON e.category_id = ec.category_id
+            LEFT JOIN TicketTypes tt ON e.event_id = tt.event_id
+            LEFT JOIN (
+                SELECT 
+                    event_id,
+                    MIN(price) AS min_price,
+                    MAX(price) AS max_price
+                FROM TicketTypes
+                GROUP BY event_id
+            ) AS price_stats ON price_stats.event_id = e.event_id
+            WHERE e.event_id = :eventId
+            ORDER BY tt.price ASC
         ");
 
-        $stmt->execute([
-            'organiser_id' => $data['organiser_id'],
-            'title' => $data['title'],
-            'description' => $data['description'],
-            'category_id' => $data['category_id'],
-            'location' => $data['location'],
-            'event_date' => $formattedDate,
-            'event_id' => $data['event_id']
-        ]);
+        $stmt->execute(['eventId' => $eventId]);
+        $rawEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        send_response('success', 'Successfully updated event details', 200);
+        if (empty($rawEvents))
+            send_response('error', 'Event not found after creation.', 404);
+
+        $row = $rawEvents[0];
+
+        $event = [
+            'event_id' => $row['event_id'],
+            'organiser_id' => $row['organiser_id'],
+            'title' => $row['title'],
+            'description' => $row['description'],
+            'location' => $row['location'],
+            'event_date' => $row['event_date'],
+            'category_id' => $row['category_id'],
+            'category_name' => $row['category_name'],
+            'min_price' => $row['min_price'],
+            'max_price' => $row['max_price'],
+            'ticket_types' => []
+        ];
+
+        foreach ($rawEvents as $row)
+        {
+            if (!empty($row['ticket_type_id']))
+            {
+                $event['ticket_types'][] = [
+                    'ticket_type_id' => $row['ticket_type_id'],
+                    'name' => $row['ticket_name'],
+                    'price' => $row['price'],
+                    'benefits' => $row['benefits'],
+                    'quantity_available' => $row['quantity_available'],
+                    'tickets_left' => $row['tickets_left']
+                ];
+            }
+        }
+
+        send_response('success', 'Event and tickets created/updated successfully.', 200, json_encode($event));
     }
     catch (Exception $e)
     {
-        send_response('error', 'Could not update event details: ' . $e->getMessage(), 500);
+        $pdo->rollBack();
+        send_response('error', 'Error creating/updatingevent: ' . $e->getMessage(), 500);
     }
 }
 
@@ -594,6 +710,175 @@ function getRegistrationInfo($pdo, $data)
     }
 }
 
+function sendNotifications($pdo, $data)
+{
+    if (empty($data['msg']))
+        send_response('error', 'Notification message is required!', 400);
+
+    if (empty($data['users']) || !is_array($data['users']))
+        send_response('error', 'Users array is empty!', 400);
+
+    $message = $data['msg'];
+    $userIds = $data['users'];
+
+    try
+    {
+        // inserto new notifications
+        $stmt = $pdo->prepare("
+            INSERT INTO Notifications (user_id, message)
+            VALUES (:user_id, :message)
+        ");
+
+        // execute notifications for each user
+        foreach ($userIds as $userId)
+        {
+            $stmt->execute([
+                'user_id' => $userId,
+                'message' => $message
+            ]);
+        }
+
+        send_response('success', 'Notifications sent successfully.', 200);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to send notifications. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function getEventAdminDetails($pdo, $data)
+{
+    if (empty($data['eventId']))
+        send_response('error', 'eventId is required!', 400);
+
+    $eventId = $data['eventId'];
+
+    try
+    {
+        // get total tickets sold and revenue
+        $stmt = $pdo->prepare("
+            SELECT 
+                SUM(rt.quantity) AS total_tickets_sold,
+                SUM(rt.quantity * tt.price) AS total_revenue
+            FROM RegistrationTickets rt
+            JOIN TicketTypes tt ON rt.ticket_type_id = tt.ticket_type_id
+            JOIN Registrations r ON rt.registration_id = r.registration_id
+            WHERE r.event_id = :eventId
+        ");
+
+        $stmt->execute(['eventId' => $eventId]);
+        $salesData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // get total attendance
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) AS attendance_count
+            FROM Registrations
+            WHERE event_id = :eventId AND status = 'approved'
+        ");
+
+        $stmt->execute(['eventId' => $eventId]);
+        $attendanceData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // get all registered users
+        $stmt = $pdo->prepare("
+            SELECT 
+                u.user_id,
+                u.name,
+                u.email,
+                r.registration_id,
+                r.status,
+                r.registration_date
+            FROM Registrations r
+            JOIN Users u ON r.user_id = u.user_id
+            WHERE r.event_id = :eventId
+        ");
+
+        $stmt->execute(['eventId' => $eventId]);
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // get results as data structure
+        $result = [
+            'total_tickets_sold' => (int) $salesData['total_tickets_sold'],
+            'total_revenue' => (float) $salesData['total_revenue'],
+            'attendance_count' => (int) $attendanceData['attendance_count'],
+            'registered_users' => $users
+        ];
+
+        send_response('success', 'Event admin details fetched successfully!', 200, json_encode($result));
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to get event admin details. Error: ' . $e->getMessage(), 500);
+    }
+}
+
+function changeUserStatus($pdo, $data)
+{
+    if (empty($data['eventId']) || empty($data['userId']) || empty($data['newStatus']))
+        send_response('error', 'eventId, userId and newStatus are required!', 400);
+
+    $eventId = $data['eventId'];
+    $userId = $data['userId'];
+    $newStatus = $data['newStatus'];
+
+    try
+    {
+        // get registration ID
+        $stmt = $pdo->prepare("
+            SELECT registration_id
+            FROM Registrations
+            WHERE event_id = :eventId AND user_id = :userId
+        ");
+
+        $stmt->execute([
+            'eventId' => $eventId,
+            'userId' => $userId
+        ]);
+
+        $registration = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$registration)
+            send_response('error', 'Registration not found for given event and user.', 404);
+
+        $registrationId = $registration['registration_id'];
+
+        // update registration status
+        $stmt = $pdo->prepare("
+            UPDATE Registrations
+            SET status = :newStatus
+            WHERE registration_id = :registrationId
+        ");
+
+        $stmt->execute([
+            'newStatus' => $newStatus,
+            'registrationId' => $registrationId
+        ]);
+
+        // update payment status accordingly
+        $paymentStatus = ($newStatus === 'approved') ? 'completed' : (($newStatus === 'rejected') ? 'refunded' : null);
+
+        if ($paymentStatus)
+        {
+            $stmt = $pdo->prepare("
+                UPDATE Payments
+                SET payment_status = :paymentStatus
+                WHERE registration_id = :registrationId
+            ");
+
+            $stmt->execute([
+                'paymentStatus' => $paymentStatus,
+                'registrationId' => $registrationId
+            ]);
+        }
+
+        send_response('success', 'User status updated successfully!', 200);
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to update user status. Error: ' . $e->getMessage(), 500);
+    }
+}
+
 try {
     // establish connection to sql database
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
@@ -626,12 +911,16 @@ try {
             createEvent($pdo, $data);
         } else if ($action === "GET_BOOKED_EVENTS") {
             getBookedEvents($pdo, $data);
-        } else if ($action === "UPDATE_EVENT") {
-            updateEventDetails($pdo, $data);
         } else if ($action === "ADD_REGISTRATION") {
             addRegistrationInfo($pdo, $data);
         } else if ($action === "GET_REGISTRATION") {
             getRegistrationInfo($pdo, $data);
+        } else if ($action === "GET_ADMIN_DETAILS") {
+            getEventAdminDetails($pdo, $data);
+        } else if ($action === "SEND_NOTIFICATIONS") {
+            sendNotifications($pdo, $data);
+        } else if ($action === "UPDATE_USER_STATUS") {
+            changeUserStatus($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
