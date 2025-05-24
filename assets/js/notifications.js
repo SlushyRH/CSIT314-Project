@@ -21,18 +21,23 @@ async function loadNotifications() {
     const tableBody = document.getElementById('notificationsTableBody');
     const template = document.getElementById('notificationRow');
 
-    notifications.forEach(n =>
-    {
+    notifications.forEach(n => {
         const row = template.content.cloneNode(true);
         const tr = row.querySelector('tr');
-        tr.dataset.id = n.id;
-        tr.addEventListener('click', () =>
-        {
-            window.location.href = `notification.html?id=${n.notification_id}`;
 
+        tr.addEventListener('click', () => {
+            showNotification(n);
         });
 
-        row.querySelector('[data-message]').textContent = n.message;
+        const maxLength = 75;
+        let message = n.message;
+
+        // limit description length
+        if (message.length > maxLength) {
+            message = message.slice(0, maxLength) + '...';
+        }
+
+        row.querySelector('[data-message]').textContent = message;
         row.querySelector('[data-date]').textContent = n.sent_at;
 
         tableBody.appendChild(row);
@@ -40,8 +45,23 @@ async function loadNotifications() {
 }
 
 function showNotification(notification) {
+    // get notification window and set the message
     const notificationModal = document.getElementById('notificationModal');
-    document.getElementById('notificationMessage').value = notification.message;
-    notificationModal.classList.remove('hidden');
+    document.getElementById('notificationMessage').innerHTML = notification.message;
 
+    // apply hide function
+    const hideModalOnEscape = function (e) {
+        if (e.key === 'Escape' || e.target.id === 'notificationModal') {
+            document.removeEventListener('keydown', hideModalOnEscape);
+            document.removeEventListener('click', hideModalOnEscape);
+            notificationModal.classList.add('hidden');
+        }
+    };
+
+    
+    document.addEventListener('keydown', hideModalOnEscape);
+    document.addEventListener('click', hideModalOnEscape);
+
+    // show window
+    notificationModal.classList.remove('hidden');
 }
