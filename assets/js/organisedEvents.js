@@ -7,18 +7,18 @@ document.addEventListener("DOMContentLoaded", function() {
 async function getUserEvents() {
     //var user_id = localStorage("user_id");
     // Test user stuff
-    const userSearchId = {
-        "user_id":2
-    };
+    const userSearchId = 1;
     console.log(userSearchId);
     // Gets events booked by the user
+    await forceEventCacheReset();
     const userResponse = getCachedEvents();
     // Converts the response from request into the json dictionary contain all events
     let allEvents = userResponse; // this being a json object
     console.log(allEvents);
     let organisedEvents = FilterEvents(userSearchId,allEvents);
+    console.log(organisedEvents);
     // Sends events to be sorted
-    GetEvents(allEvents.events);
+    GetEvents(organisedEvents);
 }
 // Sorts events based on if they are in the future or the past
 function GetEvents(Events){
@@ -30,7 +30,6 @@ function GetEvents(Events){
     let upcomingEvents = GetUpcomingEvents(Events);
     console.log("Future:");
     console.log(upcomingEvents);
-    console.log(upcomingEvents[0]);
     // sorts the upcoming events by their dates in ascending order
     upcomingEvents = orderEventsAscending(upcomingEvents);
     console.log(upcomingEvents);
@@ -76,9 +75,10 @@ function convertToDatetimeLocalFormat(input) {
         console.warn("Invalid input to convertToDatetimeLocalFormat:", input);
         return null;
     }
-    const [date, time] = input.split(" ");
+    let [time, date] = input.split(" ");
+    let [DD, MM, YY] = date.split("/");
     const [hours, minutes] = time.split(":");
-    return `${date}T${hours}:${minutes}`;
+    return `${YY}-${MM}-${DD}T${hours}:${minutes}`;
 }
 
 function getNow(){
@@ -91,9 +91,9 @@ function getNow(){
     const mins = String(today.getMinutes()).padStart(2, '0');
 
     const now = `${yyyy}-${mm}-${dd}T${hh}:${mins}`;
+    console.log(now);
     return now;
 }
-
 
 function orderEventsAscending(events){
     let len = events.length;
@@ -157,6 +157,7 @@ function displayEvents(containerID, events){
         card.className = `
             bg-[#121e33] text-white p-6 rounded-xl shadow-lg
             hover:bg-[#1a2a48] transition-all duration-200
+            h-50
         `;
 
         card.innerHTML = `
@@ -181,4 +182,14 @@ function displayEvents(containerID, events){
 
         container.appendChild(card);
     });
+}
+
+function FilterEvents(OrgID, Events){
+    let Organised_events = [];
+    for (let i = 0; i < Events.length; i++){
+        if (Events[i].organiser_id == OrgID){
+            Organised_events.push(Events[i]);
+        }
+    }
+    return Organised_events;
 }

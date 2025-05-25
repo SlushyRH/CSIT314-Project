@@ -8,7 +8,7 @@ async function getUserEvents() {
     //var user_id = localStorage("user_id");
     // Test user stuff
     const userSearchId = {
-        "user_id":1
+        "user_id":2
     };
     console.log(userSearchId);
     // Gets events booked by the user
@@ -160,7 +160,10 @@ function displayEvents(containerID, events){
         card.className = `
             bg-[#121e33] text-white p-6 rounded-xl shadow-lg
             hover:bg-[#1a2a48] transition-all duration-200
+            h-50
         `;
+
+        event.event_date = Convert_Consistent(event.event_date);
 
         card.innerHTML = `
             <h3 class="text-xl font-bold mb-2">${event.title}</h3>
@@ -184,4 +187,13 @@ function displayEvents(containerID, events){
 
         container.appendChild(card);
     });
+}
+
+function Convert_Consistent(Event_date){
+    let Converted_Date;
+    let [Date, Time] = Event_date.split(" ");
+    let [YY,MM,DD] = Date.split("-");
+    console.log(Date);
+    Converted_Date = `${Time} ${DD}/${MM}/${YY}`;
+    return Converted_Date;
 }
