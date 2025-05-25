@@ -92,6 +92,7 @@ function attachHeaderScripts(hideNav, showSearch) {
     
     const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
     const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
+    const headerNotificationsBtn = document.getElementById('headerNotificationsBtn');
     const logoutBtn = document.getElementById('headerLogoutBtn');
 
     if (hideNav) {
@@ -115,6 +116,10 @@ function attachHeaderScripts(hideNav, showSearch) {
 
     headerUserEventsBtn.onclick = function() {
         navToPage('bookedEvents.html');
+    };
+
+    headerNotificationsBtn.onclick = function() {
+        navToPage('notifications.html');
     };
 
     logoutBtn.onclick = function() {

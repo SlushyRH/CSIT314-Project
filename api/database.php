@@ -367,7 +367,7 @@ function createEvent($pdo, $data)
                 'description' => $data['description'],
                 'categoryId' => $data['category'],
                 'location' => $data['location'],
-                'eventDate' => $data['date'],
+                'eventDate' => DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s'),
                 'eventId' => $data['eventId']
             ]);
 
@@ -387,7 +387,7 @@ function createEvent($pdo, $data)
                 }
             }
 
-            if (!isset($ticket['id']) || (int)$ticket['id'] === -1)
+            if (!isset($ticket['ticket_type_id']) || (int)$ticket['ticket_type_id'] === -1)
             {
                 $stmt = $pdo->prepare("
                     INSERT INTO TicketTypes (event_id, name, price, benefits, quantity_available, tickets_left)
@@ -416,7 +416,7 @@ function createEvent($pdo, $data)
                 ");
 
                 $stmt->execute([
-                    'ticketId' => $ticket['id'],
+                    'ticketId' => $ticket['ticket_type_id'],
                     'eventId' => $eventId,
                     'name' => $ticket['name'],
                     'price' => $ticket['price'],
