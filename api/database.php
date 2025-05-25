@@ -343,7 +343,7 @@ function createEvent($pdo, $data)
                 'description' => $data['description'],
                 'categoryId' => $data['category'],
                 'location' => $data['location'],
-                'eventDate' => 'eventDate' => DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s')
+                'eventDate' => DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s')
             ]);
 
             $eventId = $pdo->lastInsertId();
