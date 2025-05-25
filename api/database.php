@@ -343,7 +343,7 @@ function createEvent($pdo, $data)
                 'description' => $data['description'],
                 'categoryId' => $data['category'],
                 'location' => $data['location'],
-                'eventDate' => $data['date']
+                'eventDate' => DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s')
             ]);
 
             $eventId = $pdo->lastInsertId();
@@ -879,6 +879,31 @@ function changeUserStatus($pdo, $data)
     }
 }
 
+function getUserNotifications($pdo, $data)
+{
+    if (empty($data['userId']))
+        send_response('error', 'userId is required!', 400);
+
+    try
+    {
+        $stmt = $pdo->prepare("
+            SELECT notification_id, message, sent_at
+            FROM Notifications
+            WHERE user_id = :userId
+            ORDER BY sent_at DESC
+        ");
+
+        $stmt->execute(['userId' => $data['userId']]);
+        $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        send_response('success', $notifications, 200, json_encode($notifications));
+    }
+    catch (Exception $e)
+    {
+        send_response('error', 'Failed to retrieve notifications. Error: ' . $e->getMessage(), 500);
+    }
+}
+
 try {
     // establish connection to sql database
     $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
@@ -921,6 +946,8 @@ try {
             sendNotifications($pdo, $data);
         } else if ($action === "UPDATE_USER_STATUS") {
             changeUserStatus($pdo, $data);
+        } else if ($action === "GET_NOTIFICATIONS") {
+            getUserNotifications($pdo, $data);
         }
     } else if ($method === "GET") {
         if ($action === "ALL_EVENTS") {
