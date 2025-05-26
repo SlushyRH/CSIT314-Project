@@ -70,7 +70,7 @@ function createTablesIfNeeded($pdo)
             user_id INT NOT NULL,
             event_id INT NOT NULL,
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
             FOREIGN KEY (user_id) REFERENCES Users(user_id),
             FOREIGN KEY (event_id) REFERENCES Events(event_id)
         );

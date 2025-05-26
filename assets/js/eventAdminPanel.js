@@ -16,19 +16,26 @@ document.addEventListener('DOMContentLoaded', function() {
     sendBtn.addEventListener('click', sendNotification);
 });
 
-const registeredUsers = [];
+let registeredUsers = [];
 
 async function sendNotification() {
     const message = document.getElementById('notificationMessage').value;
     console.log('Sending Notification:', message);
 
     const data = {
-        message: message,
+        msg: message,
         users: registeredUsers
     };
 
+    console.log(data);
     const response = await sqlRequest('POST', 'SEND_NOTIFICATIONS', data);
-    modal.classList.add('hidden');
+    console.log(response);
+
+    const modal = document.getElementById('notificationModal');
+
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }
 
 function getEventInfo() {
@@ -57,7 +64,9 @@ async function getAdminData(eventId) {
     const data = JSON.parse(response.data);
     console.log(data);
 
-    registeredUsers = data.registered_users;
+    data.registered_users.forEach(user => {
+        registeredUsers.push(parseInt(user.user_id));
+    });
 
     fillAdminData(eventId, data)
 }
@@ -91,13 +100,22 @@ function fillAdminData(eventId, data) {
         const approveBtn = clone.querySelector('[data-approve-btn]');
         const rejectBtn = clone.querySelector('[data-reject-btn]');
 
-        approveBtn.onclick = (e) => {
-            changeUserStatus(eventId, user.user_id, 'approved', statusData);
-        };
+        if (user.status === 'pending') {
+            approveBtn.onclick = (e) => {
+                changeUserStatus(eventId, user.user_id, 'approved', statusData);
+                approveBtn.classList.add('hidden');
+                rejectBtn.classList.add('hidden');
+            };
 
-        rejectBtn.onclick = (e) => {
-            changeUserStatus(eventId, user.user_id, 'rejected', statusData);
-        };
+            rejectBtn.onclick = (e) => {
+                changeUserStatus(eventId, user.user_id, 'rejected', statusData);
+                approveBtn.classList.add('hidden');
+                rejectBtn.classList.add('hidden');
+            };
+        } else {
+            approveBtn.classList.add('hidden');
+            rejectBtn.classList.add('hidden');
+        }
 
         tbody.appendChild(clone);
     });
@@ -105,6 +123,7 @@ function fillAdminData(eventId, data) {
 
 async function changeUserStatus(eventId, userId, newStatus, statusHtml) {
     statusHtml.textContent = newStatus;
+    
 
     const data = {
         'eventId': eventId,
@@ -113,5 +132,4 @@ async function changeUserStatus(eventId, userId, newStatus, statusHtml) {
     };
 
     const response = await sqlRequest('POST', 'UPDATE_USER_STATUS', data);
-    console.log(response);
 }
