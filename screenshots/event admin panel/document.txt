@@ -1,0 +1,12 @@
+admin:
+this is the admin page for managing events, it shows event data
+along with a list of all attending users, if the users status is
+pending, then the admin can approve or reject the user. the admin
+can click the 'Edit Event' button which shows the createEvent page,
+or they can click 'Send Notification' button to open the modal window
+
+admin-notification:
+the admin notification modal window allows the user to send a 
+notification to all users that are attending the event, they type
+a message into the message text box and click send, or click cancel
+to cancel the nofication request

@@ -1,0 +1,9 @@
+notifications:
+the noficiations page displays a table of notifications that the user
+has in order of date from newest to oldest, the user can click on
+a notifcation to open the notifcation, the notifiation in the table will
+display the time the notifcation was sent, and a preview of the message
+
+notification-view:
+upon clicking a notification, a modal window will be shown the whole 
+message without cutting off the notifcation text

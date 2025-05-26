@@ -1,0 +1,11 @@
+on nearly every page, a header and footer can be seen.
+
+the header allows the user to access the home page (index page),
+and hte user can also access quick filters like categorys or 
+upcoming (this limits the date between the current date, and 
+one from now).
+
+the header also shows the profile icon. upon clicking the profile
+icon, it will direct the user to the login/signup page if they are
+not currently logged in. if the user is logged in, then a dropdown
+will show for easy navigation

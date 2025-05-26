@@ -1,0 +1,14 @@
+ticket-purchase:
+The ticket purchase page shows the details of the tickets that the user are
+purchasing on left in the form of a table, on the right is a form
+where the user enters their payment information, and under the form
+they can see the total amount and breakdown of costs.
+
+upon clicking the purchase, the website database will process the
+purchase then redirect to the ticket purchase confirm page
+
+ticket-purchase-confirm:
+The ticket purchase confirm page shows a breakdown of tickets on
+the left in teh form of a table, and on the right is a QR code
+that will be shown at the event to allow access. below the qr code
+is a breakdown of the costs of the ticket/s
