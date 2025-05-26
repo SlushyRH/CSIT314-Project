@@ -13,13 +13,23 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.classList.add('hidden');
     });
 
-    sendBtn.addEventListener('click', function() {
-        const message = document.getElementById('notificationMessage').value;
-        modal.classList.add('hidden');
-
-        console.log('Sending Notification:', message);
-    });
+    sendBtn.addEventListener('click', sendNotification);
 });
+
+const registeredUsers = [];
+
+async function sendNotification() {
+    const message = document.getElementById('notificationMessage').value;
+    console.log('Sending Notification:', message);
+
+    const data = {
+        message: message,
+        users: registeredUsers
+    };
+
+    const response = await sqlRequest('POST', 'SEND_NOTIFICATIONS', data);
+    modal.classList.add('hidden');
+}
 
 function getEventInfo() {
     const params  = new URLSearchParams(window.location.search);
@@ -46,6 +56,8 @@ async function getAdminData(eventId) {
 
     const data = JSON.parse(response.data);
     console.log(data);
+
+    registeredUsers = data.registered_users;
 
     fillAdminData(eventId, data)
 }
