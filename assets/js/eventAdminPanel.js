@@ -42,6 +42,13 @@ function getEventInfo() {
     const params  = new URLSearchParams(window.location.search);
     const eventId = params.get("eventId");
 
+    document.getElementById('editEventBtn').onclick = function() {
+        const params = new URLSearchParams();
+        params.set("eventId", eventId);
+
+        navToPage('createEvent.html?' + params.toString());
+    };
+
     const event = getEvent(eventId);
 
     fillEventData(event);
