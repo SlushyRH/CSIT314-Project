@@ -773,8 +773,8 @@ function sendNotifications($pdo, $data)
     {
         // inserto new notifications
         $stmt = $pdo->prepare("
-            INSERT INTO Notifications (user_id, message)
-            VALUES (:user_id, :message)
+            INSERT INTO Notifications (user_id, message, sent_at)
+            VALUES (:user_id, :message, :sent_at)
         ");
 
         // execute notifications for each user
