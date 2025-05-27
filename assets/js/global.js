@@ -206,14 +206,11 @@ function addEventToCache(event) {
     const cachedEvents = getCachedEvents() || [];
     const eventIndex = cachedEvents.findIndex(e => e.event_id === event.event_id);
 
-    console.log(event);
-    const jsonEvent = JSON.parse(event);
-
     // overwrite event if exists, otherwise add it to cache
     if (eventIndex !== -1)
-        cachedEvents[eventIndex] = jsonEvent;
+        cachedEvents[eventIndex] = event;
     else
-        cachedEvents.push(jsonEvent);
+        cachedEvents.push(event);
 
     // set cached events in storage
     localStorage.setItem("cached_events", JSON.stringify(cachedEvents));
@@ -251,17 +248,17 @@ function getLastResponse() {
 }
 
 async function sqlRequest(method, action, data = null) {
-    // sets url and options
-    const url = `${URL}api/database.php?action=${action}`;
-    const options = {
-        method: method,
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: data ? JSON.stringify(data) : null
-    };
-
     try {
+        // sets url and options
+        const url = `${URL}api/database.php?action=${action}`;
+        const options = {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: data ? JSON.stringify(data) : null
+        };
+
         // send request to url
         document.body.style.cursor = 'wait';
         const response = await fetch(url, options);
@@ -279,6 +276,8 @@ async function sqlRequest(method, action, data = null) {
     catch (error) {
         // throw error
         document.body.style.cursor = 'default';
+
+        console.error(error.message || "Network error");
         throw new Error(error.message || "Network error");
     }
 }
