@@ -943,7 +943,7 @@ function getUserNotifications($pdo, $data)
 }
 
 try {
-    // gets database details from server
+    // gets database details from server to hide database details
     $db_host = getenv('DB_HOST');
     $db_name = getenv('DB_NAME');
     $db_user = getenv('DB_USER');
