@@ -943,6 +943,8 @@ function getUserNotifications($pdo, $data)
 }
 
 try {
+    send_response('error', 'HOST: ' . $_SERVER('DB_HOST'), 200);
+
     // gets database details from server
     $db_host = $_SERVER('DB_HOST');
     $db_name = $_SERVER('DB_NAME');
