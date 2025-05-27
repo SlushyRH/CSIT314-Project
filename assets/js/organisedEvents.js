@@ -5,9 +5,9 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 // function to het user events and converts them from string to dictionary
 async function getUserEvents() {
-    //var user_id = localStorage("user_id");
+    var user_id = localStorage("user_id");
     // Test user stuff
-    const userSearchId = 1;
+    const userSearchId = user_id;
     console.log(userSearchId);
     // Gets events booked by the user
     await forceEventCacheReset();
@@ -177,7 +177,7 @@ function displayEvents(containerID, events){
             const params = new URLSearchParams();
             params.set("eventId", event.event_id);
 
-            window.location.href = 'eventBookingConfirm.html?' + params.toString();
+            window.location.href = 'eventAdminPanel.html?' + params.toString();
         });
 
         container.appendChild(card);
