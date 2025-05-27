@@ -5,7 +5,6 @@ let currentSearchValue;
 
 function initSearchBar() {
     const searchBarText = document.getElementById('searchBarText');
-
     searchBarText.addEventListener('input', handleSearchBarInput);
 }
 

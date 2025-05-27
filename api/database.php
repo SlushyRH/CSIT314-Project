@@ -10,7 +10,7 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
-// handle preflight request for cors
+// handle preflight request for cors preventation
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
@@ -119,16 +119,19 @@ function userSignUp($pdo, $data)
     $name = $data['name'];
     $dob = $data['dob'];
     $phoneNumber = $data['phoneNumber'];
-    $password = password_hash($data['password'], PASSWORD_DEFAULT);
+    $password = password_hash($data['password'], PASSWORD_DEFAULT); // hash password for security
 
     try
     {
+        // select user id where email matches
         $stmt = $pdo->prepare("SELECT user_id FROM Users where email = :email");
         $stmt->execute(['email' => $email]);
 
+        // if exists, then try log in
         if ($stmt->fetch())
             return userLogIn($data);
 
+        // otherwise, insert user data 
         $stmt = $pdo->prepare("
             INSERT INTO Users (email, name, password, dob, phone_number)
             VALUES (:email, :name, :password, :dob, :phone_number)
@@ -142,6 +145,7 @@ function userSignUp($pdo, $data)
             'phone_number' => $phoneNumber
         ]);
 
+        // select all from new user to send back to client
         $stmt = $pdo->prepare("
             SELECT * FROM Users WHERE email = :email
         ");
@@ -168,21 +172,20 @@ function userLogIn($pdo, $data)
 
     try
     {
+        // select all from users with email matching
         $stmt = $pdo->prepare("
             SELECT * FROM Users WHERE email = :email
         ");
         $stmt->execute(['email' => $data['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // send error if no user
         if (!$user)
-        {
             send_response('error', 'User not found.', 404);
-        }
 
+            // ensure password matches before sending success
         if (!password_verify($data['password'], $user['password']))
-        {
             send_response('error', 'Incorrect password.', 401);
-        }
 
         send_response('success', 'User logged in successfully.', 200, json_encode($user));
     }
@@ -192,46 +195,11 @@ function userLogIn($pdo, $data)
     }
 }
 
-function resetPassword($pdo, $data)
-{
-    $required = ['email', 'password'];
-
-    foreach ($required as $field)
-    {
-        if (empty($data[$field]))
-            send_response('error', $field . ' is required!', 400);
-    }
-
-    $newPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-
-    try
-    {
-        $stmt = $pdo->prepare("SELECT user_id FROM Users WHERE email = :email");
-        $stmt->execute(['email' => $data['email']]);
-
-        if (!$stmt->fetch())
-        {
-            send_response('error', 'User with that email does not exist.', 404);
-        }
-
-        $stmt = $pdo->prepare("UPDATE Users SET password = :password WHERE email = :email");
-        $stmt->execute([
-            'password' => $newPassword,
-            'email' => $data['email']
-        ]);
-
-        send_response('success', 'Password updated successfully.', 200);
-    }
-    catch (Exception $e)
-    {
-        send_response('error', 'Could not reset password. Error: ' . $e->getMessage(), 500);
-    }
-}
-
 function getAllEvents($pdo)
 {
     try
     {
+        // select all data to do with an event
         $stmt = $pdo->prepare("
             SELECT 
                 e.event_id,
@@ -269,10 +237,12 @@ function getAllEvents($pdo)
 
         $groupedEvents = [];
 
+        // loop through each ticket to gruop to event
         foreach ($rawEvents as $row)
         {
             $eventId = $row['event_id'];
 
+            // create event in grouped event if none
             if (!isset($groupedEvents[$eventId]))
             {
                 $groupedEvents[$eventId] = [
@@ -290,6 +260,7 @@ function getAllEvents($pdo)
                 ];
             }
 
+            // add onto existing tickets if event does exist
             if (!empty($row['ticket_type_id']))
             {
                 $groupedEvents[$eventId]['ticket_types'][] = [
@@ -303,8 +274,8 @@ function getAllEvents($pdo)
             }
         }
 
+        // get data as array and send to client
         $events = array_values($groupedEvents);
-
         send_response('success', 'Events fetched successfully.', 200, json_encode($events));
     }
     catch (Exception $e)
@@ -330,6 +301,7 @@ function createEvent($pdo, $data)
     {
         $pdo->beginTransaction();
 
+        // insert new event if eventid is -1
         if ((int)$data['eventId'] === -1)
         {
             $stmt = $pdo->prepare("
@@ -337,6 +309,7 @@ function createEvent($pdo, $data)
                 VALUES (:userId, :title, :description, :categoryId, :location, :eventDate)
             ");
 
+            // format date to correct date format
             $stmt->execute([
                 'userId' => $data['userId'],
                 'title' => $data['title'],
@@ -346,9 +319,10 @@ function createEvent($pdo, $data)
                 'eventDate' => DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s')
             ]);
 
+            // get the latest event id
             $eventId = $pdo->lastInsertId();
         }
-        else
+        else // otherwise update event where id
         {
             $stmt = $pdo->prepare("
                 UPDATE Events
@@ -374,12 +348,14 @@ function createEvent($pdo, $data)
             $eventId = $data['eventId'];
         }
 
+        // go through each ticket in the event
         foreach ($data['tickets'] as $ticket)
         {
             $requiredTicketFields = ['name', 'price', 'benefits', 'quantity_available', 'tickets_left'];
 
             foreach ($requiredTicketFields as $field)
             {
+                // if any ticket type is missing, don't commit event to database
                 if (!isset($ticket[$field]))
                 {
                     $pdo->rollBack();
@@ -387,6 +363,7 @@ function createEvent($pdo, $data)
                 }
             }
 
+            // insert new ticket if ticket type is equal to -1
             if (!isset($ticket['ticket_type_id']) || (int)$ticket['ticket_type_id'] === -1)
             {
                 $stmt = $pdo->prepare("
@@ -403,7 +380,7 @@ function createEvent($pdo, $data)
                     'ticketsLeft' => $ticket['tickets_left']
                 ]);
             }
-            else
+            else // otherwise update existing event
             {
                 $stmt = $pdo->prepare("
                     UPDATE TicketTypes
@@ -427,8 +404,10 @@ function createEvent($pdo, $data)
             }
         }
         
+        // commit changes to database
         $pdo->commit();
 
+        // select all data to do with an event
         $stmt = $pdo->prepare("
             SELECT 
                 e.event_id,
@@ -462,6 +441,7 @@ function createEvent($pdo, $data)
             ORDER BY tt.price ASC
         ");
 
+        // fetch has eird bug, so use fetchAll then get the first result instead
         $stmt->execute(['eventId' => $eventId]);
         $rawEvents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -469,7 +449,6 @@ function createEvent($pdo, $data)
             send_response('error', 'Event not found after creation.', 404);
 
         $row = $rawEvents[0];
-
         $event = [
             'event_id' => $row['event_id'],
             'organiser_id' => $row['organiser_id'],
@@ -484,6 +463,7 @@ function createEvent($pdo, $data)
             'ticket_types' => []
         ];
 
+        // ensure ticket types are correct
         foreach ($rawEvents as $row)
         {
             if (!empty($row['ticket_type_id']))
@@ -503,6 +483,7 @@ function createEvent($pdo, $data)
     }
     catch (Exception $e)
     {
+        // rollback changes incase of error
         $pdo->rollBack();
         send_response('error', 'Error creating/updatingevent: ' . $e->getMessage(), 500);
     }
@@ -524,6 +505,7 @@ function getBookedEvents($pdo, $data)
 
     try
     {
+        // get all registration information baesd on userid
         $stmt = $pdo->prepare("
             SELECT
                 r.registration_id,
@@ -547,10 +529,12 @@ function getBookedEvents($pdo, $data)
 
         $events = [];
 
+        // attach all ticket information to registration information
         foreach ($registrations as $registration)
         {
             $registrationId = $registration['registration_id'];
 
+            // get ticket info based on regid
             $ticketStmt = $pdo->prepare("
                 SELECT
                     tt.name AS ticket_type,
@@ -564,6 +548,7 @@ function getBookedEvents($pdo, $data)
             $ticketStmt->execute(['registration_id' => $registrationId]);
             $tickets = $ticketStmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // combine event and ticket data into 1 objecet
             $events[] = [
                 'registration_id' => $registration['registration_id'],
                 'event_id' => $registration['event_id'],
@@ -612,6 +597,7 @@ function addRegistrationInfo($pdo, $data)
     {
         $pdo->beginTransaction();
 
+        // insert reg data 
         $stmt = $pdo->prepare("
             INSERT INTO Registrations (user_id, event_id)
             VALUES (:user_id, :event_id)
@@ -622,8 +608,10 @@ function addRegistrationInfo($pdo, $data)
             'event_id' => $eventId,
         ]);
 
+        // get last reg id
         $registrationId = $pdo->lastInsertId();
 
+        // update data for each ticket
         foreach ($tickets as $ticket)
         {
             if (empty($ticket['ticketTypeId']) || !isset($ticket['amount']))
@@ -632,7 +620,7 @@ function addRegistrationInfo($pdo, $data)
             $ticketTypeId = $ticket['ticketTypeId'];
             $amount = $ticket['amount'];
 
-            // Check if enough tickets are available
+            // check if enough tickets are available
             $stmt = $pdo->prepare("
                 SELECT tickets_left FROM TicketTypes
                 WHERE ticket_type_id = :ticket_type_id AND event_id = :event_id
@@ -647,16 +635,13 @@ function addRegistrationInfo($pdo, $data)
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$row)
-            {
                 throw new Exception("Ticket type not found.");
-            }
 
+            // if not enough tickets left, send error
             if ($row['tickets_left'] < $amount)
-            {
                 throw new Exception("Not enough tickets left for ticket type ID $ticketTypeId.");
-            }
 
-            // Update tickets_left
+            // change the amount of tickets left
             $stmt = $pdo->prepare("
                 UPDATE TicketTypes
                 SET tickets_left = tickets_left - :amount
@@ -668,7 +653,7 @@ function addRegistrationInfo($pdo, $data)
                 'ticket_type_id' => $ticketTypeId
             ]);
 
-            // Add to RegistrationTickets
+            // insert ticket info
             $stmt = $pdo->prepare("
                 INSERT INTO RegistrationTickets (registration_id, ticket_type_id, quantity)
                 VALUES (:registration_id, :ticket_type_id, :quantity)
@@ -681,6 +666,7 @@ function addRegistrationInfo($pdo, $data)
             ]);
         }
 
+        // insert payment information
         $stmt = $pdo->prepare("
             INSERT INTO Payments (registration_id, amount, payment_status)
             VALUES (:registration_id, :amount, :status)
@@ -693,7 +679,6 @@ function addRegistrationInfo($pdo, $data)
         ]);
 
         $pdo->commit();
-
         send_response('success', 'Registration completed successfully!', 200, json_encode(['reg_id' => $registrationId]));
     }
     catch (Exception $e)
@@ -712,6 +697,7 @@ function getRegistrationInfo($pdo, $data)
 
     try
     {
+        // get all registration infroamtion based on regid
         $stmt = $pdo->prepare("
             SELECT 
                 r.event_id,
@@ -731,6 +717,7 @@ function getRegistrationInfo($pdo, $data)
         $eventId = $rows[0]['event_id'];
         $tickets = [];
 
+        // format each of the tickets
         foreach ($rows as $row)
         {
             $tickets[] = [
@@ -764,6 +751,7 @@ function sendNotifications($pdo, $data)
     $userIds = $data['users'];
     $date = '';
 
+    // format date if exists, otherwise use current date
     if (!empty($data['date']))
         $date = DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s');
     else
@@ -771,13 +759,13 @@ function sendNotifications($pdo, $data)
 
     try
     {
-        // inserto new notifications
+        // inserto new notification
         $stmt = $pdo->prepare("
             INSERT INTO Notifications (user_id, message, sent_at)
             VALUES (:user_id, :message, :sent_at)
         ");
 
-        // execute notifications for each user
+        // execute notification request for each user
         foreach ($userIds as $userId)
         {
             $stmt->execute([
@@ -845,7 +833,7 @@ function getEventAdminDetails($pdo, $data)
         $stmt->execute(['eventId' => $eventId]);
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // get results as data structure
+        // get results as one object
         $result = [
             'total_tickets_sold' => (int) $salesData['total_tickets_sold'],
             'total_revenue' => (float) $salesData['total_revenue'],
@@ -935,6 +923,7 @@ function getUserNotifications($pdo, $data)
 
     try
     {
+        // select all notifications wher user id matches
         $stmt = $pdo->prepare("
             SELECT notification_id, message, sent_at
             FROM Notifications
@@ -954,8 +943,14 @@ function getUserNotifications($pdo, $data)
 }
 
 try {
+    // gets database details from server
+    $db_host = getenv('DB_HOST');
+    $db_name = getenv('DB_NAME');
+    $db_user = getenv('DB_USER');
+    $db_pass = getenv('DB_PASS');
+
     // establish connection to sql database
-    $pdo = new PDO("mysql:host=localhost;dbname=u858448367_csit314", "u858448367_root", "4O|9>g0I/k", [
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     ]);
 

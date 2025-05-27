@@ -1,5 +1,6 @@
 const URL = "https://mediumslateblue-toad-454408.hostingersite.com/"; // https://mediumslateblue-toad-454408.hostingersite.com/
 
+// create footer and header
 function initFooter() { initComponent('footer', 'footer'); }
 function initHeader(hideNav = false, hideSearch = false, onLoaded = null) {
 	initComponent('header', 'header', () => {
@@ -48,6 +49,7 @@ function formatEventDate(event) {
 }
 
 function attachHeaderScripts(hideNav, showSearch) {
+    // get neccassary elements
     const profileButton = document.getElementById('profileButton');
     const profileDropdown = document.getElementById('profileDropdown');
     const hamburger = document.getElementById('hamburger');
@@ -57,12 +59,12 @@ function attachHeaderScripts(hideNav, showSearch) {
     const searchBar = document.getElementById('searchBar');
     const searchInput = searchBar?.querySelector('input');
     
+    //  show search bar on search icon click
     searchIcon?.addEventListener('click', (e) => {
         e.stopPropagation();
         searchBar?.classList.toggle('hidden');
     
-        if (!searchBar?.classList.contains('hidden'))
-        {
+        if (!searchBar?.classList.contains('hidden')) {
             searchInput?.focus();
         }
     });
@@ -72,19 +74,16 @@ function attachHeaderScripts(hideNav, showSearch) {
     });
     
     window.addEventListener('click', () => {
-        if (!searchBar?.classList.contains('hidden'))
-        {
+        if (!searchBar?.classList.contains('hidden')) {
             searchBar.classList.add('hidden');
         }
     });
 
-    window.addEventListener('keydown', (e) => 
-    {
-        if (e.key === 'Escape' && !searchBar?.classList.contains('hidden'))
-        {
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !searchBar?.classList.contains('hidden')) {
             searchBar.classList.add('hidden');
-            if (searchInput)
-            {
+
+            if (searchInput) {
                 searchInput.value = '';
             }
         }
@@ -104,6 +103,7 @@ function attachHeaderScripts(hideNav, showSearch) {
     if (showSearch)
         searchIcon.classList.remove('hidden');
 
+    // get user information
     const user = JSON.parse(localStorage.getItem('user_details'));
     const userId = localStorage.getItem('user');
 
@@ -111,6 +111,7 @@ function attachHeaderScripts(hideNav, showSearch) {
         document.getElementById('profileName').innerText = user.name;
     }
 
+    // ensure each profile dropdown button works
     headerOrgEventsBtn.onclick = function() {
         navToPage('organisedEvents.html');
     };
@@ -174,6 +175,7 @@ function attachHeaderScripts(hideNav, showSearch) {
     }
 }
 
+// navigates to page and allows redirect if page handles it
 function navToPage(page, redirectURL = null) {
     let url = page;
 
@@ -259,7 +261,7 @@ async function sqlRequest(method, action, data = null) {
             body: data ? JSON.stringify(data) : null
         };
 
-        // send request to url
+        // send request to url and show wait cursor
         document.body.style.cursor = 'wait';
         const response = await fetch(url, options);
 
@@ -267,6 +269,7 @@ async function sqlRequest(method, action, data = null) {
         if (!response.ok)
             throw new Error(`Request failed with status ${response.status}`);
 
+        // revert cursor
         document.body.style.cursor = 'default';
 
         // return response as json

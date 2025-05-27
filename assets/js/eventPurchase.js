@@ -85,6 +85,7 @@ function displayTicketSummary(event, ticketsIds) {
     const feeAmount = subTotal * (websiteFeeCharge / 100);
     const totalAmountWithFee = subTotal + feeAmount;
 
+    // format prices to currency
     const subTotalAmount = subTotal.toLocaleString('en-AU', {
         style: 'currency',
         currency: 'AUD'
@@ -128,6 +129,7 @@ function displayTicketSummary(event, ticketsIds) {
 }
 
 async function onPurchaseConfirm(eventId, userId, totalPaid, detailedTickets, tickets) {
+    // package purhcase data
     const data = {
         'user_id': userId,
         'event_id': eventId,
@@ -142,8 +144,10 @@ async function onPurchaseConfirm(eventId, userId, totalPaid, detailedTickets, ti
     if (response.status !== 'success')
         return;
 
+    // ger regId
     const regId = JSON.parse(response.data)['reg_id'];
     
+    // create params
     const params = new URLSearchParams();
     params.append("eventId", eventId);
 
@@ -152,5 +156,6 @@ async function onPurchaseConfirm(eventId, userId, totalPaid, detailedTickets, ti
         params.append(`ticket[${type}]`, count);
     }
 
+    // open confirm page with param
     navToPage('eventBookingConfirm.html?' + params.toString());
 }

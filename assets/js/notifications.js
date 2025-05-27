@@ -1,36 +1,29 @@
 async function loadNotifications() {
+    // get user id and reqeust all notifications
     const userId = localStorage.getItem('user');
-    const response = await sqlRequest('POST', 'GET_NOTIFICATIONS', {'userId': userId});
+    const response = await sqlRequest('POST', 'GET_NOTIFICATIONS', { 'userId': userId });
 
     if (response.status !== 'success') {
-        console.log(response.message);
         return;
     }
 
+    // get notifications and elements
     const notifications = JSON.parse(response.data);
-    console.log(notifications);
-
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.has('id')) {
-        
-    } else {
-
-    }
-
     const tableBody = document.getElementById('notificationsTableBody');
     const template = document.getElementById('notificationRow');
 
-    notifications.forEach(n => {
+    // loop through each notification and create html
+    notifications.forEach(noti => {
         const row = template.content.cloneNode(true);
         const tr = row.querySelector('tr');
 
+        // show notification on click
         tr.addEventListener('click', () => {
-            showNotification(n);
+            showNotification(noti);
         });
 
         const maxLength = 75;
-        let message = n.message;
+        let message = noti.message;
 
         // limit description length
         if (message.length > maxLength) {
@@ -38,7 +31,7 @@ async function loadNotifications() {
         }
 
         row.querySelector('[data-message]').textContent = message;
-        row.querySelector('[data-date]').textContent = n.sent_at;
+        row.querySelector('[data-date]').textContent = noti.sent_at;
 
         tableBody.appendChild(row);
     });
@@ -58,10 +51,9 @@ function showNotification(notification) {
         }
     };
 
-    
     document.addEventListener('keydown', hideModalOnEscape);
     document.addEventListener('click', hideModalOnEscape);
 
-    // show window
+    // hide window
     notificationModal.classList.remove('hidden');
 }

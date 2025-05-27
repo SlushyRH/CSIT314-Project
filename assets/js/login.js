@@ -1,12 +1,10 @@
-window.addEventListener("DOMContentLoaded", () =>
-{
+window.addEventListener("DOMContentLoaded", () => {
     // get redirect params
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get("redirect");
 
     // get redirect url if it exists and rmeove it from the url params
-    if (redirect)
-    {
+    if (redirect) {
         redirectUrl = redirect;
         urlParams.delete("redirect");
         
@@ -36,8 +34,7 @@ let fullName;
 let dob;
 let phoneNumber;
 
-function getElements()
-{
+function getElements() {
     titleText = document.getElementById("titleText");
     logInBtn = document.getElementById("logInBtn");
     toggleText = document.getElementById("showSignUpBtn");
@@ -57,16 +54,14 @@ function getElements()
     phoneNumber.input = phoneNumber.querySelector("input");
 }
 
-async function submitBtn(event)
-{
+async function submitBtn(event) {
     // prevent default form submission
     // this is needed to prevent the page from reloading when the form is submitted
     event.preventDefault();
 
     getElements();
 
-    if (!hasAccount)
-    {
+    if (!hasAccount) {
         // signup if hasAccount is false
         await signup(
             fullName.input.value,
@@ -79,8 +74,7 @@ async function submitBtn(event)
         // switch to login page so user can log in
         toggleLogInType();
     }
-    else
-    {
+    else {
         // otherwise login
         await login(
             email.value,
@@ -90,8 +84,7 @@ async function submitBtn(event)
 }
 
 
-function toggleLogInType()
-{
+function toggleLogInType() {
     // toggle has account
     hasAccount = !hasAccount;
 
@@ -105,8 +98,7 @@ function toggleLogInType()
     phoneNumber.input.value = "";
 
     // if hasAccount is true, only show sign in elements, otherwise show sign up elements
-    if (hasAccount)
-    {
+    if (hasAccount) {
         // change page contents
         titleText.textContent = "Log In";
         logInBtn.textContent = "Log In";
@@ -121,8 +113,7 @@ function toggleLogInType()
         // replace url with default url
         history.replaceState(null, "", location.pathname);
     }
-    else
-    {
+    else {
         // change page contents
         titleText.textContent = "Sign Up";
         logInBtn.textContent = "Sign Up";
@@ -139,21 +130,18 @@ function toggleLogInType()
     }
 }
 
-async function login(email, password)
-{
+async function login(email, password) {
     const data = {
         email: email,
         password: password
     };
 
-    try
-    {
+    try {
         // send and get response from sql api
         const response = await sqlRequest("POST", "USER_LOG_IN", data);
 
         // check if success and alert if not
-        if (response.status != "success")
-        {
+        if (response.status != "success") {
             console.error("Login Failed:", response.message);
             return;
         }
@@ -168,14 +156,12 @@ async function login(email, password)
         else
             navToPage('index.html');
     }
-    catch (error)
-    {
+    catch (error) {
         console.error("Login Failed:", error);
     }
 }
 
-async function signup(name, dob, phoneNumber, email, password)
-{
+async function signup(name, dob, phoneNumber, email, password) {
     // package data to to send to api
     const data = {
         name: name,
@@ -185,20 +171,17 @@ async function signup(name, dob, phoneNumber, email, password)
         password: password
     };
 
-    try
-    {
+    try {
         // send and get response
         const response = await sqlRequest("POST", "USER_SIGN_UP", data);
 
         // log error if not success
-        if (response.status !== "success")
-        {
+        if (response.status !== "success") {
             console.error("Signup Failed:", response.message);
             return;
         }
     }
-    catch (error)
-    {
+    catch (error) {
         console.error("Signup Failed:", error);
     }
 }

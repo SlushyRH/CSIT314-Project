@@ -1,103 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        
-        <title>Event Admin Panel</title>
-        <link rel="icon" href="content/logo.png" type="image/x-icon" />
-        
-        <link rel="stylesheet" href="assets/css/main.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-        
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-        <script src="assets/js/global.js"></script>
-        <script src="assets/js/eventAdminPanel.js"></script>
-    </head>
 
-    <body class="min-h-screen flex flex-col bg-(--bg)">
-        <div id="header"></div>
-        <main class="flex-grow flex-col items-center justify-center">
-            <div class="max-w-4xl mx-auto bg-(--secondary) rounded-lg px-4 py-8 flex flex-col items-left justify-center">
-                <h1 class="text-3xl font-bold text-left text-(--text) mb-2">
-                    <span data-event-title=""></span>
-                    <span class="font-semibold text-xl text-(--hover-text)" data-event-category=""></span>
-                </h1>
-                <p class="text-lg text-left text-(--hover-text) mb-6">
-                    <span data-event-location=""></span>
-                    @
-                    <span data-event-date=""></span>
-                </p>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-                <div class="flex flex-wrap justify-center gap-4 mb-6">
-                    <div class="bg-(--bg) text-(--text) px-6 py-4 rounded-lg flex items-center gap-3 shadow">
-                        <i class="fa-solid fa-ticket text-xl text-(--icon)"></i>
-                        <span>Total Tickets Sold: <span data-total-tickets=""></span></span>
-                    </div>
-                    <div class="bg-(--bg) text-(--text) px-6 py-4 rounded-lg flex items-center gap-3 shadow">
-                        <i class="fa-solid fa-dollar-sign text-xl text-(--icon)"></i>
-                        <span>Total Money Made: <span data-total-money=""></span></span>
-                    </div>
-                </div>
+	<title>Event Admin Panel</title>
+	<link rel="icon" href="content/logo.png" type="image/x-icon" />
 
-                <div class="flex gap-4 flex-wrap justify-center">
-                    <button id="editEventBtn" class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-5 py-2 rounded-lg cursor-pointer">Edit Event</button>
-                    <button id="openNotificationWindow" class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-5 py-2 rounded-lg cursor-pointer">Send Notification</button>
-                </div>
-            </div>
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
-            <div class="max-w-4xl mx-auto bg-(--secondary) rounded-lg px-4 py-8 flex flex-col items-left justify-center mt-4">
-                <div>
-                    <h2 class="text-xl font-bold text-(--text) mb-4">Approved Attendees: <span data-total-attendees=""></span></h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-(--bg) text-(--text) rounded-lg shadow">
-                            <thead>
-                                <tr class="bg-(--bg)">
-                                    <th class="text-left px-4 py-2">Name</th>
-                                    <th class="text-left px-4 py-2">Email</th>
-                                    <th class="text-left px-4 py-2">Status</th>
-                                    <th class="text-left px-4 py-2">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>                                
-                                <!-- attendees here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+	<script src="assets/js/global.js"></script>
+	<script src="assets/js/eventAdminPanel.js"></script>
+</head>
 
-                <template id="attendeeRow">
-                    <tr class="border-t border-(--hover-text)">
-                        <td class="px-4 py-2" data-attendee-name=""></td>
-                        <td class="px-4 py-2" data-attendee-email=""></td>
-                        <td class="px-4 py-2" data-attendee-status=""></td>
-                        <td class="px-4 py-2">
-                            <button data-approve-btn="" class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded-lg cursor-pointer">Approve</button>
-                            <button data-reject-btn="" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded-lg cursor-pointer">Reject</button>
-                        </td>
-                    </tr>
-                </template>
-            </div>
+<body class="min-h-screen flex flex-col bg-(--bg)">
+	<div id="header"></div>
+	<main class="flex-grow flex-col items-center justify-center">
+		<div class="max-w-4xl mx-auto bg-(--secondary) rounded-lg px-4 py-8 flex flex-col items-left justify-center">
+			<h1 class="text-3xl font-bold text-left text-(--text) mb-2">
+				<span data-event-title=""></span>
+				<span class="font-semibold text-xl text-(--hover-text)" data-event-category=""></span>
+			</h1>
+			<p class="text-lg text-left text-(--hover-text) mb-6">
+				<span data-event-location=""></span>
+				@
+				<span data-event-date=""></span>
+			</p>
 
-            <div id="notificationModal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-50 hidden">
-                <div class="bg-(--secondary) rounded-2xl p-6 w-full max-w-md text-center">
-                    <h2 class="text-2xl font-semibold mb-4">Send Notification</h2>
-                    <input type="textarea" id="notificationMessage" placeholder="Message..." class="w-full rounded border-2 border-(--form-outline) p-3 mb-6 focus:outline-none focus:ring-4 focus:ring-(--form-focus-outline)" />
-                    <div class="flex justify-center gap-4">
-                        <button id="sendBtn" class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded-lg cursor-pointer">Send</button>
-                        <button id="cancelBtn" class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded-lg cursor-pointer">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </main>
+			<div class="flex flex-wrap justify-center gap-4 mb-6">
+				<div class="bg-(--bg) text-(--text) px-6 py-4 rounded-lg flex items-center gap-3 shadow">
+					<i class="fa-solid fa-ticket text-xl text-(--icon)"></i>
+					<span>Total Tickets Sold: <span data-total-tickets=""></span></span>
+				</div>
+				<div class="bg-(--bg) text-(--text) px-6 py-4 rounded-lg flex items-center gap-3 shadow">
+					<i class="fa-solid fa-dollar-sign text-xl text-(--icon)"></i>
+					<span>Total Money Made: <span data-total-money=""></span></span>
+				</div>
+			</div>
 
-        <div id="footer"></div>
+			<div class="flex gap-4 flex-wrap justify-center">
+				<button id="editEventBtn"
+					class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-5 py-2 rounded-lg cursor-pointer">Edit
+					Event</button>
+				<button id="openNotificationWindow"
+					class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-5 py-2 rounded-lg cursor-pointer">Send
+					Notification</button>
+			</div>
+		</div>
 
-        <script>
-            initHeader();
-            initFooter();
+		<div
+			class="max-w-4xl mx-auto bg-(--secondary) rounded-lg px-4 py-8 flex flex-col items-left justify-center mt-4">
+			<div>
+				<h2 class="text-xl font-bold text-(--text) mb-4">Approved Attendees: <span
+						data-total-attendees=""></span></h2>
+				<div class="overflow-x-auto">
+					<table class="min-w-full bg-(--bg) text-(--text) rounded-lg shadow">
+						<thead>
+							<tr class="bg-(--bg)">
+								<th class="text-left px-4 py-2">Name</th>
+								<th class="text-left px-4 py-2">Email</th>
+								<th class="text-left px-4 py-2">Status</th>
+								<th class="text-left px-4 py-2">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- attendees here -->
+						</tbody>
+					</table>
+				</div>
+			</div>
 
-            getEventInfo();
-        </script>
-    </body>
+			<template id="attendeeRow">
+				<tr class="border-t border-(--hover-text)">
+					<td class="px-4 py-2" data-attendee-name=""></td>
+					<td class="px-4 py-2" data-attendee-email=""></td>
+					<td class="px-4 py-2" data-attendee-status=""></td>
+					<td class="px-4 py-2">
+						<button data-approve-btn=""
+							class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded-lg cursor-pointer">Approve</button>
+						<button data-reject-btn=""
+							class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded-lg cursor-pointer">Reject</button>
+					</td>
+				</tr>
+			</template>
+		</div>
+
+		<div id="notificationModal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-50 hidden">
+			<div class="bg-(--secondary) rounded-2xl p-6 w-full max-w-md text-center">
+				<h2 class="text-2xl font-semibold mb-4">Send Notification</h2>
+				<input type="textarea" id="notificationMessage" placeholder="Message..."
+					class="w-full rounded border-2 border-(--form-outline) p-3 mb-6 focus:outline-none focus:ring-4 focus:ring-(--form-focus-outline)" />
+				<div class="flex justify-center gap-4">
+					<button id="sendBtn"
+						class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded-lg cursor-pointer">Send</button>
+					<button id="cancelBtn"
+						class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded-lg cursor-pointer">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<div id="footer"></div>
+
+	<script>
+		initHeader();
+		initFooter();
+
+		getEventInfo();
+	</script>
+</body>
+
 </html>

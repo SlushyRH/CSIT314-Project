@@ -1,50 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CSIT314 Project</title>
-    <link rel="icon" href="content/logo.png" type="image/x-icon">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+	<title>CSIT314 Project</title>
+	<link rel="icon" href="content/logo.png" type="image/x-icon">
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="assets/js/global.js"></script>
-    <script src="assets/js/eventBookingConfirm.js"></script>
-    <script src="assets/js/eventPurchase.js"></script>
-  </head>
+	<link rel="stylesheet" href="assets/css/main.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-  <body class="min-h-screen flex flex-col">
-    <div id="header"></div>
-      <main class="flex-grow">
+	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+	<script src="assets/js/global.js"></script>
+	<script src="assets/js/eventBookingConfirm.js"></script>
+	<script src="assets/js/eventPurchase.js"></script>
+</head>
+
+<body class="min-h-screen flex flex-col">
+	<div id="header"></div>
+	<main class="flex-grow">
 
 		<div class="max-w-6xl mx-auto px-4 py-6 flex flex-col justify-center items-center min-h-[calc(100vh-100px)]">
-          <h1 class="text-2xl text-center font-bold text-(--text) mb-2">Booking Confirmed</h1>
-          <h1 id="eventTitle" class="text-xl text-center text-(--text) mb-2">Event Title</h1>
-          <h1 id="eventLocation" class="text-center text-(--text) mb-4">Event Location</h1>
+			<h1 class="text-2xl text-center font-bold text-(--text) mb-2">Booking Confirmed</h1>
+			<h1 id="eventTitle" class="text-xl text-center text-(--text) mb-2">Event Title</h1>
+			<h1 id="eventLocation" class="text-center text-(--text) mb-4">Event Location</h1>
 
-          <div class="flex flex-col lg:flex-row gap-6">
-              <!-- ticket info -->
-              <div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow space-y-4">
-                  <h2 class="text-xl text-center font-semibold text-(--text)">Ticket Summary</h2>
-                  <table class="w-full text-(--text)">
-                      <thead>
-                          <tr class="border-b border-(--form-focus-outline)">
-                              <th class="text-left p-2">Quantity</th>
-                              <th class="text-left p-2">Name</th>
-                              <th class="text-left p-2">Description</th>
-                              <th class="text-left p-2">Price</th>
-                          </tr>
-                      </thead>
-                      <tbody id="ticketTableBody">
-                          <tr>
-                            
-                          </tr>
-                      </tbody>
-                  </table>
-              </div>
+			<div class="flex flex-col lg:flex-row gap-6">
+				<div class="flex-1 bg-(--secondary) p-4 rounded-xl shadow space-y-4">
+					<h2 class="text-xl text-center font-semibold text-(--text)">Ticket Summary</h2>
+					<table class="w-full text-(--text)">
+						<thead>
+							<tr class="border-b border-(--form-focus-outline)">
+								<th class="text-left p-2">Quantity</th>
+								<th class="text-left p-2">Name</th>
+								<th class="text-left p-2">Description</th>
+								<th class="text-left p-2">Price</th>
+							</tr>
+						</thead>
+						<tbody id="ticketTableBody">
+							<tr>
+
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
 				<template id="ticketRowTemplate">
 					<tr class=" border-b">
@@ -55,46 +55,46 @@
 					</tr>
 				</template>
 
-              <!-- payment info -->
-              <div class="flex-1 bg-(--secondary) p-4 rounded-xl max-w-[400px] shadow flex flex-col">                
-				<div id="qrCode" class="flex flex-col justify-center items-center w-full">
-					<p class="text-center mb-4">
-                    	Show the QR code below to gain access to the event.
-                	</p>
+				<div class="flex-1 bg-(--secondary) p-4 rounded-xl max-w-[400px] shadow flex flex-col">
+					<div id="qrCode" class="flex flex-col justify-center items-center w-full">
+						<p class="text-center mb-4">
+							Show the QR code below to gain access to the event.
+						</p>
 
-					<span class="w-full max-w-[250px] flex justify-center">
-						<img src="/content/qr-example.png" alt="Gate Pass" class="object-contain" />
-					</span>
-				</div>
+						<span class="w-full max-w-[250px] flex justify-center">
+							<img src="/content/qr-example.png" alt="Gate Pass" class="object-contain" />
+						</span>
+					</div>
 
-				<div class="mt-auto space-y-4 text-(--text) pt-4">
-					<div class="space-y-2">
-						<div class="flex justify-between">
-							<span>Subtotal</span>
-							<span id="subtotalAmount">$0.00</span>
-						</div>
-						<div class="flex justify-between">
-							<span id="feePercent">Fee (5%)</span>
-							<span id="feeAmount">$0.00</span>
-						</div>
-						<div class="flex justify-between font-bold">
-							<span>Total</span>
-							<span id="totalAmount">$0.00</span>
+					<div class="mt-auto space-y-4 text-(--text) pt-4">
+						<div class="space-y-2">
+							<div class="flex justify-between">
+								<span>Subtotal</span>
+								<span id="subtotalAmount">$0.00</span>
+							</div>
+							<div class="flex justify-between">
+								<span id="feePercent">Fee (5%)</span>
+								<span id="feeAmount">$0.00</span>
+							</div>
+							<div class="flex justify-between font-bold">
+								<span>Total</span>
+								<span id="totalAmount">$0.00</span>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-          </div>
-      </div>
+		</div>
 
-      </main>
-    <div id="footer"></div>
+	</main>
+	<div id="footer"></div>
 
-    <script>
-        initHeader();      
-        initFooter();
+	<script>
+		initHeader();
+		initFooter();
 
-        getRegistration();
-    </script>
-  </body>    
+		getRegistration();
+	</script>
+</body>
+
 </html>
