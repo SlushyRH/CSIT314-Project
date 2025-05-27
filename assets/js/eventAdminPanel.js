@@ -13,17 +13,41 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.classList.add('hidden');
     });
 
-    sendBtn.addEventListener('click', function() {
-        const message = document.getElementById('notificationMessage').value;
-        modal.classList.add('hidden');
-
-        console.log('Sending Notification:', message);
-    });
+    sendBtn.addEventListener('click', sendNotification);
 });
+
+let registeredUsers = [];
+
+async function sendNotification() {
+    const message = document.getElementById('notificationMessage').value;
+    console.log('Sending Notification:', message);
+
+    const data = {
+        msg: message,
+        users: registeredUsers
+    };
+
+    console.log(data);
+    const response = await sqlRequest('POST', 'SEND_NOTIFICATIONS', data);
+    console.log(response);
+
+    const modal = document.getElementById('notificationModal');
+
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
 
 function getEventInfo() {
     const params  = new URLSearchParams(window.location.search);
     const eventId = params.get("eventId");
+
+    document.getElementById('editEventBtn').onclick = function() {
+        const params = new URLSearchParams();
+        params.set("eventId", eventId);
+
+        navToPage('createEvent.html?' + params.toString());
+    };
 
     const event = getEvent(eventId);
 
@@ -46,6 +70,10 @@ async function getAdminData(eventId) {
 
     const data = JSON.parse(response.data);
     console.log(data);
+
+    data.registered_users.forEach(user => {
+        registeredUsers.push(parseInt(user.user_id));
+    });
 
     fillAdminData(eventId, data)
 }
@@ -79,13 +107,22 @@ function fillAdminData(eventId, data) {
         const approveBtn = clone.querySelector('[data-approve-btn]');
         const rejectBtn = clone.querySelector('[data-reject-btn]');
 
-        approveBtn.onclick = (e) => {
-            changeUserStatus(eventId, user.user_id, 'approved', statusData);
-        };
+        if (user.status === 'pending') {
+            approveBtn.onclick = (e) => {
+                changeUserStatus(eventId, user.user_id, 'approved', statusData);
+                approveBtn.classList.add('hidden');
+                rejectBtn.classList.add('hidden');
+            };
 
-        rejectBtn.onclick = (e) => {
-            changeUserStatus(eventId, user.user_id, 'rejected', statusData);
-        };
+            rejectBtn.onclick = (e) => {
+                changeUserStatus(eventId, user.user_id, 'rejected', statusData);
+                approveBtn.classList.add('hidden');
+                rejectBtn.classList.add('hidden');
+            };
+        } else {
+            approveBtn.classList.add('hidden');
+            rejectBtn.classList.add('hidden');
+        }
 
         tbody.appendChild(clone);
     });
@@ -93,6 +130,7 @@ function fillAdminData(eventId, data) {
 
 async function changeUserStatus(eventId, userId, newStatus, statusHtml) {
     statusHtml.textContent = newStatus;
+    
 
     const data = {
         'eventId': eventId,
@@ -101,5 +139,4 @@ async function changeUserStatus(eventId, userId, newStatus, statusHtml) {
     };
 
     const response = await sqlRequest('POST', 'UPDATE_USER_STATUS', data);
-    console.log(response);
 }

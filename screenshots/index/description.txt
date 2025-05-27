@@ -1,0 +1,23 @@
+index:
+the main page shows a grid of all events that are not in the past,
+the grid is mobile friendly with each event showing the event title,
+date, category, and a brief description of the event. when the user
+clicks the event, it will open a modal window with ticket information
+
+index-event:
+the event modal window showcases all the event information needed,
+along with all the tickets in a table allowing the user to choose
+a quantity of tickets. clicking 'purchse' opens the ticket purchase
+page to allow the user to pay for the tickets.
+
+index-filters:
+showcases events that have been filtereed
+
+index-search:
+showcases events limited by the search bar in the top right
+
+index-profile:
+showcases the profile dropdown
+
+mobile-index:
+this image is just a showcase of this page on mobile

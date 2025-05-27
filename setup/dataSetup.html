@@ -8,24 +8,263 @@
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <script src="/assets/js/testsHelper.js"></script>
         <script src="/assets/js/global.js"></script>
+    </head>
+    <body class="min-h-screen flex flex-col">
+
+        <main class="flex-grow flex flex-col gap-10 items-center justify-center">
+            <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer px-6 py-3 rounded-lg" onclick="setup();">
+                Run Setup
+            </button>
+        </main>
 
         <script>
+            // values for category
+            const COMEDY = 12;
+            const CONCERT = 5;
+            const CONFERENCE = 7;
+            const LESSON = 10;
+            const MUSICAL = 6;
+            const OTHER = 11;
+            const SHOWCASE = 9;
+            const SPORT = 8;
+
+            // values for locations
+            const ADELAIDE = 'Adelaide';
+            const BRISBANE = 'Brisbane';
+            const CANBERRA = 'Canberra';
+            const COFFS_HARBOUR = 'Coffs Harbour';
+            const DARWIN = 'Darwin';
+            const HOBART = 'Hobart';
+            const MELBOURNE = 'Melbourne';
+            const NEWCASTLE = 'Newcastle';
+            const PERTH = 'Perth';
+            const SYDNEY = 'Sydney';
+            const GERMANY = 'Germany';
+            const POLAND = 'Poland';
+            const UK = 'United Kingdom';
+            const USA = 'USA';
+
             async function setup() {
-                await signup('FIFA', '1958-09-07', '0202 234 114', 'football@fifa.com', 'AllWeWantIsMoney');
-                await signup('John Doe', '2000-01-01', '0423 144 923', 'johndoe@gmail.com', 'johndoe');
-                await signup('Jim Jones', '2010-01-15', '123 4245 233', 'jimjones@gmail.com', 'JimJonesPassword');
-                await signup('Harry Ape', '2012-04-25', '023 2222 139', 'harryApe888@gmail.com', 'HarryTheApe');
-                await signup('Heisenberg', '1958-09-07', '0103 923 877', 'walterwhite@outlook.com', 'Breaking@Bad');
-                await signup('William Zhao', '1991-03-30', '0435 884 920', 'wZhao91@outlook.com', 'willz91');
-                await signup('Isabella Martin', '1996-08-23', '0451 673 288', 'izzymartin96@outlook.com', 'bella96');        
-                await signup('Ava Richardson', '2000-03-24', '0482 119 382', 'avaRich2000@gmail.com', 'password123');
-                await signup('Marcus Bennett', '1987-11-03', '0456 203 190', 'mbennett87@gmail.com', 'marcus87');
-                await signup('Chloe Nguyen', '1998-01-22', '0479 448 200', 'QueenChloe98@gmail.com', 'chloeng98');
-                await signup('Ethan Brooks', '1990-05-11', '0430 114 229', 'ethanbrooks90@icloud.com', 'brooks90');
-                await signup('Amelia White', '1985-09-29', '0423 803 166', 'amelia85@icloud.com', 'amelia85');
-                await signup('Lucas Patel', '1992-04-18', '0418 764 111', 'lucas.patel92@gmail.com', 'lucas92');
-                await signup('Grace Thompson', '1995-12-05', '0499 281 753', 'graceQueen95@yahoo.com', 'grace95');
-                await signup('Noah Murphy', '1988-02-17', '0402 597 640', 'nmurphy88@outlook.com', 'noah888');
+                // create users
+                const johnDoe = await signup('John Doe', '2000-01-01', '0423 144 923', 'johndoe@gmail.com', 'johndoe');
+                const jimJones = await signup('Jim Jones', '2010-01-15', '123 4245 233', 'jimjones@gmail.com', 'JimJonesPassword');
+                const harryApe = await signup('Harry Ape', '2012-04-25', '023 2222 139', 'harryApe888@gmail.com', 'HarryTheApe');
+                const walterWhite = await signup('Heisenberg', '1958-09-07', '0103 923 877', 'walterwhite@outlook.com', 'Breaking@Bad');
+                const willZhao = await signup('William Zhao', '1991-03-30', '0435 884 920', 'wZhao91@outlook.com', 'willz91');
+                const izzyMartin = await signup('Isabella Martin', '1996-08-23', '0451 673 288', 'izzymartin96@outlook.com', 'bella96');        
+                const avaRichardson = await signup('Ava Richardson', '2000-03-24', '0482 119 382', 'avaRich2000@gmail.com', 'password123');
+                const marcusBennett = await signup('Marcus Bennett', '1987-11-03', '0456 203 190', 'mbennett87@gmail.com', 'marcus87');
+                const choleNguyen = await signup('Chloe Nguyen', '1998-01-22', '0479 448 200', 'QueenChloe98@gmail.com', 'chloeng98');
+                const ethanBrooks = await signup('Ethan Brooks', '1990-05-11', '0430 114 229', 'ethanbrooks90@icloud.com', 'brooks90');
+                const ameliaWhite = await signup('Amelia White', '1985-09-29', '0423 803 166', 'amelia85@icloud.com', 'amelia85');
+                const lucaPatel = await signup('Lucas Patel', '1992-04-18', '0418 764 111', 'lucas.patel92@gmail.com', 'lucas92');
+                const graceThompson = await signup('Grace Thompson', '1995-12-05', '0499 281 753', 'graceQueen95@yahoo.com', 'grace95');
+                const noahMurhpy = await signup('Noah Murphy', '1988-02-17', '0402 597 640', 'nmurphy88@outlook.com', 'noah888');
+                const sophieLee = await signup('Sophie Lee', '1999-07-08', '0401 222 333', 'sophielee99@gmail.com', 'sophielee99');
+
+                console.log('Generated all users!');
+
+                // create events, tickets, and registrations
+                const codeConTicket1 = createTicket('General', 300, 60, 'General admission');
+                const codeConTicket2 = createTicket('Early Bird', 100, 100, 'Early access to the panels');
+                const codeConEvent = await createEvent('CodeCon', johnDoe, CONFERENCE, MELBOURNE, '19:00 07/07/2025', 'CodeCon is a premier tech conference bringing together developers from around the globe.', [codeConTicket1, codeConTicket2]);
+                await createRegistration(codeConEvent, ethanBrooks, [{ticket: codeConTicket2, quantity: 3}]);
+                await createRegistration(codeConEvent, choleNguyen, [{ticket: codeConTicket1, quantity: 2}]);
+                await createRegistration(codeConEvent, graceThompson, [{ticket: codeConTicket1, quantity: 1}]);
+
+                const laughRiotTicket1 = createTicket('General', 800, 60, 'General admission');
+                const laughRiotTicket2 = createTicket('Front Row', 22, 99, 'Front row access');
+                const laughRiotEvent = await createEvent('Laugh Riot', choleNguyen, COMEDY, POLAND, '09:00 28/07/2025', 'Laugh Riot is a night of pure comedy featuring top stand-up performers and hilarious improv acts.', [laughRiotTicket1, laughRiotTicket2]);
+                await createRegistration(laughRiotEvent, willZhao, [{ticket: laughRiotTicket1, quantity: 1}]);
+                await createRegistration(laughRiotEvent, lucaPatel, [{ticket: laughRiotTicket2, quantity: 2}]);
+
+                const fitness101Ticket1 = createTicket('General', 500, 80, 'General admission');
+                const fitness101Event = await createEvent('Fitness 101', avaRichardson, LESSON, PERTH, '07:30 12/08/2025', 'Fitness 101 is a beginner friendly bootcamp covering strength, cardio, and flexibility training.', [fitness101Ticket1]);
+                await createRegistration(fitness101Event, jimJones, [{ticket: fitness101Ticket1, quantity: 4}]);
+                await createRegistration(fitness101Event, sophieLee, [{ticket: fitness101Ticket1, quantity: 1}]);
+                await createRegistration(fitness101Event, walterWhite, [{ticket: fitness101Ticket1, quantity: 2}]);
+
+                const jazzFestivalTicket1 = createTicket('General', 450, 80, 'General admission');
+                const jazzFestivalTicket2 = createTicket('VIP', 70, 150, 'VIP access');
+                const jazzFestivalEvent = await createEvent('Jazz Festival', ethanBrooks, MUSICAL, SYDNEY, '20:15 02/06/2025', 'Enjoy a smooth evening of jazz with live performances from internationally renowned artists.', [jazzFestivalTicket1, jazzFestivalTicket2]);
+                await createRegistration(jazzFestivalEvent, johnDoe, [{ticket: jazzFestivalTicket2, quantity: 2}]);
+                await createRegistration(jazzFestivalEvent, graceThompson, [{ticket: jazzFestivalTicket1, quantity: 3}]);
+                await createRegistration(jazzFestivalEvent, lucaPatel, [{ticket: jazzFestivalTicket1, quantity: 1}]);
+
+                const globalMarketTicket1 = createTicket('General', 350, 40, 'General admission');
+                const globalMarketTicket2 = createTicket('VIP', 150, 200, 'VIP access');
+                const globalMarketEvent = await createEvent('Global Market', izzyMartin, OTHER, NEWCASTLE, '12:30 05/06/2025', 'Explore a world of flavors, crafts, and cultures at this vibrant international market.', [globalMarketTicket1, globalMarketTicket2]);
+                await createRegistration(globalMarketEvent, marcusBennett, [{ticket: globalMarketTicket1, quantity: 2}]);
+                await createRegistration(globalMarketEvent, walterWhite, [{ticket: globalMarketTicket2, quantity: 1}]);
+
+                const aiFutureTicket1 = createTicket('General', 700, 100, 'General admission');
+                const aiFutureTicket2 = createTicket('Early Bird', 100, 200, 'VIP access');
+                const aiFutureEvent = await createEvent('AI Future', noahMurhpy, CONFERENCE, USA, '09:00 13/07/2025', 'AI Future explores the cutting-edge developments and ethical challenges in artificial intelligence.', [aiFutureTicket1, aiFutureTicket2]);
+                await createRegistration(aiFutureEvent, willZhao, [{ticket: aiFutureTicket2, quantity: 1}]);
+                await createRegistration(aiFutureEvent, lucaPatel, [{ticket: aiFutureTicket1, quantity: 5}]);
+                await createRegistration(aiFutureEvent, jimJones, [{ticket: aiFutureTicket1, quantity: 2}, {ticket: aiFutureTicket2, quantity: 2}]);
+
+                const streetSoccerTicket1 = createTicket('Play', 60, 80, 'Register to play');
+                const streetSoccerTicket2 = createTicket('Viewer', 600, 25, 'General admission to watch');
+                const streetSoccerEvent = await createEvent('Street Soccer', ameliaWhite, SPORT, SYDNEY, '16:45 22/08/2025', 'Join the excitement of a outdoor street soccer tournament open to anyone.', [streetSoccerTicket1, streetSoccerTicket2]);
+                await createRegistration(streetSoccerEvent, sophieLee, [{ticket: streetSoccerTicket1, quantity: 3}]);
+                await createRegistration(streetSoccerEvent, walterWhite, [{ticket: streetSoccerTicket1, quantity: 1}]);
+                await createRegistration(streetSoccerEvent, willZhao, [{ticket: streetSoccerTicket1, quantity: 4}]);
+                await createRegistration(streetSoccerEvent, jimJones, [{ticket: streetSoccerTicket2, quantity: 2}]);
+
+                const theBigSingTicket1 = createTicket('General', 900, 80, 'General admission');
+                const theBigSingEvent = await createEvent('The Big Sing', graceThompson, SHOWCASE, UK, '21:00 30/07/2025', 'A large scale vocal performance where choirs and soloists come together for an unforgettable musical showcase.', [theBigSingTicket1]);
+                await createRegistration(theBigSingEvent, harryApe, [{ticket: theBigSingTicket1, quantity: 1}]);
+                await createRegistration(theBigSingEvent, ethanBrooks, [{ticket: theBigSingTicket1, quantity: 2}]);
+
+                const actingClassTicket1 = createTicket('General', 40, 60, 'General admission');
+                const actingClassEvent = await createEvent('Acting Class', harryApe, LESSON, GERMANY, '13:00 03/08/2025', 'A hands-on workshop for aspiring actors to learn the fundamentals of performance and stage presence.', [actingClassTicket1]);
+                await createRegistration(actingClassEvent, izzyMartin, [{ticket: actingClassTicket1, quantity: 3}]);
+
+                const gamingBashTicket1 = createTicket('General', 700, 60, 'General admission');
+                const gamingBashEvent = await createEvent('Gaming Bash', walterWhite, SHOWCASE, COFFS_HARBOUR, '17:25 11/08/2025', 'A community gaming celebration featuring tournaments, free-play areas, and game previews.', [gamingBashTicket1]);
+                await createRegistration(gamingBashEvent, johnDoe, [{ticket: gamingBashTicket1, quantity: 1}]);
+                await createRegistration(gamingBashEvent, sophieLee, [{ticket: gamingBashTicket1, quantity: 2}]);
+                await createRegistration(gamingBashEvent, willZhao, [{ticket: gamingBashTicket1, quantity: 1}]);
+
+                const gameShowcaseTicket1 = createTicket('Day Pass', 500, 59, 'General admisson for a single day');
+                const gameShowcaseTicket2 = createTicket('Weekend Pass', 1500, 120, 'General admission for the full weekend');
+                const gameShowcaseTicket3 = createTicket('Insider Pass', 250, 250, 'General admission for the full weekend with full access to everywhere');
+                const gameShowcaseEvent = await createEvent('Game Showcase', marcusBennett, SHOWCASE, SYDNEY, '09:00 27/06/2025', 'A multi-day event showcasing the newest and greatest games!', [gameShowcaseTicket1, gameShowcaseTicket2, gameShowcaseTicket3]);
+                await createRegistration(gameShowcaseEvent, sophieLee, [{ticket: gameShowcaseTicket1, quantity: 4}]);
+                await createRegistration(gameShowcaseEvent, johnDoe, [{ticket: gameShowcaseTicket3, quantity: 1}]);
+                await createRegistration(gameShowcaseEvent, jimJones, [{ticket: gameShowcaseTicket3, quantity: 1}, {ticket: gameShowcaseTicket2, quantity: 3}]);
+            
+                const writerSummitTicket1 = createTicket('Early Bird', 50, 40, 'Discounted ticket for early supporters');
+                const writerSummitTicket2 = createTicket('Workshop Pass', 100, 100, 'Access to all writing workshops');
+                const writerSummitEvent = await createEvent('Writer Summit', marcusBennett, CONFERENCE, HOBART, '14:00 19/10/2025', 'A summit for writers to connect, attend workshops, and share ideas across all genres.', [writerSummitTicket1, writerSummitTicket2]);
+                await createRegistration(writerSummitEvent, avaRichardson, [{ticket: writerSummitTicket2, quantity: 1}]);
+                await createRegistration(writerSummitEvent, choleNguyen, [{ticket: writerSummitTicket1, quantity: 2}]);
+
+                const laughNightTicket1 = createTicket('Balcony', 120, 50, 'Balcony seating with partial view');
+                const laughNightTicket2 = createTicket('Front Row', 20, 200, 'Premium front-row experience');
+                const laughNightEvent = await createEvent('Laugh Night', lucaPatel, COMEDY, ADELAIDE, '22:05 23/08/2025', 'A hilarious evening filled with standup comedy and live entertainment to keep you up all night.', [laughNightTicket1, laughNightTicket2]);
+                await createRegistration(laughNightEvent, noahMurhpy, [{ticket: laughNightTicket1, quantity: 1}]);
+                await createRegistration(laughNightEvent, jimJones, [{ticket: laughNightTicket2, quantity: 2}]);
+                await createRegistration(laughNightEvent, walterWhite, [{ticket: laughNightTicket2, quantity: 4}]);
+
+                const danceBootcampTicket1 = createTicket('Dancer', 150, 90, 'Admission for dancers to come aand learn');
+                const danceBootcampEvent = await createEvent('Dance Bootcamp', jimJones, LESSON, DARWIN, '10:00 01/06/2025', 'An intensive training session for dancers to improve their skills and techniques.', [danceBootcampTicket1]);
+                await createRegistration(danceBootcampEvent, graceThompson, [{ticket: danceBootcampTicket1, quantity: 1}]);
+                await createRegistration(danceBootcampEvent, izzyMartin, [{ticket: danceBootcampTicket1, quantity: 2}]);
+
+                const indieJamTicket1 = createTicket('Standard', 200, 70, 'Access to the standard zone');
+                const indieJamTicket2 = createTicket('Lounge', 40, 130, 'Access to the luxurious longe zone');
+                const indieJamEvent = await createEvent('Indie Jam', sophieLee, MUSICAL, BRISBANE, '16:00 09/06/2025', 'An afternoon for indie game developers to create, innovate, and imrpove!', [indieJamTicket1, indieJamTicket2]);
+                await createRegistration(indieJamEvent, willZhao, [{ticket: indieJamTicket1, quantity: 3}]);
+                await createRegistration(indieJamEvent, choleNguyen, [{ticket: indieJamTicket2, quantity: 1}]);
+                await createRegistration(indieJamEvent, avaRichardson, [{ticket: indieJamTicket1, quantity: 2}]);
+
+                const smartHomeExpoTicket1 = createTicket('Tech Pass', 500, 60, 'Access to technology showcases');
+                const smartHomeExpoTicket2 = createTicket('Full Access', 100, 120, 'Entry plus all sessions');
+                const smartHomeExpoEvent = await createEvent('Smart Home Expo', willZhao, SHOWCASE, CANBERRA, '10:00 15/08/2025', 'An exhibition of the latest smart home innovations and technologies.', [smartHomeExpoTicket1, smartHomeExpoTicket2]);
+                await createRegistration(smartHomeExpoEvent, harryApe, [{ticket: smartHomeExpoTicket1, quantity: 2}]);
+                await createRegistration(smartHomeExpoEvent, noahMurhpy, [{ticket: smartHomeExpoTicket2, quantity: 1}]);
+                await createRegistration(smartHomeExpoEvent, choleNguyen, [{ticket: smartHomeExpoTicket1, quantity: 3}]);
+
+                const fightNightTicket1 = createTicket('Upper Deck', 300, 50, 'Standard seating in upper deck');
+                const fightNightTicket2 = createTicket('Cage Side', 20, 250, 'Premium cage-side experience');
+                const fightNightEvent = await createEvent('Fight Night', lucaPatel, SPORT, BRISBANE, '20:00 23/08/2025', 'An  night of mixed martial arts bouts and high-intensity fights for your pleasure.', [fightNightTicket1, fightNightTicket2]);
+                await createRegistration(fightNightEvent, marcusBennett, [{ticket: fightNightTicket1, quantity: 1}]);
+                await createRegistration(fightNightEvent, johnDoe, [{ticket: fightNightTicket2, quantity: 2}]);
+                await createRegistration(fightNightEvent, walterWhite, [{ticket: fightNightTicket1, quantity: 1}]);
+                await createRegistration(fightNightEvent, harryApe, [{ticket: fightNightTicket2, quantity: 3}]);
+                await createRegistration(fightNightEvent, avaRichardson, [{ticket: fightNightTicket1, quantity: 5}]);
+
+                const filmWorkshopTicket1 = createTicket('Observer', 80, 30, 'Watch the workshop as observer');
+                const filmWorkshopTicket2 = createTicket('Participant', 20, 100, 'Full hands-on experience');
+                const filmWorkshopEvent = await createEvent('Film Workshop', noahMurhpy, LESSON, MELBOURNE, '11:00 12/05/2025', 'A creative workshop exploring filmmaking techniques, from directing, editing and more.', [filmWorkshopTicket1, filmWorkshopTicket2]);
+                await createRegistration(filmWorkshopEvent, avaRichardson, [{ticket: filmWorkshopTicket1, quantity: 1}]);
+                await createRegistration(filmWorkshopEvent, sophieLee, [{ticket: filmWorkshopTicket2, quantity: 1}]);
+
+                const countryFestTicket1 = createTicket('Field Pass', 1000, 40, 'Access to open field area');
+                const countryFestTicket2 = createTicket('Barn Access', 100, 100, 'Exclusive barn after party access');
+                const countryFestEvent = await createEvent('Country Fest', harryApe, MUSICAL, PERTH, '17:00 05/12/2025', 'A lively outdoor festival with country music performances and a barn after party.', [countryFestTicket1, countryFestTicket2]);
+                await createRegistration(countryFestEvent, izzyMartin, [{ticket: countryFestTicket1, quantity: 3}]);
+                await createRegistration(countryFestEvent, walterWhite, [{ticket: countryFestTicket2, quantity: 1}]);
+                await createRegistration(countryFestEvent, avaRichardson, [{ticket: countryFestTicket1, quantity: 2}]);
+
+                const creatorConfTicket1 = createTicket('Viewer', 200, 40, 'Access to livestreams only');
+                const creatorConfTicket2 = createTicket('Creator Badge', 50, 90, 'Meet and greet access');
+                const creatorConfEvent = await createEvent('Creator Conference', choleNguyen, CONFERENCE, SYDNEY, '09:00 12/10/2025', 'A networking and learning event for online creators and fans.', [creatorConfTicket1, creatorConfTicket2]);
+                await createRegistration(creatorConfEvent, johnDoe, [{ticket: creatorConfTicket2, quantity: 1}]);
+                await createRegistration(creatorConfEvent, ethanBrooks, [{ticket: creatorConfTicket1, quantity: 2}]);
+
+                const winterMarketTicket1 = createTicket('Standard', 300, 20, 'Entry to winter market zone');
+                const winterMarketTicket2 = createTicket('Food Bundle', 100, 60, 'Includes entry and food tokens');
+                const winterMarketEvent = await createEvent('Winter Market', walterWhite, OTHER, NEWCASTLE, '15:00 18/09/2025', 'A cozy winter-themed market with stalls, food, and holiday vibes.', [winterMarketTicket1, winterMarketTicket2]);
+                await createRegistration(winterMarketEvent, willZhao, [{ticket: winterMarketTicket1, quantity: 3}]);
+                await createRegistration(winterMarketEvent, graceThompson, [{ticket: winterMarketTicket2, quantity: 1}]);
+
+                const artCircleTicket1 = createTicket('Gallery Pass', 150, 25, 'Standard access to art gallery');
+                const artCircleTicket2 = createTicket('Artist Lounge', 20, 80, 'Meet artists and exclusive works');
+                const artCircleEvent = await createEvent('Art Circle', izzyMartin, OTHER, SYDNEY, '13:00 04/10/2025', 'An artistic showcase featuring galleries, live painting, and artist meetups.', [artCircleTicket1, artCircleTicket2]);
+                await createRegistration(artCircleEvent, harryApe, [{ticket: artCircleTicket1, quantity: 1}]);
+                await createRegistration(artCircleEvent, johnDoe, [{ticket: artCircleTicket2, quantity: 1}]);
+
+                const coderSprintTicket1 = createTicket('Standard Entry', 200, 50, 'Join the hackathon and compete');
+                const coderSprintTicket2 = createTicket('Mentor Access', 30, 100, 'Extra support from mentors');
+                const coderSprintEvent = await createEvent('12 Hour Coder Sprint', ethanBrooks, CONFERENCE, MELBOURNE, '08:00 10/11/2025', 'A twwelve hour coding marathon for developers to solve challenges and innovate under pressure.', [coderSprintTicket1, coderSprintTicket2]);
+                await createRegistration(coderSprintEvent, graceThompson, [{ticket: coderSprintTicket2, quantity: 1}]);
+                await createRegistration(coderSprintEvent, choleNguyen, [{ticket: coderSprintTicket1, quantity: 2}]);
+
+                const salsaFeverTicket1 = createTicket('Dance Floor', 120, 60, 'General access to the floor');
+                const salsaFeverTicket2 = createTicket('Instructor Pack', 15, 150, 'Includes lessons and feedback');
+                const salsaFeverEvent = await createEvent('Salsa Fever', lucaPatel, LESSON, PERTH, '18:00 16/05/2025', 'An energetic dance night with salsa lessons, music, and social dancing.', [salsaFeverTicket1, salsaFeverTicket2]);
+                await createRegistration(salsaFeverEvent, sophieLee, [{ticket: salsaFeverTicket2, quantity: 1}]);
+                await createRegistration(salsaFeverEvent, noahMurhpy, [{ticket: salsaFeverTicket1, quantity: 2}]);
+
+                const ecoExpoTicket1 = createTicket('Green Pass', 300, 40, 'Access to eco product stalls');
+                const ecoExpoTicket2 = createTicket('Talk Access', 100, 70, 'Access to all speaker sessions');
+                const ecoExpoEvent = await createEvent('Eco Expo', willZhao, SHOWCASE, ADELAIDE, '09:00 22/07/2025', 'An expo promoting sustainability through eco-products and speaker sessions.', [ecoExpoTicket1, ecoExpoTicket2]);
+                await createRegistration(ecoExpoEvent, marcusBennett, [{ticket: ecoExpoTicket2, quantity: 1}]);
+                await createRegistration(ecoExpoEvent, avaRichardson, [{ticket: ecoExpoTicket1, quantity: 2}]);
+
+                const futureFoodsTicket1 = createTicket('Tasting Entry', 200, 60, 'Try all the futuristic dishes');
+                const futureFoodsTicket2 = createTicket('Kitchen Entry', 50, 90, 'Cook alongside food innovators');
+                const futureFoodsEvent = await createEvent('Future Foods', johnDoe, OTHER, CANBERRA, '14:00 28/05/2025', 'A culinary experience exploring innovative and futuristic food trends.', [futureFoodsTicket1, futureFoodsTicket2]);
+                await createRegistration(futureFoodsEvent, izzyMartin, [{ticket: futureFoodsTicket1, quantity: 1}]);
+                await createRegistration(futureFoodsEvent, ethanBrooks, [{ticket: futureFoodsTicket2, quantity: 1}]);
+
+                const indieFilmFestTicket1 = createTicket('Screening Only', 300, 30, 'Watch selected films only');
+                const indieFilmFestTicket2 = createTicket('All Access', 60, 100, 'Includes workshops and panels');
+                const indieFilmFestEvent = await createEvent('Indie Film Fest', walterWhite, OTHER, HOBART, '17:00 15/04/2025', 'A film festival celebrating independent filmmakers with screenings and workshops.', [indieFilmFestTicket1, indieFilmFestTicket2]);
+                await createRegistration(indieFilmFestEvent, jimJones, [{ticket: indieFilmFestTicket2, quantity: 1}]);
+                await createRegistration(indieFilmFestEvent, graceThompson, [{ticket: indieFilmFestTicket1, quantity: 2}]);
+
+                const retroGameNightTicket1 = createTicket('Arcade Mode', 150, 35, 'Unlimited arcade plays');
+                const retroGameNightTicket2 = createTicket('Competition Mode', 30, 80, 'Enter retro game challenges for a chance to win $$$');
+                const retroGameNightEvent = await createEvent('Retro Game Night', marcusBennett, OTHER, BRISBANE, '19:00 08/09/2025', 'A nostalgic gaming night with arcade machines for fun, and competitive challenges for money.', [retroGameNightTicket1, retroGameNightTicket2]);
+                await createRegistration(retroGameNightEvent, willZhao, [{ticket: retroGameNightTicket1, quantity: 1}]);
+                await createRegistration(retroGameNightEvent, lucaPatel, [{ticket: retroGameNightTicket2, quantity: 2}]);
+
+                const rooftopJazzTicket1 = createTicket('Standard View', 200, 60, 'General admission on rooftop');
+                const rooftopJazzTicket2 = createTicket('Lounge Seat', 40, 110, 'Comfortable seating and service');
+                const rooftopJazzEvent = await createEvent('Rooftop Jazz', izzyMartin, MUSICAL, SYDNEY, '20:00 14/08/2025', 'A romantic evening of live jazz music under the stars on a rooftop.', [rooftopJazzTicket1, rooftopJazzTicket2]);
+                await createRegistration(rooftopJazzEvent, choleNguyen, [{ticket: rooftopJazzTicket1, quantity: 1}]);
+                await createRegistration(rooftopJazzEvent, walterWhite, [{ticket: rooftopJazzTicket2, quantity: 1}]);
+
+                const cosplayCarnivalTicket1 = createTicket('Entry Only', 500, 20, 'Access to carnival area');
+                const cosplayCarnivalTicket2 = createTicket('Photo Pass', 100, 50, 'Pose with featured cosplayers');
+                const cosplayCarnivalEvent = await createEvent('Cosplay Carnival', harryApe, OTHER, MELBOURNE, '10:00 20/12/2025', 'A colourful celebration of cosplay with photo ops and carnival fun.', [cosplayCarnivalTicket1, cosplayCarnivalTicket2]);
+                await createRegistration(cosplayCarnivalEvent, avaRichardson, [{ticket: cosplayCarnivalTicket2, quantity: 2}]);
+                await createRegistration(cosplayCarnivalEvent, johnDoe, [{ticket: cosplayCarnivalTicket1, quantity: 1}]);
+                
+                console.log('Generated all events, tickets, and registrations!');
+
+                // create some notifications
+                await sendNotification(choleNguyen, 'The Rooftop Jazz event has been pushed from the 14/08/2025 at 18:00 to the 14/08/2025 at 20:00.', '11:43 27/07/2025');
+                await sendNotification(walterWhite, 'The Rooftop Jazz event has been pushed from the 14/08/2025 at 18:00 to the 14/08/2025 at 20:00.', '11:43 27/07/2025');
+                await sendNotification(avaRichardson, 'Thank you for your interest in the Film Workshop! We hope you will enjoy your time!', '06:57 01/05/2025');
+                await sendNotification(sophieLee, 'Thank you for your interest in the Film Workshop! We hope you will enjoy your time!', '17:21 27/03/2025');
+                await sendNotification(izzyMartin, 'Get your acting shoes on, and get ready to learn from the best!', '17:33 03/06/2025');
+
+                console.log('Generated some notifications.');
             }
 
             async function signup(name, dob, phoneNumber, email, password) {
@@ -38,24 +277,89 @@
                     password: password
                 };
 
-                await sqlRequest("POST", "USER_SIGN_UP", data);
+                const response = await sqlRequest("POST", "USER_SIGN_UP", data);
+
+                if (response.status === 'success')
+                    return JSON.parse(response.data);
             }
 
-            async function createEvent() {
+            async function createEvent(title, organiser, categoryId, location, date, description, tickets) {
                 const data = {
-
+                    eventId: -1,
+                    userId: organiser.user_id,
+                    title: title,
+                    description: description,
+                    category: categoryId,
+                    location: location,
+                    date: date,
+                    tickets: tickets
                 };
 
-                await sqlRequest("POST", "CREATE_EVENT", data);
+                const response = await sqlRequest("POST", "CREATE_EVENT", data);
+
+                if (response.status === 'success')
+                    return JSON.parse(response.data);
+            }
+
+            function createTicket(title, quantity, price, description) {
+                const data = {
+                    id: -1,
+                    name: title,
+                    price: price,
+                    benefits: description,
+                    quantity_available: quantity,
+                    tickets_left: quantity
+                }
+
+                return data;
+            }
+
+            async function createRegistration(event, user, tickets)
+            {
+                const formattedTickets = [];
+                let totalAmount = 0;
+
+                for (const item of tickets) {
+                    const { ticket, quantity } = item;
+
+                    // find matching ticket type from event.tickets
+                    const matchingTicket = event.ticket_types.find(t => {
+                        return t.name === ticket.name;
+                    });
+
+                    if (!matchingTicket)
+                        continue;
+
+                    formattedTickets.push({
+                        ticketTypeId: parseInt(matchingTicket.ticket_type_id),
+                        amount: quantity
+                    });
+
+                    totalAmount += matchingTicket.price * quantity;
+                }
+
+                const data = {
+                    user_id: user.user_id,
+                    event_id: event.event_id,
+                    tickets: formattedTickets,
+                    total_payment: totalAmount
+                };
+
+                const response = await sqlRequest("POST", "ADD_REGISTRATION", data);
+
+                if (response.status === 'success')
+                    return JSON.parse(response.data);
+            }
+        
+            async function sendNotification(user, msg, date = '') {
+                const data = {
+                    users: [user.user_id],
+                    msg: msg,
+                    date: date
+                };
+
+                const response = await sqlRequest('POST', 'SEND_NOTIFICATIONS', data);
             }
         </script>
-    </head>
-    <body class="min-h-screen flex flex-col">
-
-        <main class="flex-grow flex flex-col gap-10 items-center justify-center">
-            <button class="bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer px-6 py-3 rounded-lg" onclick="setup();">
-                Run Setup
-            </button>
-        </main>
     </body>
 </html>

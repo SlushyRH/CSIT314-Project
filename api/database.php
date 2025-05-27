@@ -70,7 +70,7 @@ function createTablesIfNeeded($pdo)
             user_id INT NOT NULL,
             event_id INT NOT NULL,
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
             FOREIGN KEY (user_id) REFERENCES Users(user_id),
             FOREIGN KEY (event_id) REFERENCES Events(event_id)
         );
@@ -367,7 +367,7 @@ function createEvent($pdo, $data)
                 'description' => $data['description'],
                 'categoryId' => $data['category'],
                 'location' => $data['location'],
-                'eventDate' => $data['date'],
+                'eventDate' => DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s'),
                 'eventId' => $data['eventId']
             ]);
 
@@ -387,7 +387,7 @@ function createEvent($pdo, $data)
                 }
             }
 
-            if (!isset($ticket['id']) || (int)$ticket['id'] === -1)
+            if (!isset($ticket['ticket_type_id']) || (int)$ticket['ticket_type_id'] === -1)
             {
                 $stmt = $pdo->prepare("
                     INSERT INTO TicketTypes (event_id, name, price, benefits, quantity_available, tickets_left)
@@ -416,7 +416,7 @@ function createEvent($pdo, $data)
                 ");
 
                 $stmt->execute([
-                    'ticketId' => $ticket['id'],
+                    'ticketId' => $ticket['ticket_type_id'],
                     'eventId' => $eventId,
                     'name' => $ticket['name'],
                     'price' => $ticket['price'],
@@ -610,6 +610,8 @@ function addRegistrationInfo($pdo, $data)
 
     try
     {
+        $pdo->beginTransaction();
+
         $stmt = $pdo->prepare("
             INSERT INTO Registrations (user_id, event_id)
             VALUES (:user_id, :event_id)
@@ -630,6 +632,43 @@ function addRegistrationInfo($pdo, $data)
             $ticketTypeId = $ticket['ticketTypeId'];
             $amount = $ticket['amount'];
 
+            // Check if enough tickets are available
+            $stmt = $pdo->prepare("
+                SELECT tickets_left FROM TicketTypes
+                WHERE ticket_type_id = :ticket_type_id AND event_id = :event_id
+                FOR UPDATE
+            ");
+
+            $stmt->execute([
+                'ticket_type_id' => $ticketTypeId,
+                'event_id' => $eventId
+            ]);
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row)
+            {
+                throw new Exception("Ticket type not found.");
+            }
+
+            if ($row['tickets_left'] < $amount)
+            {
+                throw new Exception("Not enough tickets left for ticket type ID $ticketTypeId.");
+            }
+
+            // Update tickets_left
+            $stmt = $pdo->prepare("
+                UPDATE TicketTypes
+                SET tickets_left = tickets_left - :amount
+                WHERE ticket_type_id = :ticket_type_id
+            ");
+
+            $stmt->execute([
+                'amount' => $amount,
+                'ticket_type_id' => $ticketTypeId
+            ]);
+
+            // Add to RegistrationTickets
             $stmt = $pdo->prepare("
                 INSERT INTO RegistrationTickets (registration_id, ticket_type_id, quantity)
                 VALUES (:registration_id, :ticket_type_id, :quantity)
@@ -653,10 +692,13 @@ function addRegistrationInfo($pdo, $data)
             'status' => 'completed',
         ]);
 
+        $pdo->commit();
+
         send_response('success', 'Registration completed successfully!', 200, json_encode(['reg_id' => $registrationId]));
     }
     catch (Exception $e)
     {
+        $pdo->rollBack();
         send_response('error', 'Failed to register. Error: ' . $e->getMessage(), 500);
     }
 }
@@ -720,13 +762,19 @@ function sendNotifications($pdo, $data)
 
     $message = $data['msg'];
     $userIds = $data['users'];
+    $date = '';
+
+    if (!empty($data['date']))
+        $date = DateTime::createFromFormat('H:i d/m/Y', $data['date'])->format('Y-m-d H:i:s');
+    else
+        $date = date('Y-m-d H:i:s');
 
     try
     {
         // inserto new notifications
         $stmt = $pdo->prepare("
-            INSERT INTO Notifications (user_id, message)
-            VALUES (:user_id, :message)
+            INSERT INTO Notifications (user_id, message, sent_at)
+            VALUES (:user_id, :message, :sent_at)
         ");
 
         // execute notifications for each user
@@ -734,7 +782,8 @@ function sendNotifications($pdo, $data)
         {
             $stmt->execute([
                 'user_id' => $userId,
-                'message' => $message
+                'message' => $message,
+                'sent_at' => $date
             ]);
         }
 

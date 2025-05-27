@@ -1,0 +1,16 @@
+login:
+the login section allows the user to enter an email and password
+with a login page, upon clicking the login button, the database
+verify the login credentials and redirect the user back to the page
+they came from if successful. the user can click the 'Sign Up' text
+which shows extra form elements for sign up
+
+signup:
+the signup section allows the user to sign up with details in the
+form, the user can go to the login page upon clicking 'Sign In'.
+if the user clicks signup button, the database will process the request
+then direct the user to the login section to sign in with the new
+credentials
+
+mb-login:
+a mobile view of the login section
