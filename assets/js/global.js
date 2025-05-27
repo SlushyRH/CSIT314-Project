@@ -92,6 +92,7 @@ function attachHeaderScripts(hideNav, showSearch) {
     
     const headerOrgEventsBtn = document.getElementById('headerOrgEventsBtn');
     const headerUserEventsBtn = document.getElementById('headerUserEventsBtn');
+    const headerCreateEventBtn = document.getElementById('createEventBtn');
     const headerNotificationsBtn = document.getElementById('headerNotificationsBtn');
     const logoutBtn = document.getElementById('headerLogoutBtn');
 
@@ -116,6 +117,10 @@ function attachHeaderScripts(hideNav, showSearch) {
 
     headerUserEventsBtn.onclick = function() {
         navToPage('bookedEvents.html');
+    };
+
+    headerCreateEventBtn.onclick = function() {
+        navToPage('createEvent.html');
     };
 
     headerNotificationsBtn.onclick = function() {
