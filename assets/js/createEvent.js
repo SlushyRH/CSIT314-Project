@@ -247,20 +247,22 @@ function create() {
 // function to make sure that the catagory field has a catagory and converts string value to integer
 function validateCategoryID(category_id) {
     // group of if functions for conversion
-    if (category_id == "1") {
-        return 1;
-    } else if (category_id == "2") {
-        return 2;
-    } else if (category_id == "3") {
-        return 3;
-    } else if (category_id == "4") {
-
-    } else if (category_id == "5") {
-
+    if (category_id == "5") {
+        return 5;
     } else if (category_id == "6") {
-
+        return 6;
     } else if (category_id == "7") {
-
+        return 7;
+    } else if (category_id == "8") {
+        return 8;
+    } else if (category_id == "9") {
+        return 9;
+    } else if (category_id == "10") {
+        return 10;
+    } else if (category_id == "11") {
+        return 11;
+    } else if (category_id == "12") {
+        return 12;
     } else {
         return "invalid";
     }

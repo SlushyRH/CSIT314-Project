@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 // function to het user events and converts them from string to dictionary
 async function getUserEvents() {
-    var user_id = localStorage("user_id");
+    var user_id = localStorage.getItem("user_id");
     // Test user stuff
     const userSearchId = {
         "user_id":user_id
