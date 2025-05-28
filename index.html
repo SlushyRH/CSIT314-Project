@@ -1,43 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>CSIT314 Project</title>
-    <link rel="icon" href="content/logo.png" type="image/x-icon">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+	<title>CSIT314 Project</title>
+	<link rel="icon" href="content/logo.png" type="image/x-icon">
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="assets/js/global.js"></script>
-    <script src="assets/js/index.js"></script>
-  </head>
+	<link rel="stylesheet" href="assets/css/main.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-  <body class="min-h-screen flex flex-col">
-    <div id="header"></div>
+	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+	<script src="assets/js/global.js"></script>
+	<script src="assets/js/index.js"></script>
+</head>
 
-    <main class="flex-grow">
+<body class="min-h-screen flex flex-col">
+	<div id="header"></div>
 
-        <!-- event filters -->
-        <div class="w-full max-w-6xl mx-auto px-4 mt-4">
-            <form id="eventFilter" class="bg-(--secondary) p-4 rounded-xl shadow-md space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    
+	<main class="flex-grow">
+
+		<div class="w-full max-w-6xl mx-auto px-4 mt-4">
+			<form id="eventFilter" class="bg-(--secondary) p-4 rounded-xl shadow-md space-y-4">
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
 					<div>
-					<label for="filterStartDate" class="block mb-1 text-sm font-medium">Start Date</label>
-					<input type="date" id="filterStartDate" name="filterStartDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+						<label for="filterStartDate" class="block mb-1 text-sm font-medium">Start Date</label>
+						<input type="date" id="filterStartDate" name="filterStartDate"
+							class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
 					</div>
 
 					<div>
-					<label for="filterEndDate" class="block mb-1 text-sm font-medium">End Date</label>
-					<input type="date" id="filterEndDate" name="filterEndDate" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+						<label for="filterEndDate" class="block mb-1 text-sm font-medium">End Date</label>
+						<input type="date" id="filterEndDate" name="filterEndDate"
+							class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
 					</div>
 
 					<div>
 						<label for="filterCategory" class="block mb-1 text-sm font-medium">Category</label>
-						<select id="filterCategory" name="filterCategory" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+						<select id="filterCategory" name="filterCategory"
+							class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
 							<option value="">Select Category</option>
 							<option value="Comedy">Comedy</option>
 							<option value="Concert">Concert</option>
@@ -52,7 +55,8 @@
 
 					<div>
 						<label for="filterLocation" class="block mb-1 text-sm font-medium">Location</label>
-						<select id="filterLocation" name="filterLocation" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
+						<select id="filterLocation" name="filterLocation"
+							class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)">
 							<option value="">Select Location</option>
 							<option value="Adelaide">Adelaide</option>
 							<option value="Brisbane">Brisbane</option>
@@ -71,33 +75,39 @@
 						</select>
 					</div>
 
-                  	<div>
+					<div>
 						<label for="filterMinPrice" class="block mb-1 text-sm font-medium">Min Price</label>
-						<input type="number" placeholder="0" id="filterMinPrice" name="filterMinPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+						<input type="number" placeholder="0" id="filterMinPrice" name="filterMinPrice"
+							class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
 					</div>
 
 					<div>
 						<label for="filterMaxPrice" class="block mb-1 text-sm font-medium">Max Price</label>
-						<input type="number" placeholder="0" id="filterMaxPrice" name="filterMaxPrice" class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
+						<input type="number" placeholder="0" id="filterMaxPrice" name="filterMaxPrice"
+							class="w-full p-2 rounded border border-(--form-focus-outline) bg-(--bg) text-(--text)" />
 					</div>
-					
+
 					<div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-center gap-2 items-center">
-						<button type="reset" id="filterClearBtn" onclick="applyFilterOnEvents(true);" class="flex-1 cursor-pointer bg-(--bg) hover:bg-(--tertiary) text-(--text) px-4 py-2 rounded shadow">
+						<button type="reset" id="filterClearBtn" onclick="applyFilterOnEvents(true);"
+							class="flex-1 cursor-pointer bg-(--bg) hover:bg-(--tertiary) text-(--text) px-4 py-2 rounded shadow">
 							Clear
 						</button>
-						<button type="button" id="filterSubmitBtn" onclick="applyFilterOnEvents();" class="flex-1 cursor-pointer bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded shadow">
+						<button type="button" id="filterSubmitBtn" onclick="applyFilterOnEvents();"
+							class="flex-1 cursor-pointer bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) px-4 py-2 rounded shadow">
 							Apply
 						</button>
 					</div>
 
-                </div>
-            </form>
-        </div>
+				</div>
+			</form>
+		</div>
 
-        <div id="eventList" class="w-full max-w-6xl mx-auto my-4 px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+		<div id="eventList"
+			class="w-full max-w-6xl mx-auto my-4 px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
 
 			<template id="eventTemplate">
-				<div class="bg-(--secondary) shadow-xl rounded-lg overflow-hidden cursor-pointer max-w-xs w-full transition hover:scale-110">
+				<div
+					class="bg-(--secondary) shadow-xl rounded-lg overflow-hidden cursor-pointer max-w-xs w-full transition hover:scale-110">
 					<div class="p-4 space-y-3">
 						<h2 data-title class="text-lg font-bold text-(--text) truncate">{{title}}</h2>
 						<div class="flex items-center justify-between text-xs text-(--text)">
@@ -111,13 +121,12 @@
 				</div>
 			</template>
 
-        </div>
+		</div>
 
 		<template id="eventModalTemplate">
-			<div id="modalOverlay" class="fixed inset-0 bg-black/75 flex justify-center items-center p-6 z-50">	
+			<div id="modalOverlay" class="fixed inset-0 bg-black/75 flex justify-center items-center p-6 z-50">
 				<div class="w-full max-w-[1000px] flex flex-col items-center gap-4">
 
-					<!-- event info panel -->
 					<div class="w-full min-w-[300px] bg-(--secondary) rounded-xl p-6 shadow">
 						<div>
 							<h2 data-title="" class="text-2xl text-(--text) font-bold">Event Title</h2>
@@ -127,14 +136,13 @@
 							<p data-description class="text-(--text)">Event Description</p>
 						</div>
 						<div class="mt-6 text-sm text-(--hover-text)">
-							<span class="font-medium">Location:</span><p data-location>Event Location</p>
+							<span class="font-medium">Location:</span>
+							<p data-location>Event Location</p>
 						</div>
 					</div>
 
-					<!-- ticketing panel -->
 					<div class="w-full min-w-[300px] bg-(--secondary) rounded-xl p-6 shadow flex flex-col">
 
-						<!-- ticket table -->
 						<div class="overflow-x-auto">
 							<table class="w-full text-sm border-collapse">
 								<thead>
@@ -154,7 +162,8 @@
 						<template id="ticketRowTemplate">
 							<tr class=" border-b">
 								<td class="py-2">
-									<input type="number" min="0" value="0" class="w-16 border border-(--text) rounded px-2 py-1 ticket-amount-input">
+									<input type="number" min="0" value="0"
+										class="w-16 border border-(--text) rounded px-2 py-1 ticket-amount-input">
 								</td>
 								<td data-name=""></td>
 								<td data-description=""></td>
@@ -162,9 +171,9 @@
 							</tr>
 						</template>
 
-						<!-- purchase button -->
 						<div class="mt-auto pt-6">
-							<button id="purchaseBtn" class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer py-2 px-4 rounded ">
+							<button id="purchaseBtn"
+								class="w-full bg-(--book-btn) hover:bg-(--hover-book-btn) text-(--text) cursor-pointer py-2 px-4 rounded ">
 								Purchase
 							</button>
 						</div>
@@ -172,17 +181,17 @@
 				</div>
 			</div>
 		</template>
-    </main>
+	</main>
 
-    <div id="footer"></div>
+	<div id="footer"></div>
 
-    <script>
-        initHeader(false, true, () => initSearchBar());
-        initFooter();
+	<script>
+		initHeader(false, true, () => initSearchBar());
+		initFooter();
 
-        initEvents();
-        getUrlFilterQuery();
-    </script>
+		initEvents();
+		getUrlFilterQuery();
+	</script>
 </body>
 
 </html>
