@@ -25,8 +25,6 @@
 ### Lachlan Henderson
 [database.php](https://github.com/SlushyRH/CSIT314-Project/blob/main/api/database.php),
 [dataSetup.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/setup/dataSetup.html),
-[footer.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/components/footer.html),
-[header.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/components/header.html),
 [global.js](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/js/global.js),
 [eventAdminPanel.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/eventAdminPanel.html),
 [eventAdminPanel.js](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/js/eventAdminPanel.js),
