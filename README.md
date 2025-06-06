@@ -7,6 +7,8 @@
 [database.php](https://github.com/SlushyRH/CSIT314-Project/blob/main/api/database.php),
 [dataSetup.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/setup/dataSetup.html),
 [global.js](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/js/global.js),
+[header.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/components/header.html),
+[footer.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/components/footer.html),
 [eventAdminPanel.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/eventAdminPanel.html),
 [eventAdminPanel.js](https://github.com/SlushyRH/CSIT314-Project/blob/main/assets/js/eventAdminPanel.js),
 [eventBookingConfirm.html](https://github.com/SlushyRH/CSIT314-Project/blob/main/eventBookingConfirm.html),
